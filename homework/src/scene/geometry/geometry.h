@@ -1,0 +1,33 @@
+#pragma once
+
+#include <raytracing/intersection.h>
+#include <openGL/drawable.h>
+#include <raytracing/ray.h>
+#include <scene/materials/material.h>
+#include <scene/transform.h>
+#include <raytracing/boundingbox.h>
+
+class Intersection;//Forward declaration because Intersection and Geometry cross-include each other
+class Material;
+
+//Geometry is an abstract class since it contains a pure virtual function (i.e. a virtual function that is set to 0)
+class Geometry : public Drawable
+{
+public:
+    Geometry():
+    name("GEOMETRY"), transform()
+    {
+        material = NULL;
+    }
+
+    virtual ~Geometry(){}
+    virtual Intersection GetIntersection(Ray r) = 0;
+
+    virtual void SetMaterial(Material* m){material = m;}
+
+    virtual BoundingBox getBoundingBox(){ return BoundingBox();}
+
+    QString name;//Mainly used for debugging purposes
+    Transform transform;
+    Material* material;
+};

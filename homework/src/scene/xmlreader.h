@@ -13,7 +13,7 @@ class XMLReader
 public:
     void LoadSceneFromFile(QFile &file, const QStringRef &local_path, Scene &scene, Integrator &integrator);
     Geometry* LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QList<Geometry*>> &map, const QStringRef &local_path);
-    Material* LoadMaterial(QXmlStreamReader &xml_reader);
+    Material* LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef &local_path);
     Camera LoadCamera(QXmlStreamReader &xml_reader);
     Transform LoadTransform(QXmlStreamReader &xml_reader);
     Integrator LoadIntegrator(QXmlStreamReader &xml_reader);

@@ -53,10 +53,6 @@ void Scene::Clear()
         delete g;
     }
     objects.clear();
-    for(Geometry *l : lights)
-    {
-        delete l;
-    }
     lights.clear();
     for(Material *m : materials)
     {

@@ -1,4 +1,5 @@
 #include <scene/materials/material.h>
+#include <QColor>
 
 Material::Material() :
     Material(glm::vec3(0.5f, 0.5f, 0.5f))
@@ -15,17 +16,17 @@ Material::Material(const glm::vec3 &color):
     texture = NULL;
 }
 
-glm::vec4 Material::GetTextureColor(const glm::vec2 &uv_coord)
+glm::vec3 Material::GetImageColor(const glm::vec2 &uv_coord, const QImage* const& image)
 {
-    if(texture == NULL)
+    if(image == NULL)
     {
-        return glm::vec4(1,1,1,1);
+        return glm::vec3(1,1,1);
     }
     else
     {
-        int X = texture->TellWidth() * uv_coord.x;
-        int Y = texture->TellHeight() * uv_coord.y;
-        RGBApixel color = texture->GetPixel(X, Y);
-        return glm::vec4(color.Red, color.Green, color.Blue, color.Alpha);
+        int X = image->width() * uv_coord.x;
+        int Y = image->height() * (1.0f - uv_coord.y);
+        QColor color = image->pixel(X, Y);
+        return glm::vec3(color.red(), color.green(), color.blue())/255.0f;
     }
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include <la.h>
 #include <bmp/EasyBMP.h>
-
 #include <raytracing/intersection.h>
+#include <QImage>
 
 class Intersection;
 
@@ -17,7 +17,9 @@ public:
     //ray direction.
     virtual glm::vec3 EvaluateReflectedEnergy(const Intersection &isx, const glm::vec3 &outgoing_ray, const glm::vec3 &incoming_ray) = 0;
 
-    glm::vec4 GetTextureColor(const glm::vec2 &uv_coord);
+    //Returns the RGB color stored in the input image as a vec3 with values ranging from 0 to 1.
+    //Note that this is a STATIC function, so you don't need to call it from an instance of Material
+    static glm::vec3 GetImageColor(const glm::vec2 &uv_coord, const QImage * const &image);
 
     QString name;           //The name given in the scene XML file
     glm::vec3 base_color;   //The base material color
@@ -42,6 +44,7 @@ public:
             |       |
      */
 
-    BMP* texture;   //When non-null, the Material has a texture assigned to it.
+    QImage* texture;   //When non-null, the Material has a texture assigned to it.
                     //A Material's texture is multiplied with its base_color to determine its color at a given point in space.
+    QImage* normal_map;
 };

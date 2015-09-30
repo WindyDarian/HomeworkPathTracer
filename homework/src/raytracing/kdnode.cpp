@@ -1,5 +1,10 @@
 #include "kdnode.h"
 
+// Just ignore this for my hw02
+
+// K-D Tree Node Class for optimization
+// Because I wanted to render the dragon.obj after hw01 is done
+
 KDNode::KDNode()
 {
 

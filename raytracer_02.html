@@ -1,0 +1,105 @@
+<HTML>
+	<head>
+		<title>
+			CIS 560 Assignment 2 - Simple Raytracer
+		</title>
+	</head>
+	<body>
+		<h1 align = "center">
+			Simple Raytracer
+		</h1>
+		<h2 align = "center">
+			CIS 560 Homework 2
+		</h2>
+		<h2 align = "center">
+			Due: Wednesday, September 30, 2015 at 11:59 PM
+		</h2>
+
+		<br/>
+
+		<h3>
+			1  Goal
+		</h3>
+		<p>
+			To create ray-traced scene renderer using the framework from homework 1.
+		</p>
+
+		<h3>
+			2  Supplied Code
+		</h3>
+		<p>
+			We have provided several updated files in order to support texture file reading. Please copy these files/folders into your project and overwrite the old files as necessary.
+		</p>
+
+		<h3>
+			3  Requirements
+		</h3>
+		<h4>
+			3.1  UV Mapping (20 points)
+		</h4>
+		<p>
+			Implement the purely function called GetUVCoordinates in each subclass of the Geometry class; this function takes as input a local-space vec3 point on the surface of the object and returns a vec2 representing the texture coordinates at that point. This is somewhat simple for triangles since they receive their UVs from the OBJ file that was used to create them, but for other geometric objects the mapping may not be as clear. You should implement spherical UV mapping for spheres and a mapping for cubes that gives each face a unique set of UVs. A square plane should simply map its lower-left corner to the lower-left corner of an image, and its upper-right corner to the upper-right corer of an image. Note that you won't need to implement this function for your mesh class, but you'll still need to declare it in the Mesh's class definition otherwise you'll get a compilatione error.
+		</p>
+		<h4>
+			3.2  Intersection Texture Color (5 points)
+		</h4>
+		<p>
+			Add a member variable to the Intersection class that stores the color on the surface of the object hit (we recommend using a vec3). This color should be the material's base color multiplied with its texture color (note that Material::GetImageColor will return WHITE if the material has no texture). Don't forget to initialize this color in the Intersection constructor! Each Geometry subclass should store its texture color at the point of intersection in its GetIntersection function.
+		</p>
+		<h4>
+			3.3  Integrator Functions (15 points)
+		</h4>
+		<p>
+			Implement the Integrator::TraceRay function, which will recursively evaluate the path a ray takes through a scene in order to determine how to shade the pixel that generated the ray. The function's return value is the color that should be used to shade the pixel in question. The TraceRay function takes as input the ray to evaluate and the number of times the ray's path has been recursively evaluated (beginning at 0). When the recursion depth reaches a maximum value (assigned in the scene configuration file) you should have the function return black instead of evaluating the color of the ray. When a ray is found to intersect a surface, the light energy reflected into the camera at the point of intersection should be recursively evaluated and returned as the result.
+		</p>
+		<h4>
+			3.4  Shadow Testing (10 points)
+		</h4>
+		<p>
+			Implement the Integrator::ShadowTest function, which determines if a given point in space is directly lit by a light source. If any light source in the scene can be reached by a ray from the input intersection point, then this function should return FALSE. If the input point cannot see any light source directly, then this function should return TRUE. Use this to determine whether or not a point in the scene is directly lit and compute its reflected light accordingly. If the point in shadow is obscured by a transparent object, its color should be multiplied by the color of the obscuring object rather than being set to black.
+		</p>
+		<h4>
+			3.5  Material Color Functions (20 points)
+		</h4>
+		<p>
+			For the LambertMaterial and PhongMaterial classes, implement the EvaluateReflectedEnergy function. This function takes the intersection of the ray with a surface, an outgoing ray, and an incoming ray and returns the color reflected along the outgoing ray at that point. Note that the "outgoing ray" could also be thought of as an "incoming ray" in the context of backwards raytracing; the function's input parameters are named such that an "outgoing ray" is the light bouncing off a surface and into the camera, but implementation-wise it is the ray you cast from the camera and test for intersection with the scene. Likewise, the "incoming ray" is the ray coming from the light source to the point of intersection.
+		</p>
+		<h4>
+			3.6  Specular Reflectivity and Refraction (30 points)
+		</h4>
+		<p>
+			The EvaluateReflectedEnergy functions for your materials should handle cases wherein the material in question is reflective and/or refractive. When a material's <i>reflectivity</i> value is greater than 0, its surface color is a weighted combination of its diffuse reflected color and its mirrored reflected color, where the weighting of the diffuse color is (1 - reflectivity). The reflected ray's color is multiplied by the reflective material's base color. When a material's <i>indices of refraction</i> are nonzero, then it is completely transparent and will bend rays of light through its volume rather than reflecting them off its surface. A transparent object's base_color will still affect the color of objects seen through the transparent object; rays passing through transparent objects have their color multiplied by the object's base_color.
+			<br/><br/>
+			When handling the refraction of a ray, you must account for <b>total internal reflection</b>. This can only occur when a ray is entering a less dense medium than the one through which it is currently traveling. In this event, rather than refracting the ray you should reflect it off the interior of the transparent object and continue tracing it. Note that when entering a refractive object, the ratio of refractive indices should be ior_Out/ior_In, and when leaving a refractive object it should be ior_In/ior_Out.
+		</p>
+		<h3>
+			4  Extra Credit (Maximum 40 points)
+		</h3>
+		<h4>
+			4.1  Normal Mapping (20 points)
+		</h4>
+		<p>
+			In each GetIntersection function, use the Geometry's Material's normal map to offset the local-space normal. In order to do this, you must compute two tangent vectors (they are perpendicular to each other as well as the surface normal) aligned with the UV axes of your point. Then, use these along with the normal to create a matrix that will transform the normal represented by the map so that it is aligned with the space defined by the object's normal. Note that a tangent-space normal map's "zero offset" color is (128, 128, 255), since it operates in a space that treats the normal at any given point as the "forward" (0, 0, 1) direction. In other words, the color (0, 0, 255) corresponds to a texture-space normal of (-1, -1, 1), while the color (255, 255, 255) corresponds to a normal of (1, 1, 1).
+			<br/><br/>
+			To have the XML reader load a normal map into a Material, add a &ltnormalMap&gt section to the Material in question (refer to many_spheres.xml for an example).
+		</p>
+		<h4>
+			4.2  Area Lights and Soft Shadows (15-30 points)
+		</h4>
+		<p>
+			For every point hit by a ray, cast multiple rays towards each light source to determine how much energy the point receives from the light. You'll have to sample points on the surface of the light source to get an accurate shadow computation, which means writing functions for each geometry type to determine where on the surface to sample. The better your sampling functions (and the more geometry types you sample), the more points you'll earn.
+		</p>
+		<h4>
+			4.3  Fresnel Reflectance (25 points)
+		</h4>
+		<p>
+			Implement a more physically realistic model of reflection for materials. You may assume that transparent materials use the dielectric model of reflectance, while opaque materials use the conductor model. Since conductive materials refer to an index of refraction for the Fresnel reflection formula, you might want to define opaque materials as materials with ONLY an incoming index of refraction. Refer to page 434 of <i>Physically Based Rendering: From Theory to Implementation</i> for more information on Fresnel reflectance.
+		</p>
+		<h3>
+			5  Submission
+		</h3>
+		<p>
+			Submit your cleaned and zipped project on Canvas. Include your test scene renders in your submission. Feel free to create scene files of your own and render them, too (in fact, we prefer that you do)!
+		</p>
+	</body>
+</HTML>

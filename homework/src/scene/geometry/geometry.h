@@ -22,11 +22,11 @@ public:
 
     virtual ~Geometry(){}
     virtual Intersection GetIntersection(Ray r) = 0;
-
     virtual void SetMaterial(Material* m){material = m;}
 
     virtual BoundingBox getBoundingBox(){ return BoundingBox();}
 
+    virtual glm::vec2 GetUVCoordinates(const glm::vec3 &point) = 0;
     QString name;//Mainly used for debugging purposes
     Transform transform;
     Material* material;

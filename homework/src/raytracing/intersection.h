@@ -12,12 +12,13 @@ class Intersection
 {
 public:
     Intersection();
-    Intersection(glm::vec3 point, glm::vec3 normal, float t, Geometry* object_hit);
+    Intersection(glm::vec3 point, glm::vec3 normal, float t, glm::vec3 surface_color, Geometry* object_hit );
 
     glm::vec3 point;      //The place at which the intersection occurred
     glm::vec3 normal;     //The surface normal at the point of intersection
     float t;              //The parameterization for the ray (in world space) that generated this intersection.
                           //t is equal to the distance from the point of intersection to the ray's origin if the ray's direction is normalized.
+    glm::vec3 surface_color;
     Geometry* object_hit; //The object that the ray intersected, or NULL if the ray hit nothing.
 
 };

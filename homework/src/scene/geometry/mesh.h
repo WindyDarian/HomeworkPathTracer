@@ -26,6 +26,8 @@ public:
                                                     //based on the point inside the triangle that is given.
     glm::vec4 GetNormal(const glm::vec4 &position);
 
+    glm::vec2 GetUVCoordinates(const glm::vec3 &point);
+
     BoundingBox getBoundingBox();
 };
 
@@ -38,6 +40,8 @@ public:
     void SetMaterial(Material *m);
     void create();
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
+
+    glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 
 private:
     QList<Triangle*> faces;

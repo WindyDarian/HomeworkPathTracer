@@ -54,17 +54,27 @@ Intersection Cube::GetIntersection(Ray r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    return Intersection(ipoint_world, normal_world, t_world, this);
+    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
+
+    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
 glm::vec3 Cube::getNormal(const glm::vec3& point) const
 {
-    float bounds[3][2] = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}};
+    auto axis_and_sign = this->getFaceNormalAxisAndDirection(point);
 
+    glm::vec3 normal(0.f);
+    normal[axis_and_sign.first] = 1;
+    normal *= axis_and_sign.second;
+
+    return normal;
+}
+
+std::pair<int, int> Cube::getFaceNormalAxisAndDirection(const glm::vec3 &point) const
+{
+    float d_min = std::numeric_limits<float>::max();
     int normal_axis = 0; // axis for normal, 0 for x, 1 for y, 2 for z;
     int normal_sign = 0;
-
-    float d_min = std::numeric_limits<float>::max();
 
     for(int i = 0; i < 3; i++)
     {
@@ -84,12 +94,7 @@ glm::vec3 Cube::getNormal(const glm::vec3& point) const
             normal_sign = 1;
         }
     }
-
-    glm::vec3 normal(0.f);
-    normal[normal_axis] = 1;
-    normal *= normal_sign;
-
-    return normal;
+    return std::pair<int, int>(normal_axis, normal_sign);
 }
 
 
@@ -239,4 +244,66 @@ void Cube::create()
     bufCol.setUsagePattern(QOpenGLBuffer::StaticDraw);
     bufCol.allocate(cub_vert_col, CUB_VERT_COUNT * sizeof(glm::vec3));
 
+}
+
+glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
+{
+    glm::vec2 p1(0.f);
+    glm::vec2 d, o;
+    glm::vec3 shift(0.5f, 0.5f, 0.5f);
+
+    auto axis_and_direction = this->getFaceNormalAxisAndDirection(point);
+
+    switch (axis_and_direction.first)
+    {
+     case 0: //x slab
+        p1.y = 1.0f;
+        o = (point + shift).yz();
+        if (axis_and_direction.second > 0)
+        {
+            p1.x = 0.75f;
+            d = glm::vec2(-1.0f, 1.0f);
+
+        }
+        else
+        {
+            p1.x = 0.0f;
+            d = glm::vec2(1.0f, 1.0f);
+        }
+        break;
+    case 1: //y slab
+        p1.x = 0.25f;
+        o = (point + shift).xz();
+        if (axis_and_direction.second > 0)
+        {
+            p1.y = 0.5f;
+            d = glm::vec2(1.0f, -1.0f);
+        }
+        else
+        {
+            p1.y = 0.25f;
+            d = glm::vec2(1.0f, 1.0f);
+        }
+        break;
+    case 2: //z slab
+        p1.x = 0.25f;
+        o = (point + shift).xy();
+        if (axis_and_direction.second > 0)
+        {
+            p1.y = 1.0f;
+            d = glm::vec2(1.0f, 1.0f);
+        }
+        else
+        {
+            p1.y = 0.25f;
+            d = glm::vec2(1.0f, -1.0f);
+        }
+    }
+
+    o = glm::clamp(o, 0.0f, 1.0f);
+    d *= 0.25f;
+    d.x *= o.x;
+    d.y *= o.y;
+
+    return p1 + d;
 }

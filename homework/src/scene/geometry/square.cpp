@@ -30,8 +30,10 @@ Intersection SquarePlane::GetIntersection(Ray r)
     normal_world = glm::normalize(normal_world);
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
+    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
-    return Intersection(ipoint_world, normal_world, t_world, this);
+
+    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
 void SquarePlane::create()
@@ -70,4 +72,9 @@ void SquarePlane::create()
     bufCol.bind();
     bufCol.setUsagePattern(QOpenGLBuffer::StaticDraw);
     bufCol.allocate(cub_vert_col, 4 * sizeof(glm::vec3));
+}
+
+glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
+{
+    return glm::vec2(point.x + 0.5f, point.y + 0.5f);
 }

@@ -39,7 +39,10 @@ Intersection Sphere::GetIntersection(Ray r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    return Intersection(ipoint_world, normal_world, t_world, this);
+    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
+
+
+    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 
 }
 
@@ -167,4 +170,13 @@ void Sphere::create()
     bufNor.bind();
     bufNor.setUsagePattern(QOpenGLBuffer::StaticDraw);
     bufNor.allocate(sph_vert_nor, SPH_VERT_COUNT * sizeof(glm::vec3));
+}
+
+glm::vec2 Sphere::GetUVCoordinates(const glm::vec3 &point)
+{
+   float phi = std::atan2(point.z, point.x);
+   if (phi < 0) phi += TWO_PI;
+   float theta = glm::acos(point.y);
+
+   return glm::vec2(1 - phi / TWO_PI, 1 - theta / PI);
 }

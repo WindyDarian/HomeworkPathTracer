@@ -47,6 +47,17 @@ glm::vec4 Triangle::GetNormal(const glm::vec4 &position)
     return glm::vec4(result, 0);
 }
 
+
+
+glm::vec2 Triangle::GetUVCoordinates(const glm::vec3 &point)
+{
+    float S = tri_area(points[0], points[1], points[2]);
+    float S1 = tri_area(point, points[1], points[2]);
+    float S2 = tri_area(point, points[2], points[0]);
+    float S3 = tri_area(point, points[0], points[1]);
+    return this->uvs[0] * S1/S + this->uvs[1] * S2/S + this->uvs[2] * S3/S;
+}
+
 //HAVE THEM IMPLEMENT THIS
 //The ray in this function is not transformed because it was *already* transformed in Mesh::GetIntersection
 Intersection Triangle::GetIntersection(Ray r)
@@ -83,9 +94,12 @@ Intersection Triangle::GetIntersection(Ray r)
         return Intersection();
     }
 
+    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
+
     return Intersection(ipoint,
                         this->GetNormal(ipoint),
                         t,
+                        s_color,
                         this);
 }
 
@@ -145,7 +159,7 @@ Intersection Mesh::GetIntersection(Ray r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    return Intersection(ipoint_world, normal_world, t_world, this);
+    return Intersection(ipoint_world, normal_world, t_world, result.surface_color, this);
 }
 
 void Mesh::RecomputeKDNode()
@@ -220,6 +234,11 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
         //An error loading the OBJ occurred!
         std::cout << errors << std::endl;
     }
+}
+
+glm::vec2 Mesh::GetUVCoordinates(const glm::vec3 &point)
+{
+    return glm::vec2();
 }
 
 void Mesh::create(){

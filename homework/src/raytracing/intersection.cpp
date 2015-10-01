@@ -3,16 +3,18 @@
 Intersection::Intersection():
     point(glm::vec3(0)),
     normal(glm::vec3(0)),
-    t(-1)
+    t(-1),
+    surface_color(1.f)
 {
     object_hit = NULL;
 }
 
-Intersection::Intersection(glm::vec3 point, glm::vec3 normal, float t , Geometry* object_hit):
+Intersection::Intersection(glm::vec3 point, glm::vec3 normal, float t , glm::vec3 surface_color, Geometry* object_hit):
     point(point),
     normal(normal),
     t(t),
-    object_hit(object_hit)
+    object_hit(object_hit),
+    surface_color(surface_color)
 {}
 
 IntersectionEngine::IntersectionEngine()

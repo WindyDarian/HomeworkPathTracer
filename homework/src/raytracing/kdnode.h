@@ -7,9 +7,10 @@
 #include <scene/geometry/geometry.h>
 
 // Just ignore this for my hw02
+// Because I wanted to render the dragon.obj after hw01 is done
+// it helped my Wahoo
 
 // K-D Tree Node Class for optimization
-// Because I wanted to render the dragon.obj after hw01 is done
 class KDNode
 {
 public:

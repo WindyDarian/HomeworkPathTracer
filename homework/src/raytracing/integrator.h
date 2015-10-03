@@ -17,6 +17,7 @@ public:
     Integrator();
     Integrator(Scene *s);
     glm::vec3 TraceRay(Ray r, unsigned int depth);
+    glm::vec3 ShadowTest(const glm::vec3 &point, Geometry* light) const;
     void SetDepth(unsigned int depth);
 
     Scene* scene;

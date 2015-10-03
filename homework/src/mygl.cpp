@@ -200,6 +200,31 @@ void MyGL::SceneLoadDialog()
     intersection_engine.scene = &scene;
 }
 
+inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)
+{
+    Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+
+    Intersection intersection(intersection_engine.GetIntersection(r));
+
+    if(intersection.object_hit == NULL || intersection.object_hit == nullptr)
+    {
+        scene.film.pixels[x][y] = glm::vec3(0.f);
+    }
+    else
+    {
+        scene.film.pixels[x][y] = glm::abs(intersection.normal);
+        //scene.film.pixels[x][y] = intersection.normal;
+    }
+}
+
+inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator)
+{
+    Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+
+    scene.film.pixels[x][y] = integrator.TraceRay(r, 0);
+
+}
+
 void MyGL::RaytraceScene()
 {
     QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
@@ -215,39 +240,18 @@ void MyGL::RaytraceScene()
         {
             for(unsigned int j = 0; j < scene.camera.height; j++)
             {
-                Ray r(scene.camera.Raycast(static_cast<float>(i), static_cast<float>(j)));
-
-                Intersection intersection(intersection_engine.GetIntersection(r));
-
-                if(intersection.object_hit == NULL || intersection.object_hit == nullptr)
-                {
-                    scene.film.pixels[i][j] = glm::vec3(0.f);
-                }
-                else
-                {
-                    scene.film.pixels[i][j] = glm::abs(intersection.normal);
-                    //scene.film.pixels[i][j] = intersection.normal;
-                }
+                //_renderpixel_normal(i,j,scene,intersection_engine);
+                _renderpixel(i,j,this->scene,this->integrator);
             }
         });
     #else
+
         for(unsigned int i = 0; i < scene.camera.width; i++)
         {
             for(unsigned int j = 0; j < scene.camera.height; j++)
             {
-                Ray r(scene.camera.Raycast(static_cast<float>(i), static_cast<float>(j)));
-
-                Intersection intersection(intersection_engine.GetIntersection(r));
-
-                if(intersection.object_hit == NULL || intersection.object_hit == nullptr)
-                {
-                    scene.film.pixels[i][j] = glm::vec3(0.f);
-                }
-                else
-                {
-                    scene.film.pixels[i][j] = glm::abs(intersection.normal);
-                    //scene.film.pixels[i][j] = intersection.normal;
-                }
+                //_renderpixel_normal(i,j,scene,intersection_engine);
+                _renderpixel(i,j,this->scene,this->integrator);
             }
         }
     #endif

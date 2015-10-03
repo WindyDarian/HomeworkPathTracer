@@ -76,5 +76,7 @@ void SquarePlane::create()
 
 glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
 {
-    return glm::vec2(point.x + 0.5f, point.y + 0.5f);
+    glm::vec2 uv(point.x + 0.5f, point.y + 0.5f);
+
+    return uv;
 }

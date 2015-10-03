@@ -23,7 +23,12 @@ Intersection Sphere::GetIntersection(Ray r)
 
     float t = ( -B + glm::sqrt(disc) ) / (2 * A);
     float temp = ( -B - glm::sqrt(disc) ) / (2 * A);
-    if (temp < t && temp >= 0) t = temp;
+    if (t >= 0)
+    {
+        if (temp < t && temp >= 0) t = temp;
+    }
+    else
+        t = temp;
 
     if (t < 0 ) return Intersection(); // not in the front
 
@@ -176,7 +181,9 @@ glm::vec2 Sphere::GetUVCoordinates(const glm::vec3 &point)
 {
    float phi = std::atan2(point.z, point.x);
    if (phi < 0) phi += TWO_PI;
-   float theta = glm::acos(point.y);
+   float theta = glm::acos(point.y * 2); //map y to (-1, 1)
 
-   return glm::vec2(1 - phi / TWO_PI, 1 - theta / PI);
+   glm::vec2 uv( 1 - phi / TWO_PI, 1 - theta / PI);
+
+   return uv;
 }

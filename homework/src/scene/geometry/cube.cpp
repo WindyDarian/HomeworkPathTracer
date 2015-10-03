@@ -257,7 +257,7 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
     switch (axis_and_direction.first)
     {
      case 0: //x slab
-        p1.y = 1.0f;
+        p1.y = 0.0f;
         o = (point + shift).yz();
         if (axis_and_direction.second > 0)
         {
@@ -281,7 +281,7 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
         }
         else
         {
-            p1.y = 0.25f;
+            p1.y = 0.75f;
             d = glm::vec2(1.0f, 1.0f);
         }
         break;
@@ -290,12 +290,12 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
         o = (point + shift).xy();
         if (axis_and_direction.second > 0)
         {
-            p1.y = 1.0f;
+            p1.y = 0.0f;
             d = glm::vec2(1.0f, 1.0f);
         }
         else
         {
-            p1.y = 0.25f;
+            p1.y = 0.75f;
             d = glm::vec2(1.0f, -1.0f);
         }
     }
@@ -304,6 +304,9 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
     d *= 0.25f;
     d.x *= o.x;
     d.y *= o.y;
+
+    glm::vec2 uv = p1 + d;
+
 
     return p1 + d;
 }

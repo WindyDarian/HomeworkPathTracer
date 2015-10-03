@@ -78,6 +78,8 @@ Intersection Triangle::GetIntersection(Ray r)
     float t = (glm::dot(this->points[0] - r.origin, normal))
             / direction_dot_normal;
 
+    if (t <= 0) return Intersection();
+
     // intersection point of ray and plane
     glm::vec3 ipoint(r.origin + t * r.direction);
 
@@ -94,12 +96,11 @@ Intersection Triangle::GetIntersection(Ray r)
         return Intersection();
     }
 
-    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
     return Intersection(ipoint,
                         this->GetNormal(ipoint),
                         t,
-                        s_color,
+                        glm::vec3(1.f),
                         this);
 }
 
@@ -122,31 +123,15 @@ Intersection Mesh::GetIntersection(Ray r)
     for (auto tri: possible_objs)
     {
         Intersection intersection = tri->GetIntersection(r_obj);
-        if (intersection.object_hit == NULL)
+        if (intersection.object_hit == nullptr)
             continue;   // missed this triangle
 
-        if (intersection.t < min_t)
+        if (intersection.t < min_t && intersection.t > 0)
         {
             min_t = intersection.t;
             result = intersection;
         }
     }
-
-
-    /* //not using K-D Node
-    for (auto tri : this->faces)
-    {
-        Intersection intersection = tri->GetIntersection(r_obj);
-        if (intersection.object_hit == NULL)
-            continue;   // missed this triangle
-
-        if (intersection.t < min_t)
-        {
-            min_t = intersection.t;
-            result = intersection;
-        }
-    }
-    */
 
     if (result.object_hit == NULL || result.object_hit == nullptr)
         return Intersection();
@@ -159,7 +144,9 @@ Intersection Mesh::GetIntersection(Ray r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    return Intersection(ipoint_world, normal_world, t_world, result.surface_color, this);
+    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
+
+    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
 void Mesh::RecomputeKDNode()

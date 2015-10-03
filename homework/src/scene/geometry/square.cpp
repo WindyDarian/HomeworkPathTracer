@@ -32,6 +32,12 @@ Intersection SquarePlane::GetIntersection(Ray r)
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
     glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
+//    if (this->material->normal_map != NULL)
+//    {
+//        glm::normal_local = Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->normal_map) * 2 - glm::vec3(1.f);
+
+
+//    }
 
     return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }

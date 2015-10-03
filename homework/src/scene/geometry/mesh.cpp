@@ -32,14 +32,21 @@ Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3
     uvs[2] = t3;
 }
 
-//Returns the interpolation of the triangle's three normals based on the point inside the triangle that is given.
-glm::vec3 Triangle::GetNormal(const glm::vec3 &position)
+float Area(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3)
 {
-    float d0 = glm::distance(position, points[0]);
-    float d1 = glm::distance(position, points[1]);
-    float d2 = glm::distance(position, points[2]);
-    return (normals[0] * d0 + normals[1] * d1 + normals[2] * d2)/(d0+d1+d2);
+    return glm::length(glm::cross(p1 - p2, p3 - p2)) * 0.5f;
 }
+
+//Returns the interpolation of the triangle's three normals based on the point inside the triangle that is given.
+glm::vec3 Triangle::GetNormal(const glm::vec3 &P)
+{
+    float A = Area(points[0], points[1], points[2]);
+    float A0 = Area(points[1], points[2], P);
+    float A1 = Area(points[0], points[2], P);
+    float A2 = Area(points[0], points[1], P);
+    return glm::normalize(normals[0] * A0/A + normals[1] * A1/A + normals[2] * A2/A);
+}
+
 
 glm::vec4 Triangle::GetNormal(const glm::vec4 &position)
 {

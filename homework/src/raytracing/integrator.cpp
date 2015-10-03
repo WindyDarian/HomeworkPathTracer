@@ -126,11 +126,11 @@ glm::vec3 Integrator::ShadowTest(const glm::vec3 &point, Geometry* light) const
     Intersection i_lightfeeler = this->intersection_engine->GetIntersection(lightfeeler);
     if (i_lightfeeler.object_hit == light) //|| i_lightfeeler.object_hit == nullptr||i_lightfeeler.object_hit == NULL)
     {
-        return glm::vec3(1.f);
+        return i_lightfeeler.color;
     }
     else if (i_lightfeeler.object_hit == nullptr||i_lightfeeler.object_hit == NULL)
     {
-        return glm::vec3(0.3f);
+        return glm::vec3(0.f);
     }
     else if (i_lightfeeler.object_hit->material->refract_idx_in > 0 &&
              i_lightfeeler.object_hit->material->refract_idx_out > 0)

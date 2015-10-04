@@ -9,7 +9,7 @@ KDNode::KDNode()
 
 }
 
-KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth, int max_depth)
+KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth)
 {   
     //  empty
     if (objs.size() == 0) return nullptr;
@@ -19,7 +19,7 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth, int max_dep
     //  contains unique node
     if (objs.size() == 1)
     {
-        node->obj.push_back(objs.front());
+        node->obj = objs.front();
         node->bounding_box = objs.front()->getBoundingBox();
         return node;
     }
@@ -36,7 +36,7 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth, int max_dep
 
     for (auto obj: objs)
     {
-        BoundingBox b = obj->getBoundingBox();
+        auto b = obj->getBoundingBox();
         node->bounding_box.merge(b);
 
         if (median_lr) median += b.max[axis]; //right
@@ -44,18 +44,14 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth, int max_dep
     }
     median /= static_cast<float>(objs.size());
 
-    if (depth == max_depth)
-    {
-        node->obj = objs;
-        return node;
-    }
+
 
     // start dividing
     std::list<Geometry*> left_objs;
     std::list<Geometry*> right_objs;
     for (auto obj: objs)
     {
-        BoundingBox b = obj->getBoundingBox();
+        auto b = obj->getBoundingBox();
         if (median_lr)
         {
             if (b.max[axis] > median) right_objs.push_back(obj);
@@ -98,10 +94,10 @@ void KDNode::appendIntersections(std::set<Geometry*>& hitset, const Ray& r)
     if (this->right != nullptr)
         this->right->appendIntersections(hitset, r);
 
-    if (this->obj.size()!= 0)
+    if (this->obj != nullptr)
     {
-        for (auto o : this->obj){
-            hitset.insert(o);
-        }
+        hitset.insert(this->obj);
     }
 }
+
+

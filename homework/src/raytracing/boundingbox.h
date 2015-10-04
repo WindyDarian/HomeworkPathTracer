@@ -1,6 +1,8 @@
 #pragma once
 #include <la.h>
+#include <openGL/drawable.h>
 #include <raytracing/ray.h>
+
 
 class BoundingBox
 {
@@ -12,10 +14,14 @@ public:
     glm::vec3 max;
     bool valid;
 
+    virtual void create();
+
     bool isIntersected(const Ray& r);
 
     void expand(const glm::vec3& point);
     void merge(const BoundingBox& box);
+
+    BoundingBox getTransformedCopy(const glm::mat4& T) const;
 
 };
 

@@ -5,10 +5,9 @@
 static const int CUB_IDX_COUNT = 36;
 static const int CUB_VERT_COUNT = 24;
 
-
 Intersection Cube::GetIntersection(Ray r)
 {
-    Ray r_obj(r.GetTransformedCopy(this->transform.invT()));
+    Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
     float bounds[3][2] = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}};
 
@@ -305,8 +304,11 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
     d.x *= o.x;
     d.y *= o.y;
 
-    glm::vec2 uv = p1 + d;
-
-
     return p1 + d;
+}
+
+BoundingBox Cube::calculateBoundingBox()
+{
+    BoundingBox b(glm::vec3(-0.5f),glm::vec3(0.5f));
+    return b.getTransformedCopy(this->transform.T());
 }

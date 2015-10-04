@@ -16,7 +16,7 @@ Ray::Ray(const Ray &r):
     transmitted_color = r.transmitted_color;
 }
 
-Ray Ray::GetTransformedCopy(const glm::mat4 &T) const
+Ray Ray::getTransformedCopy(const glm::mat4 &T) const
 {
       // w = 1 for points
     glm::vec4 origin4 = glm::vec4(this->origin, 1.0f);

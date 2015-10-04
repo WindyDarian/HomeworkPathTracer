@@ -7,13 +7,17 @@
 class Cube : public Geometry
 {
 public:
+
+
     Intersection GetIntersection(Ray r);
     void create();
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
+    virtual BoundingBox calculateBoundingBox();
 private:
     glm::vec3 getNormal(const glm::vec3& point) const; // Get normal from point
     std::pair<int, int> getFaceNormalAxisAndDirection(const glm::vec3& point) const;
 
     float bounds[3][2] = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}};
+    std::vector<glm::vec3> vertexes;
 
 };

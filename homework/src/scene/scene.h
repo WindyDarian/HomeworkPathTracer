@@ -4,9 +4,12 @@
 #include <scene/camera.h>
 #include <raytracing/samplers/pixelsampler.h>
 #include <scene/geometry/geometry.h>
+#include <raytracing/kdnode.h>
 
 class Geometry;
 class Material;
+class KDNode;
+
 
 class Scene
 {
@@ -18,9 +21,12 @@ public:
     Camera camera;
     Film film;
     PixelSampler* pixel_sampler;
+    std::unique_ptr<KDNode> kdnode_objects = nullptr;
 
     void SetCamera(const Camera &c);
 
     void CreateTestScene();
     void Clear();
+
+    void recomputeKDNode();
 };

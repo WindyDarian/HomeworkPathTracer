@@ -65,6 +65,11 @@ glm::vec2 Triangle::GetUVCoordinates(const glm::vec3 &point)
     return this->uvs[0] * S1/S + this->uvs[1] * S2/S + this->uvs[2] * S3/S;
 }
 
+BoundingBox Triangle::calculateBoundingBox()
+{
+    return BoundingBox(this->points[0], this->points[1], this->points[2]);
+}
+
 //HAVE THEM IMPLEMENT THIS
 //The ray in this function is not transformed because it was *already* transformed in Mesh::GetIntersection
 Intersection Triangle::GetIntersection(Ray r)
@@ -111,14 +116,9 @@ Intersection Triangle::GetIntersection(Ray r)
                         this);
 }
 
-BoundingBox Triangle::getBoundingBox()
-{
-    return BoundingBox(this->points[0], this->points[1], this->points[2]);
-}
-
 Intersection Mesh::GetIntersection(Ray r)
 {
-    Ray r_obj(r.GetTransformedCopy(this->transform.invT()));
+    Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
     float min_t = std::numeric_limits<float>::max();
     Intersection result;
@@ -156,7 +156,7 @@ Intersection Mesh::GetIntersection(Ray r)
     return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
-void Mesh::RecomputeKDNode()
+void Mesh::recomputeKDNode()
 {
     std::list<Geometry*> tris;
     for (auto tri: this->faces)
@@ -220,7 +220,7 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
             }
         }
         std::cout << "" << std::endl;
-        this->RecomputeKDNode();
+        this->recomputeKDNode();
         std::cout << "K-D Node for mesh computed" << std::endl;
     }
     else
@@ -233,6 +233,18 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
 glm::vec2 Mesh::GetUVCoordinates(const glm::vec3 &point)
 {
     return glm::vec2();
+}
+
+BoundingBox Mesh::calculateBoundingBox()
+{
+    BoundingBox b;
+
+    for (auto t: this->faces)
+    {
+        b.merge(t->getBoundingBox().getTransformedCopy(this->transform.T()));
+    }
+
+    return b;
 }
 
 void Mesh::create(){

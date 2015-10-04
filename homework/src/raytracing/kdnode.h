@@ -6,28 +6,30 @@
 #include <raytracing/ray.h>
 #include <scene/geometry/geometry.h>
 
-// Just ignore this for my hw02
-// Because I wanted to render the dragon.obj after hw01 is done
-// it helped my Wahoo
+class Geometry;
 
-// K-D Tree Node Class for optimization
+
+// K-D Tree Node Class
+// I used it in both scene management and in mesh class
 class KDNode
 {
 public:
 
-    static KDNode* build(const std::list<Geometry*>& objs, int depth = 0, int max_depth = 5000);
+    static KDNode* build(const std::list<Geometry*>& objs, int depth = 0);
 
     KDNode();
 
-    void appendIntersections(std::set<Geometry*>& hitset, const Ray &r); //Calculate all possible hit targets and append to an intersection set
-
+    //Calculate all possible hit targets and append to an intersection set
+    void appendIntersections(std::set<Geometry*>& hitset, const Ray &r);
 
     //KDNode* left = nullptr;
     //KDNode* right = nullptr;
-    std::unique_ptr<KDNode> left;
-    std::unique_ptr<KDNode> right;
+    std::unique_ptr<KDNode> left = nullptr;
+    std::unique_ptr<KDNode> right = nullptr;
     BoundingBox bounding_box;
-    std::list<Geometry*> obj; //the geometry contained in this node, only for leaf nodes
+    Geometry* obj = nullptr; //the geometry contained in this node, only for leaf nodes
+
+
 };
 
 

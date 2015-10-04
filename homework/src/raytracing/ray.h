@@ -10,7 +10,7 @@ public:
 
     //Return a copy of this ray that has been transformed
     //by the input transformation matrix.
-    Ray GetTransformedCopy(const glm::mat4& T) const;
+    Ray getTransformedCopy(const glm::mat4& T) const;
 
     glm::vec3 origin;
     glm::vec3 direction;

@@ -9,7 +9,7 @@ static const int SPH_VERT_COUNT = 382;
 
 Intersection Sphere::GetIntersection(Ray r)
 {
-    Ray r_obj(r.GetTransformedCopy(this->transform.invT()));
+    Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
     float radius = 0.5f;
     glm::vec3 center(0.f);
@@ -186,4 +186,13 @@ glm::vec2 Sphere::GetUVCoordinates(const glm::vec3 &point)
    glm::vec2 uv( 1 - phi / TWO_PI, 1 - theta / PI);
 
    return uv;
+}
+
+BoundingBox Sphere::calculateBoundingBox()
+{
+    // I know this is not accurate when rotating a sphere
+    // but due to irregular scale like default scene exists
+    // I'll need a shape to cover the whole sphere for priorty
+    BoundingBox b(glm::vec3(-0.5f),glm::vec3(0.5f));
+    return b.getTransformedCopy(this->transform.T());
 }

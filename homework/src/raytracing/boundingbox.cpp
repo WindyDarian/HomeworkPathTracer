@@ -18,6 +18,11 @@ BoundingBox::BoundingBox(const glm::vec3& v1, const glm::vec3& v2, const glm::ve
 {
 }
 
+void BoundingBox::create()
+{
+
+}
+
 
 
 void BoundingBox::expand(const glm::vec3& point)
@@ -50,6 +55,30 @@ void BoundingBox::merge(const BoundingBox& box)
          this->min[i] = glm::min(this->min[i], box.min[i]);
          this->max[i] = glm::max(this->max[i], box.max[i]);
      }
+}
+
+BoundingBox BoundingBox::getTransformedCopy(const glm::mat4 &T) const
+{
+    BoundingBox b;
+
+    std::vector<glm::vec4> vertices;
+    vertices.reserve(8);
+    vertices.push_back(glm::vec4(min.x, min.y, min.z, 1.f));
+    vertices.push_back(glm::vec4(max.x, min.y, min.z, 1.f));
+    vertices.push_back(glm::vec4(min.x, max.y, min.z, 1.f));
+    vertices.push_back(glm::vec4(min.x, min.y, max.z, 1.f));
+    vertices.push_back(glm::vec4(max.x, min.y, max.z, 1.f));
+    vertices.push_back(glm::vec4(max.x, max.y, min.z, 1.f));
+    vertices.push_back(glm::vec4(min.x, max.y, max.z, 1.f));
+    vertices.push_back(glm::vec4(max.x, max.y, max.z, 1.f));
+
+
+    for (auto v: vertices)
+    {
+        b.expand(glm::vec3(T * v));
+    }
+
+    return b;
 }
 
 bool BoundingBox::isIntersected(const Ray& r)

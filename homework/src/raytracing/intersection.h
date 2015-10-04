@@ -3,10 +3,13 @@
 #include <scene/geometry/geometry.h>
 #include <raytracing/ray.h>
 #include <scene/scene.h>
+#include <set>
 
 class Material;
 class Geometry;
 class Scene;
+class KDNode;
+
 
 class Intersection
 {

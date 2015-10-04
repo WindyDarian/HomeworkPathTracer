@@ -28,7 +28,8 @@ public:
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 
-    BoundingBox getBoundingBox();
+    virtual BoundingBox calculateBoundingBox();
+
 };
 
 //A mesh just holds a collection of triangles against which one can test intersections.
@@ -43,9 +44,11 @@ public:
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 
+    virtual BoundingBox calculateBoundingBox();
+
 private:
     QList<Triangle*> faces;
 
     std::unique_ptr<KDNode> kdnode;  // K-D Node for optimization
-    void RecomputeKDNode();
+    void recomputeKDNode();
 };

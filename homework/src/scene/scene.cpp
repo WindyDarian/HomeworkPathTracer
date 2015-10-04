@@ -44,6 +44,8 @@ void Scene::CreateTestScene()
     camera.far_clip = 100.0f;
     camera.create();
     film = Film(400, 400);
+
+    this->recomputeKDNode();
 }
 
 void Scene::Clear()
@@ -63,4 +65,11 @@ void Scene::Clear()
     film = Film();
     delete pixel_sampler;
     pixel_sampler = new UniformPixelSampler();
+    this->kdnode_objects.reset();
+}
+
+void Scene::recomputeKDNode()
+{
+    this->kdnode_objects = std::unique_ptr<KDNode>(KDNode::build(this->objects.toStdList()));
+    std::cout << "K-D node for scene constructed" << std::endl;
 }

@@ -2,7 +2,7 @@
 
 Intersection SquarePlane::GetIntersection(Ray r)
 {
-    Ray r_obj(r.GetTransformedCopy(this->transform.invT()));
+    Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
     glm::vec3 center(0.f, 0.f, 0.f);
     glm::vec3 normal(0.f, 0.f, 1.f);
@@ -85,4 +85,11 @@ glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
     glm::vec2 uv(point.x + 0.5f, point.y + 0.5f);
 
     return uv;
+}
+
+BoundingBox SquarePlane::calculateBoundingBox()
+{
+    BoundingBox b(glm::vec3(-0.5f, -0.5f, 0.0f),
+                  glm::vec3(0.5f, 0.5f, 0.0f));
+    return b.getTransformedCopy(this->transform.T());
 }

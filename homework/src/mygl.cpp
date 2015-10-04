@@ -198,6 +198,8 @@ void MyGL::SceneLoadDialog()
     integrator.scene = &scene;
     integrator.intersection_engine = &intersection_engine;
     intersection_engine.scene = &scene;
+
+    scene.recomputeKDNode();
 }
 
 inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)

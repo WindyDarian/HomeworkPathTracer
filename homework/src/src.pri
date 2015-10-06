@@ -30,7 +30,8 @@ SOURCES += \
     $$PWD/scene/materials/phongmaterial.cpp \
     $$PWD/scene/materials/lambertmaterial.cpp \
     $$PWD/raytracing/boundingbox.cpp \
-    $$PWD/raytracing/kdnode.cpp
+    $$PWD/raytracing/kdnode.cpp \
+    $$PWD/scene/geometry/boundingboxframe.cpp
 
 HEADERS += \
     $$PWD/mainwindow.h \
@@ -66,4 +67,5 @@ HEADERS += \
     $$PWD/scene/materials/lambertmaterial.h \
     $$PWD/scene/materials/phongmaterial.h \
     $$PWD/raytracing/boundingbox.h \
-    $$PWD/raytracing/kdnode.h
+    $$PWD/raytracing/kdnode.h \
+    $$PWD/scene/geometry/boundingboxframe.h

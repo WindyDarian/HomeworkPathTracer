@@ -100,4 +100,22 @@ void KDNode::appendIntersections(std::set<Geometry*>& hitset, const Ray& r)
     }
 }
 
+void KDNode::appendBoundingBoxFrame(std::list<BoundingBoxFrame *>& list, glm::vec3 color, float color_decay)
+{
+    glm::vec3 newcolor = color * color_decay;
+
+    if (this->left != nullptr)
+    {
+        this->left->appendBoundingBoxFrame(list, newcolor, color_decay);
+    }
+
+    if (this->right != nullptr)
+    {
+
+        this->right->appendBoundingBoxFrame(list, newcolor, color_decay);
+    }
+
+    list.push_back(new BoundingBoxFrame(this->bounding_box, color));
+}
+
 

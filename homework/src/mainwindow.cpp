@@ -9,10 +9,33 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->mygl->setFocus();
+
+    viewMenu = new QMenu("View");
+    this->menuBar()->addMenu(viewMenu);
+    objectBBoxVisible = new QAction("Bounding Box (Object)", viewMenu);
+    objectBBoxVisible->setCheckable(true);
+    objectBBoxVisible->setChecked(true);
+    kdTreeBBoxVisible = new QAction("Bounding Box (K-D Tree)", viewMenu);
+    kdTreeBBoxVisible->setCheckable(true);
+    kdTreeBBoxVisible->setChecked(false);
+
+    connect(objectBBoxVisible, SIGNAL(toggled(bool)),
+                     this, SLOT(on_objectbboxvisible_toggled(bool)));
+    connect(kdTreeBBoxVisible, SIGNAL(toggled(bool)),
+                     this, SLOT(on_kdtreebboxvisible_toggled(bool)));
+
+    viewMenu->addAction(objectBBoxVisible);
+    viewMenu->addAction(kdTreeBBoxVisible);
+
+
+
 }
 
 MainWindow::~MainWindow()
 {
+    delete kdTreeBBoxVisible;
+    delete objectBBoxVisible;
+    delete viewMenu;
     delete ui;
 }
 
@@ -41,4 +64,14 @@ void MainWindow::on_actionCamera_Controls_triggered()
 {
     CameraControlsHelp* c = new CameraControlsHelp();
     c->show();
+}
+
+void MainWindow::on_kdtreebboxvisible_toggled(bool value)
+{
+    ui->mygl->setKDTreeBBoxVisible(value);
+}
+
+void MainWindow::on_objectbboxvisible_toggled(bool value)
+{
+    ui->mygl->setObjectBBoxVisible(value);
 }

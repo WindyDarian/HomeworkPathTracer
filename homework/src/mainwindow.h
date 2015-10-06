@@ -27,6 +27,14 @@ private slots:
 
     void on_actionCamera_Controls_triggered();
 
+    void on_objectbboxvisible_toggled(bool);
+    void on_kdtreebboxvisible_toggled(bool);
+
+
 private:
     Ui::MainWindow *ui;
+    QMenu *viewMenu;
+    QAction *objectBBoxVisible;
+    QAction *kdTreeBBoxVisible;
+
 };

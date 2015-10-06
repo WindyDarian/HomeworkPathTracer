@@ -1,5 +1,7 @@
 #include "boundingbox.h"
 
+#include <la.h>
+
 BoundingBox::BoundingBox():valid(false)
 {
 }
@@ -17,13 +19,6 @@ BoundingBox::BoundingBox(const glm::vec3& v1, const glm::vec3& v2, const glm::ve
     valid(true)
 {
 }
-
-void BoundingBox::create()
-{
-
-}
-
-
 
 void BoundingBox::expand(const glm::vec3& point)
 {

@@ -3,6 +3,7 @@
 #include <scene/geometry/cube.h>
 #include <scene/geometry/sphere.h>
 #include <scene/geometry/square.h>
+#include <scene/geometry/boundingboxframe.h>
 #include <iostream>
 #include <scene/materials/lambertmaterial.h>
 #include <scene/materials/phongmaterial.h>
@@ -81,6 +82,9 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
         for(Geometry *g : scene.objects)
         {
             g->create();
+            auto b = new BoundingBoxFrame(g->getBoundingBox());
+            b->create();
+            scene.boundingbox_objects.append(b);
             if(g->material->emissive)
             {
                 to_lights.append(g);

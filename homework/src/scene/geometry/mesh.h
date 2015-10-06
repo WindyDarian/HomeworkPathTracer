@@ -27,7 +27,7 @@ public:
     glm::vec4 GetNormal(const glm::vec4 &position);
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
-
+protected:
     virtual BoundingBox calculateBoundingBox();
 
 };
@@ -43,7 +43,7 @@ public:
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
-
+protected:
     virtual BoundingBox calculateBoundingBox();
 
 private:

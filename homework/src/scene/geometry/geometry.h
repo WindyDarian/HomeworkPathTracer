@@ -25,14 +25,15 @@ public:
     virtual Intersection GetIntersection(Ray r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 
-    virtual BoundingBox calculateBoundingBox() = 0;
+
     const BoundingBox& getBoundingBox()
     {
-        if (bounding_box == nullptr)
-            bounding_box.reset(new BoundingBox(calculateBoundingBox()));
+        if (bounding_box_ptr == nullptr)
+        {
+            bounding_box_ptr.reset(new BoundingBox(calculateBoundingBox()));
              // reset automatically deletes old pointer
-
-        return *bounding_box;
+        }
+        return *bounding_box_ptr;
     }
 
     virtual glm::vec2 GetUVCoordinates(const glm::vec3 &point) = 0;
@@ -40,10 +41,9 @@ public:
     QString name;//Mainly used for debugging purposes
     Transform transform;
     Material* material;
-
+    std::unique_ptr<BoundingBox> bounding_box_ptr = nullptr;
 
 protected:
-    // using smart pointer so I don't need to release it manually
-    std::unique_ptr<BoundingBox> bounding_box = nullptr;
+    virtual BoundingBox calculateBoundingBox() = 0;
 
 };

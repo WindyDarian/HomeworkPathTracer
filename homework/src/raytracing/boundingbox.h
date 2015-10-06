@@ -3,6 +3,10 @@
 #include <openGL/drawable.h>
 #include <raytracing/ray.h>
 
+// I didn't make BoundingBox itself drawable because I decided to use it
+// as a pure data class like Ray and use its copy constructor a lot, which
+// Drawable will encounter some problems at.
+// See scene/gemoetry/boundingboxframe.h
 
 class BoundingBox
 {
@@ -13,8 +17,6 @@ public:
     glm::vec3 min;
     glm::vec3 max;
     bool valid;
-
-    virtual void create();
 
     bool isIntersected(const Ray& r);
 

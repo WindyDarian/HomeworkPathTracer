@@ -5,6 +5,8 @@
 #include <raytracing/boundingbox.h>
 #include <raytracing/ray.h>
 #include <scene/geometry/geometry.h>
+#include <scene/geometry/boundingboxframe.h>
+
 
 class Geometry;
 
@@ -21,6 +23,10 @@ public:
 
     //Calculate all possible hit targets and append to an intersection set
     void appendIntersections(std::set<Geometry*>& hitset, const Ray &r);
+
+    void appendBoundingBoxFrame(std::list<BoundingBoxFrame*>& list,
+                                  glm::vec3 color,
+                                  float color_decay = 0.5f);
 
     //KDNode* left = nullptr;
     //KDNode* right = nullptr;

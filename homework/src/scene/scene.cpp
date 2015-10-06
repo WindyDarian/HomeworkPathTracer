@@ -32,12 +32,18 @@ void Scene::CreateTestScene()
     c->transform = Transform(glm::vec3(1,0,0), glm::vec3(0,0,45), glm::vec3(1,1,1));
     c->create();
     this->objects.append(c);
+    auto b = new BoundingBoxFrame(c->getBoundingBox());
+    b->create();
+    this->boundingbox_objects.append(b);
 
     Sphere* s = new Sphere();
     s->material = lambert2;
     s->transform = Transform(glm::vec3(-1,1,0), glm::vec3(0,0,0), glm::vec3(1,2,1));
     s->create();
     this->objects.append(s);
+    b = new BoundingBoxFrame(s->getBoundingBox());
+    b->create();
+    this->boundingbox_objects.append(b);
 
     camera = Camera(400, 400);
     camera.near_clip = 0.1f;
@@ -46,6 +52,7 @@ void Scene::CreateTestScene()
     film = Film(400, 400);
 
     this->recomputeKDNode();
+
 }
 
 void Scene::Clear()
@@ -66,10 +73,37 @@ void Scene::Clear()
     delete pixel_sampler;
     pixel_sampler = new UniformPixelSampler();
     this->kdnode_objects.reset();
+    for(auto b : this->boundingbox_objects)
+    {
+        delete b;
+    }
+    this->boundingbox_objects.clear();
+    for(auto b : this->boundingbox_kdnode)
+    {
+        delete b;
+    }
+    this->boundingbox_kdnode.clear();
 }
 
 void Scene::recomputeKDNode()
 {
+
+
     this->kdnode_objects = std::unique_ptr<KDNode>(KDNode::build(this->objects.toStdList()));
     std::cout << "K-D node for scene constructed" << std::endl;
+
+
+    // update k-d node visualization
+    for(auto b : this->boundingbox_kdnode)
+    {
+        delete b;
+    }
+    this->boundingbox_kdnode.clear();
+    std::list<BoundingBoxFrame*> b_frame;
+    this->kdnode_objects->appendBoundingBoxFrame(b_frame, glm::vec3(0.75f,0.75f,0.75f), 0.9f);
+    for (auto b : b_frame)
+    {
+        b->create();
+        this->boundingbox_kdnode.push_back(b);
+    }
 }

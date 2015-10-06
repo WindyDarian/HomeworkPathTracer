@@ -35,6 +35,9 @@ private:
     Integrator integrator;
     IntersectionEngine intersection_engine;
 
+    bool kdtree_bbox_visible = false;
+    bool object_bbox_visible = true;
+
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -48,6 +51,10 @@ public:
     void ResizeToSceneCamera();
 
     void RaytraceScene();
+
+    void setKDTreeBBoxVisible(bool value){this->kdtree_bbox_visible = value;}
+    void setObjectBBoxVisible(bool value){this->object_bbox_visible = value;}
+
 
 protected:
     void keyPressEvent(QKeyEvent *e);

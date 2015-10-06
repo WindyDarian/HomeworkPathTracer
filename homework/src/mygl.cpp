@@ -110,6 +110,23 @@ void MyGL::GLDrawScene()
         prog_flat.setModelMatrix(l->transform.T());
         prog_flat.draw(*this, *l);
     }
+    if (this->object_bbox_visible)
+        for (auto b :scene.boundingbox_objects)
+        {
+            {
+                prog_flat.setModelMatrix(glm::mat4(1.0f));
+                prog_flat.draw(*this, *b);
+            }
+        }
+    if (this->kdtree_bbox_visible)
+    {
+        for (auto b :scene.boundingbox_kdnode)
+        {
+            prog_flat.setModelMatrix(glm::mat4(1.0f));
+            prog_flat.draw(*this, *b);
+        }
+    }
+
     prog_flat.setModelMatrix(glm::mat4(1.0f));
     prog_flat.draw(*this, scene.camera);
 }

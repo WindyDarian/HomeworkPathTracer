@@ -18,7 +18,7 @@ public:
     glm::vec3 max;
     bool valid;
 
-    bool isIntersected(const Ray& r);
+    bool isIntersected(const Ray& r) const;
 
     void expand(const glm::vec3& point);
     void merge(const BoundingBox& box);

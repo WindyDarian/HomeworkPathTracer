@@ -43,8 +43,8 @@ Intersection IntersectionEngine::GetIntersection(Ray r)
         }
     }*/
 
-
-    // using BVH
+    /*
+    // using BVH (old)
     std::set<Geometry*> possible_objs;
     this->scene->kdnode_objects->appendIntersections(possible_objs, r);
     for (auto obj : possible_objs)
@@ -58,7 +58,11 @@ Intersection IntersectionEngine::GetIntersection(Ray r)
             min_t = intersection.t;
             result = intersection;
         }
-    }
+    }*/
+
+    result = this->scene->kdnode_objects->GetIntersection(r);
+    if (result.t < 0)
+        result = Intersection();
 
     return result;
 }

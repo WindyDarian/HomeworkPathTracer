@@ -123,7 +123,8 @@ Intersection Mesh::GetIntersection(Ray r)
     float min_t = std::numeric_limits<float>::max();
     Intersection result;
 
-    // Optimization: using K-D Node
+    /*
+    // Optimization: using K-D Node (old)
     std::set<Geometry*> possible_objs;
     this->kdnode->appendIntersections(possible_objs, r_obj);
 
@@ -139,8 +140,11 @@ Intersection Mesh::GetIntersection(Ray r)
             result = intersection;
         }
     }
+    */
 
-    if (result.object_hit == NULL || result.object_hit == nullptr)
+    result = this->kdnode->GetIntersection(r_obj);
+
+    if (result.object_hit == NULL || result.object_hit == nullptr || result.t < 0)
         return Intersection();
 
     glm::vec3 ipoint_world(this->transform.T() * glm::vec4(result.point, 1.f));

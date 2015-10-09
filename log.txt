@@ -1,0 +1,19 @@
+This log is maintained by a human....
+So...
+
+Many_Spheres before optimizing my last raytracer and kdtree
+(4 * random AA)
+172.12 seconds
+Many_Spheres before optimizing my last raytracer and kdtree
+(4 * stratified AA)
+170.67 seconds
+
+Many_Spheres after optimizing my last raytracer but not kdtree
+(4 * stratified AA)
+47.782 seconds
+
+Wahoo 用深度优先检测 53.841s
+Wahoo 用笨办法 54.508s
+嘛
+
+预先知道的一点是，Many Spheres 用窝的方法会导致很多不能分割的东西所以

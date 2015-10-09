@@ -76,7 +76,7 @@ BoundingBox BoundingBox::getTransformedCopy(const glm::mat4 &T) const
     return b;
 }
 
-bool BoundingBox::isIntersected(const Ray& r)
+bool BoundingBox::isIntersected(const Ray& r) const
 {
     if (!this->valid) return false;
 

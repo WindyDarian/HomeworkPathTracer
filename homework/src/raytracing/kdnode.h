@@ -4,11 +4,14 @@
 #include <set>
 #include <raytracing/boundingbox.h>
 #include <raytracing/ray.h>
+#include <raytracing/intersection.h>
+
 #include <scene/geometry/geometry.h>
 #include <scene/geometry/boundingboxframe.h>
 
 
 class Geometry;
+class Intersection;
 
 
 // K-D Tree Node Class
@@ -21,8 +24,11 @@ public:
 
     KDNode();
 
+    Intersection GetIntersection(Ray r) const; // TODO: make this and geometry const Ray&
+
     //Calculate all possible hit targets and append to an intersection set
     void appendIntersections(std::set<Geometry*>& hitset, const Ray &r);
+
 
     void appendBoundingBoxFrame(std::list<BoundingBoxFrame*>& list,
                                   glm::vec3 color,
@@ -34,6 +40,11 @@ public:
     std::unique_ptr<KDNode> right = nullptr;
     BoundingBox bounding_box;
     Geometry* obj = nullptr; //the geometry contained in this node, only for leaf nodes
+
+
+
+    bool interlanced = false;
+    int split_axis = 0;
 
 
 };

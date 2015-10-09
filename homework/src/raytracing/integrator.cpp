@@ -33,11 +33,15 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
     glm::vec3 out_origin_inside = intersection.point - intersection.normal * accurancy;
 
 
-    glm::vec3 reflected_color;
+    glm::vec3 reflected_color(0.f);
     glm::vec3 local_illumination(0.f);
 
 
     bool transparent_flag;
+
+    float kr = intersection.object_hit->material->reflectivity;
+    bool reflective_flag = kr > accurancy;
+
     if (o_hit->material->refract_idx_in > 0 && o_hit->material->refract_idx_out >0)
     {
         // transparent
@@ -48,9 +52,11 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
         if (enter_or_exit > 0)
         {
             // feeler ray exit (or light in)
-            Ray reflect_ray = Ray(out_origin_inside, glm::reflect(r.direction, -intersection.normal));
-            reflected_color = TraceRay(reflect_ray, depth + 1) * intersection.color;
-
+            if (reflective_flag)
+            {
+                Ray reflect_ray = Ray(out_origin_inside, glm::reflect(r.direction, -intersection.normal));
+                reflected_color = TraceRay(reflect_ray, depth + 1) * intersection.color;
+            }
 
             glm::vec3 refraction = glm::refract(r.direction, -intersection.normal, o_hit->material->refract_idx_in / o_hit->material->refract_idx_out);
             if (glm::length2(refraction) < accurancy)
@@ -67,10 +73,11 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
         else
         {
             // feeler ray in (or light out)
-
-            Ray reflect_ray = Ray(out_origin_outside, glm::reflect(r.direction, intersection.normal));
-            reflected_color = TraceRay(reflect_ray, depth + 1) * intersection.color;
-
+            if (reflective_flag)
+            {
+                Ray reflect_ray = Ray(out_origin_outside, glm::reflect(r.direction, intersection.normal));
+                reflected_color = TraceRay(reflect_ray, depth + 1) * intersection.color;
+            }
 
             glm::vec3 refraction = glm::refract(r.direction, intersection.normal, o_hit->material->refract_idx_out / o_hit->material->refract_idx_in);
             Ray refraction_ray = Ray(out_origin_inside, refraction);
@@ -85,13 +92,17 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
     {
         // opaque
         transparent_flag = false;
-        Ray out_ray = Ray(out_origin_outside, glm::reflect(r.direction, intersection.normal));
-        reflected_color = TraceRay(out_ray, depth + 1) * intersection.color;
+
+        if (reflective_flag)
+        {
+            Ray out_ray = Ray(out_origin_outside, glm::reflect(r.direction, intersection.normal));
+            reflected_color = TraceRay(out_ray, depth + 1) * intersection.color;
+        }
 
         local_illumination = intersection.color;  //later: * EvaluateReflectedEnergy * shadow afterwards
     }
 
-    float kr = intersection.object_hit->material->reflectivity;
+
 
 
     glm::vec3 color_sum(0.f);
@@ -99,9 +110,10 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
     {
         if (!transparent_flag)
         {
+            if (reflective_flag)
+                color_sum += kr * reflected_color;
 
-            color_sum += kr * reflected_color +
-                    (1.f - kr) * local_illumination
+            color_sum += (1.f - kr) * local_illumination
                     * ShadowTest(out_origin_shadowtest, light)
                     * o_hit->material->EvaluateReflectedEnergy(intersection,
                                                                -r.direction,

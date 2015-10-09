@@ -1,5 +1,6 @@
 #include "kdnode.h"
 
+
 // Just ignore this for my hw02
 // Because I wanted to render the dragon.obj after hw01 is done
 // it helped my Wahoo
@@ -7,6 +8,53 @@
 KDNode::KDNode()
 {
 
+}
+
+Intersection KDNode::GetIntersection(Ray r) const
+{
+
+    if ((!this->left) && this->right)
+        return this->right->GetIntersection(r);
+    if ((!this->right) && this->left)
+        return this->left->GetIntersection(r);
+
+    if (!this->bounding_box.isIntersected(r))
+        return Intersection();
+    if (this->obj)
+    {
+        return obj->GetIntersection(r);
+    }
+
+    if (!interlanced)
+    {
+        if (r.origin[split_axis] <= left->bounding_box.max[split_axis])
+        {
+            Intersection result = left->GetIntersection(r);
+            if (result.object_hit && result.t >= 0) return result;
+            return right->GetIntersection(r);
+        }
+        else
+        {
+            Intersection result = right->GetIntersection(r);
+            if (result.object_hit && result.t >= 0) return result;
+            return left->GetIntersection(r);
+        }
+    }
+    else
+    {
+        //in case bounding box of left and right child overlapped
+        Intersection il = left->GetIntersection(r);
+        Intersection ir = right->GetIntersection(r);
+
+        if (!il.object_hit || il.t < 0)
+            return ir;
+        else if (!ir.object_hit || ir.t < 0)
+            return il;
+        else
+        {
+             return (il.t > ir.t)? ir : il;
+        }
+    }
 }
 
 KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth)
@@ -30,7 +78,7 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth)
     bool median_lr = axis >= 3? true: false ;
           //"true" for using right point to calcute median, "false" for using left point
     axis %= 3;
-
+    node->split_axis = axis;
 
     float median = 0;
 
@@ -54,8 +102,8 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth)
         auto b = obj->getBoundingBox();
         if (median_lr)
         {
-            if (b.max[axis] > median) right_objs.push_back(obj);
-            else left_objs.push_back(obj);
+             if (b.max[axis] > median) right_objs.push_back(obj);
+             else left_objs.push_back(obj);
         }
         else
         {
@@ -77,6 +125,10 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, int depth)
 
     node->left = std::unique_ptr<KDNode>(KDNode::build(left_objs, depth+1));
     node->right = std::unique_ptr<KDNode>(KDNode::build(right_objs, depth+1));
+
+    if (node->left && node->right
+            && node->left->bounding_box.max[axis] > node->right->bounding_box.min[axis])
+        node->interlanced = true;
 
     return node;
 

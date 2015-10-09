@@ -6,12 +6,16 @@
 #include <QKeyEvent>
 #include <QXmlStreamReader>
 #include <QFileDialog>
+#include <QElapsedTimer>
 #include <tbb/tbb.h>
 
 #include <raytracing/samplers/pixelsampler.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/randompixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
+
+#include <ctime>
+#include <iomanip>
 
 using namespace tbb;
 
@@ -277,6 +281,9 @@ void MyGL::RaytraceScene()
     RandomPixelSampler random_sampler(4);
 
 
+    QElapsedTimer render_timer;
+    render_timer.start();
+
     //#define TBB //Uncomment this line out to render your scene with multiple threads.
     //This is useful when debugging your raytracer with breakpoints.
     #ifdef TBB
@@ -297,10 +304,17 @@ void MyGL::RaytraceScene()
                 //_renderpixel_normal(i,j,scene,intersection_engine);
                 //_renderpixel(i,j,this->scene,this->integrator);
                 //_renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
-                //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
-                _renderpixel(i, j, this->scene, this->integrator, &random_sampler);
+                _renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &random_sampler);
             }
         }
     #endif
+
+    int render_time = render_timer.elapsed();
+    std::cout << "Render completed. Total time: "
+              << std::setprecision(9) << render_time/1000.0
+              << " seconds. (" << render_time << " millseconds.)"
+              << std::endl;
+
     scene.film.WriteImage(filepath);
 }

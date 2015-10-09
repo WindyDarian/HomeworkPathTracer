@@ -8,6 +8,11 @@
 #include <QFileDialog>
 #include <tbb/tbb.h>
 
+#include <raytracing/samplers/pixelsampler.h>
+#include <raytracing/samplers/uniformpixelsampler.h>
+#include <raytracing/samplers/randompixelsampler.h>
+#include <raytracing/samplers/stratifiedpixelsampler.h>
+
 using namespace tbb;
 
 
@@ -236,12 +241,26 @@ inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& 
     }
 }
 
-inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator)
+inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator, PixelSampler* sampler = nullptr)
 {
-    Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+    if (sampler == nullptr)
+    {
+        Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+        scene.film.pixels[x][y] = integrator.TraceRay(r, 0);
+    }
+    else
+    {
+        auto samples = sampler->GetSamples(x, y);
+        glm::vec3 color_total(0.f);
 
-    scene.film.pixels[x][y] = integrator.TraceRay(r, 0);
+        for (glm::vec2 sample : samples)
+        {
+            Ray r = scene.camera.Raycast(sample.x, sample.y);
+            color_total += integrator.TraceRay(r, 0);
+        }
 
+        scene.film.pixels[x][y] = color_total / static_cast<float>(samples.size());
+    }
 }
 
 void MyGL::RaytraceScene()
@@ -251,6 +270,12 @@ void MyGL::RaytraceScene()
     {
         return;
     }
+
+    // Samplers, all default as 4*4 samples
+    UniformPixelSampler uniform_sampler(4);
+    StratifiedPixelSampler stratified_sampler(4);
+    RandomPixelSampler random_sampler(4);
+
 
     //#define TBB //Uncomment this line out to render your scene with multiple threads.
     //This is useful when debugging your raytracer with breakpoints.
@@ -270,7 +295,10 @@ void MyGL::RaytraceScene()
             for(unsigned int j = 0; j < scene.camera.height; j++)
             {
                 //_renderpixel_normal(i,j,scene,intersection_engine);
-                _renderpixel(i,j,this->scene,this->integrator);
+                //_renderpixel(i,j,this->scene,this->integrator);
+                //_renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
+                _renderpixel(i, j, this->scene, this->integrator, &random_sampler);
             }
         }
     #endif

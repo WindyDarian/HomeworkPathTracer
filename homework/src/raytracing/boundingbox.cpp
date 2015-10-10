@@ -33,6 +33,7 @@ glm::vec3 BoundingBox::getCenter() const
 void BoundingBox::cacheCenter()
 {
     this->center = (min + max) * 0.5f;
+    this->center_valid = true;
 }
 
 void BoundingBox::expand(const glm::vec3& point)
@@ -54,6 +55,9 @@ void BoundingBox::expand(const glm::vec3& point)
 
 void BoundingBox::merge(const BoundingBox& box)
 {
+    if (!box.valid)
+        return;
+
     this->center_valid = false;
     if (!this->valid)
     {

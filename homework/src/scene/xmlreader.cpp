@@ -59,11 +59,7 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
                         std::cout << "Did not properly load a pixel sampler!" << std::endl;
                         return;
                     }
-                    if(scene.pixel_sampler != NULL)
-                    {
-                        delete scene.pixel_sampler;
-                    }
-                    scene.pixel_sampler = sampler;
+                    scene.pixel_sampler.reset(sampler);
                 }
             }
         }

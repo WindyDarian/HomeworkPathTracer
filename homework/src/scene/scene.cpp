@@ -12,7 +12,7 @@
 
 Scene::Scene()
 {
-    pixel_sampler = new UniformPixelSampler();
+    pixel_sampler.reset(new UniformPixelSampler());
 }
 
 void Scene::SetCamera(const Camera &c)
@@ -70,8 +70,7 @@ void Scene::Clear()
     materials.clear();
     camera = Camera();
     film = Film();
-    delete pixel_sampler;
-    pixel_sampler = new UniformPixelSampler();
+    pixel_sampler.reset(new UniformPixelSampler());
     this->kdnode_objects.reset();
     for(auto b : this->boundingbox_objects)
     {

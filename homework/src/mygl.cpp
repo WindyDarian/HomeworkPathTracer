@@ -276,6 +276,7 @@ void MyGL::RaytraceScene()
     }
 
     // Samplers, all default as 4*4 samples
+    UniformPixelSampler simple_sampler(1);
     UniformPixelSampler uniform_sampler(4);
     StratifiedPixelSampler stratified_sampler(4);
     RandomPixelSampler random_sampler(4);
@@ -304,8 +305,10 @@ void MyGL::RaytraceScene()
                 //_renderpixel_normal(i,j,scene,intersection_engine);
                 //_renderpixel(i,j,this->scene,this->integrator);
                 //_renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
-                _renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &random_sampler);
+
+                _renderpixel(i, j, this->scene, this->integrator, &simple_sampler);
             }
         }
     #endif

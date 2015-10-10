@@ -6,6 +6,7 @@
 #include <scene/geometry/geometry.h>
 #include <scene/geometry/boundingboxframe.h>
 #include <raytracing/kdnode.h>
+#include <memory>
 
 class Geometry;
 class Material;
@@ -21,7 +22,7 @@ public:
     QList<BoundingBoxFrame*> boundingbox_objects;
     Camera camera;
     Film film;
-    PixelSampler* pixel_sampler;
+    std::unique_ptr<PixelSampler> pixel_sampler;
     std::unique_ptr<KDNode> kdnode_objects = nullptr;
     QList<BoundingBoxFrame*> boundingbox_kdnode;
 

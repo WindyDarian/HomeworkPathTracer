@@ -11,7 +11,6 @@ class Geometry;
 class Material;
 class KDNode;
 
-
 class Scene
 {
 public:

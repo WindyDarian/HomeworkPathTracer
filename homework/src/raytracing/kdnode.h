@@ -20,14 +20,17 @@ class KDNode
 {
 public:
 
-    static KDNode* build(const std::list<Geometry*>& objs, int depth = 0);
+    enum SplitMethod { SPLIT_EQUAL_COUNTS, SPLIT_SAH};
+
+    static KDNode* build(const std::list<Geometry *> &objs, SplitMethod split_method);
 
     KDNode();
 
-    Intersection GetIntersection(Ray r) const; // TODO: make this and geometry const Ray&
+    Intersection GetIntersection(const Ray& r) const; // TODO: make this and geometry const Ray&
+
 
     //Calculate all possible hit targets and append to an intersection set
-    void appendIntersections(std::set<Geometry*>& hitset, const Ray &r);
+    //void appendIntersections(std::set<Geometry*>& hitset, const Ray &r);
 
 
     void appendBoundingBoxFrame(std::list<BoundingBoxFrame*>& list,
@@ -46,6 +49,12 @@ public:
     bool interlanced = false;
     int split_axis = 0;
 
+private:
+    static KDNode* generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth = 0);
+    static KDNode* generateNode_equal_sah(std::vector<Geometry *> &objs, int depth = 0);
+
+    // to prevent many intersections being created thus enhance the performance
+    Intersection *calculateIntersection(const Ray& r) const;
 
 };
 

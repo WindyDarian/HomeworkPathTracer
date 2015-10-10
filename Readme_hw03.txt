@@ -4,11 +4,11 @@
 
 -Bounding Box:
 
-Use View menu to toggle between Object bounding box and scene BVH bounding box
+Use View menu to toggle Object bounding box and scene BVH bounding box
 
-I didn't make BoundingBox itself a Drawable because I decided to use it
-as a pure data class like Ray and use its copy constructor a lot, which
-Drawable will encounter some problems at. See 
+ I didn't make BoundingBox itself drawable because
+ I was encountering some problem with copy constructor of a drawable
+ as it sometimes resets the create() state when a copied instance dies.
 
     raytracing/boundingbox.h
     scene/gemoetry/boundingboxframe.h

@@ -1,6 +1,6 @@
 #include <scene/geometry/square.h>
 
-Intersection SquarePlane::GetIntersection(Ray r)
+Intersection SquarePlane::GetIntersection(const Ray& r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 

@@ -5,7 +5,7 @@
 //These attributes can be altered by applying a transformation matrix to the square.
 class SquarePlane : public Geometry
 {
-    Intersection GetIntersection(Ray r);
+    Intersection GetIntersection(const Ray& r);
     void create();
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:

@@ -35,7 +35,7 @@ private:
     Integrator integrator;
     IntersectionEngine intersection_engine;
 
-    bool kdtree_bbox_visible = false;
+    bool kdtree_bbox_visible = true;
     bool object_bbox_visible = true;
 
 public:

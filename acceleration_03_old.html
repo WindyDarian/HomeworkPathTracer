@@ -48,7 +48,7 @@
 		<p>
 			Create a BVH Node class that will be used within the IntersectionEngine class to hold all of the scene's objects. Each BVH Node will contain a pointer to a Left Child, a pointer to a Right Child, and an instance of a Bounding Box.
 			<br/><br/>
-			The IntersectionEngine class should contain a pointer to the root of your BVH tree. When a scene is loaded via MyGL::SceneLoadDialog, its geometry should be sorted into a BVH tree and the root of this tree should be stored in the IntersectionEngine. To this end, at the end of MyGL::SceneLoadDialog, add functionality that clears and re-creates the BVH Tree (since the geometry of the scene will be entirely new). When constructing a BVH tree, you'll want to partition the scene's geometry from the top down using a SPLIT_EQUAL_COUNTS partition algorithm. Use a different world axis at each recursion. A geometry should end up in one and only one leaf BVH Node.
+			The IntersectionEngine class should contain a pointer to the root of your BVH tree. When a scene is loaded via MyGL::SceneLoadDialog, its geometry should be sorted into a BVH tree and the root of this tree should be stored in the IntersectionEngine. To this end, at the end of MyGL::SceneLoadDialog, add functionality that clears and re-creates the BVH Tree (since the geometry of the scene will be entirely new). When constructing a BVH tree, you'll want to partition the scene's geometry from the top down, sorting along a different world axis at each recursion. Each leaf node of the tree should contain exactly one piece of geometry.
 		</p>
 		<h4>
 			3.3  BVH Tree Intersection (25 points)
@@ -78,7 +78,7 @@
 			4  Extra Credit (30 points max)
 		</h3>
 		<h4>
-			4.1  Better BVH Partitioning -  Surface Area Heuristic SPLIT_SAH (15 points)
+			4.1  K-D Tree (15 points)
 		</h4>
 		<p>
 			Implement a surface area heuristic to determine the optimal splitting plane for a given depth of your BVH tree, rather than simply splitting along the center of the tree.

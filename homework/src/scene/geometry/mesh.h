@@ -12,7 +12,7 @@ public:
     Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3);
     Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3, const glm::vec3 &n1, const glm::vec3 &n2, const glm::vec3 &n3);
     Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3, const glm::vec3 &n1, const glm::vec3 &n2, const glm::vec3 &n3, const glm::vec2 &t1, const glm::vec2 &t2, const glm::vec2 &t3);
-    Intersection GetIntersection(Ray r);
+    Intersection GetIntersection(const Ray& r);
 
     glm::vec3 points[3];
     glm::vec3 normals[3];
@@ -37,10 +37,12 @@ protected:
 class Mesh : public Geometry
 {
 public:
-    Intersection GetIntersection(Ray r);
+    Intersection GetIntersection(const Ray& r);
     void SetMaterial(Material *m);
     void create();
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
+    void recomputeKDNode();
+    void recomputeKDNode(KDNode::SplitMethod split_method);
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:
@@ -50,5 +52,5 @@ private:
     QList<Triangle*> faces;
 
     std::unique_ptr<KDNode> kdnode;  // K-D Node for optimization
-    void recomputeKDNode();
+
 };

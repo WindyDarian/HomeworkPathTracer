@@ -5,7 +5,7 @@
 static const int CUB_IDX_COUNT = 36;
 static const int CUB_VERT_COUNT = 24;
 
-Intersection Cube::GetIntersection(Ray r)
+Intersection Cube::GetIntersection(const Ray &r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 

@@ -16,13 +16,14 @@ class Geometry : public Drawable
 {
 public:
     Geometry():
-    name("GEOMETRY"), transform()
+    name("GEOMETRY"), transform(),
+      bounding_box_ptr(nullptr)
     {
         material = NULL;
     }
 
     virtual ~Geometry(){}
-    virtual Intersection GetIntersection(Ray r) = 0;
+    virtual Intersection GetIntersection(const Ray& r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 
 

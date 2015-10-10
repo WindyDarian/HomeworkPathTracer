@@ -3,10 +3,10 @@
 #include <openGL/drawable.h>
 #include <raytracing/boundingbox.h>
 
-// I didn't make BoundingBox itself drawable because I decided to use it
-// as a pure data class like Ray and use its copy constructor a lot, which
-// Drawable will encounter some problems at.
-// See raytracing/boundingbox.h
+// I didn't make BoundingBox itself drawable because
+// I was encountering some problem with copy constructor of a drawable
+// as it sometimes resets the create() state when a copied instance dies.
+// for bounding box itself see raytracing/boundingbox.h
 
 class BoundingBoxFrame: public Drawable
 {

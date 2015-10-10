@@ -72,7 +72,7 @@ BoundingBox Triangle::calculateBoundingBox()
 
 //HAVE THEM IMPLEMENT THIS
 //The ray in this function is not transformed because it was *already* transformed in Mesh::GetIntersection
-Intersection Triangle::GetIntersection(Ray r)
+Intersection Triangle::GetIntersection(const Ray &r)
 {
     glm::vec3 v01(this->points[1] - this->points[0]);
     glm::vec3 v12(this->points[2] - this->points[1]);
@@ -116,7 +116,7 @@ Intersection Triangle::GetIntersection(Ray r)
                         this);
 }
 
-Intersection Mesh::GetIntersection(Ray r)
+Intersection Mesh::GetIntersection(const Ray &r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
@@ -162,12 +162,17 @@ Intersection Mesh::GetIntersection(Ray r)
 
 void Mesh::recomputeKDNode()
 {
+    this->recomputeKDNode(KDNode::SPLIT_EQUAL_COUNTS);
+}
+
+void Mesh::recomputeKDNode(KDNode::SplitMethod split_method)
+{
     std::list<Geometry*> tris;
     for (auto tri: this->faces)
     {
         tris.push_back(tri);
     }
-    this->kdnode = std::unique_ptr<KDNode>(KDNode::build(tris));
+    this->kdnode = std::unique_ptr<KDNode>(KDNode::build(tris, split_method));
 }
 
 void Mesh::SetMaterial(Material *m)
@@ -243,11 +248,14 @@ BoundingBox Mesh::calculateBoundingBox()
 {
     BoundingBox b;
 
+    //getting bounding box in world space
     for (auto t: this->faces)
     {
-        b.merge(t->getBoundingBox().getTransformedCopy(this->transform.T()));
+        for (int i=0;i<3;i++)
+            b.expand(glm::vec3(this->transform.T() * glm::vec4(t->points[i], 1.f)));
     }
 
+    b.cacheCenter();
     return b;
 }
 

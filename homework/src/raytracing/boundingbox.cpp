@@ -2,26 +2,42 @@
 
 #include <la.h>
 
-BoundingBox::BoundingBox():valid(false)
+BoundingBox::BoundingBox():valid(false), center_valid(false)
 {
 }
 
 BoundingBox::BoundingBox(const glm::vec3& min, const glm::vec3& max):
     min(glm::min(min,max)),
     max(glm::max(min,max)),
-    valid(true)
+    valid(true),
+    center_valid(false)
 {
 }
 
 BoundingBox::BoundingBox(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3):
     min(glm::min(glm::min(v1,v2),v3)),
     max(glm::max(glm::max(v1,v2),v3)),
-    valid(true)
+    valid(true),
+    center_valid(false)
 {
+}
+
+glm::vec3 BoundingBox::getCenter() const
+{
+    if (!this->center_valid){
+       return (min + max) * 0.5f;
+    }
+    return center;
+}
+
+void BoundingBox::cacheCenter()
+{
+    this->center = (min + max) * 0.5f;
 }
 
 void BoundingBox::expand(const glm::vec3& point)
 {
+    this->center_valid = false;
     if (!this->valid)
     {
         this->min = point;
@@ -38,6 +54,7 @@ void BoundingBox::expand(const glm::vec3& point)
 
 void BoundingBox::merge(const BoundingBox& box)
 {
+    this->center_valid = false;
     if (!this->valid)
     {
         this->min = box.min;
@@ -73,6 +90,7 @@ BoundingBox BoundingBox::getTransformedCopy(const glm::mat4 &T) const
         b.expand(glm::vec3(T * v));
     }
 
+    b.cacheCenter();
     return b;
 }
 

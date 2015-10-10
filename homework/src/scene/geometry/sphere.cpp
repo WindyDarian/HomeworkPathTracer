@@ -7,7 +7,7 @@
 static const int SPH_IDX_COUNT = 2280;  // 760 tris * 3
 static const int SPH_VERT_COUNT = 382;
 
-Intersection Sphere::GetIntersection(Ray r)
+Intersection Sphere::GetIntersection(const Ray& r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
@@ -192,7 +192,7 @@ BoundingBox Sphere::calculateBoundingBox()
 {
     // I know this is not accurate when rotating a sphere
     // but due to irregular scale like default scene exists
-    // I'll need a shape to cover the whole sphere for priorty
+    // I'm just using a shape to cover the whole sphere for priorty
     BoundingBox b(glm::vec3(-0.5f),glm::vec3(0.5f));
     return b.getTransformedCopy(this->transform.T());
 }

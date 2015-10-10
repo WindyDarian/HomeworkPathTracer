@@ -15,9 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
     objectBBoxVisible = new QAction("Bounding Box (Object)", viewMenu);
     objectBBoxVisible->setCheckable(true);
     objectBBoxVisible->setChecked(true);
-    kdTreeBBoxVisible = new QAction("Bounding Box (K-D Tree)", viewMenu);
+    kdTreeBBoxVisible = new QAction("Bounding Box (BVH Tree)", viewMenu);
     kdTreeBBoxVisible->setCheckable(true);
-    kdTreeBBoxVisible->setChecked(false);
+    kdTreeBBoxVisible->setChecked(true);
 
     connect(objectBBoxVisible, SIGNAL(toggled(bool)),
                      this, SLOT(on_objectbboxvisible_toggled(bool)));

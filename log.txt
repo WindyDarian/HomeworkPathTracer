@@ -18,8 +18,11 @@ Extra credits:
 raytracing/bvhnode.h
 
 Referenced p217 of physically based rendering 2nd edition
-I divide each node into several buckets and estimate costs to split from
-each bucket then choose the minimum one as the split plane.
+I divide each node into several buckets and estimate costs of intersection test
+when splitting from each bucket then choose the minimum one as the split plane.
+estimated cost for one side
+    = surface area(relative) * object count (traversal cost ignored)
+
 
 Times for my SAH
   many_spheres.xml(4x4 uniform, no TBB) with SPLIT_EQUAL_COUNTS 48.235s
@@ -28,6 +31,7 @@ Times for my SAH
   Wahoo.xml(4x4 uniform, no TBB) with SPLIT_SAH 40.992s
   glass_dragon.xml(4x4 uniform, no TBB) with SPLIT_EQUAL_COUNTS 202.929s
   glass_dragon.xml(4x4 uniform, no TBB) with SPLIT_SAH 153.790s
+
 
 
 2.Image-Wide Stratified Sampling:
@@ -53,13 +57,13 @@ To calculate the min distance to all other samples in the image:
   5) samples in the top-right of the down-left pixel
 
 
-Recorded data:
-
-Image-Wide Stratified Sampler costs:
+Image-Wide Stratified Sampler creation costs:
 
   4x4 11.230 seconds
 
-
+for up to 4x4 AA, this method is fine for now, I may use a K-D Tree to store and
+compare points or store sample points in a data file as improvement when larger
+resolution or AA level is needed.
 
 
 

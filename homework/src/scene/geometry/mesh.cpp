@@ -147,7 +147,7 @@ Intersection Mesh::GetIntersection(const Ray &r)
     }
     */
 
-    result = this->kdnode->GetIntersection(r_obj);
+    result = this->bvh->GetIntersection(r_obj);
 
     if (result.object_hit == NULL || result.object_hit == nullptr || result.t < 0)
         return Intersection();
@@ -165,19 +165,19 @@ Intersection Mesh::GetIntersection(const Ray &r)
     return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
-void Mesh::recomputeKDNode()
+void Mesh::recomputeBVH()
 {
-    this->recomputeKDNode(KDNode::SPLIT_SAH);
+    this->recomputeBVH(BVHNode::SPLIT_SAH);
 }
 
-void Mesh::recomputeKDNode(KDNode::SplitMethod split_method)
+void Mesh::recomputeBVH(BVHNode::SplitMethod split_method)
 {
     std::list<Geometry*> tris;
     for (auto tri: this->faces)
     {
         tris.push_back(tri);
     }
-    this->kdnode = std::unique_ptr<KDNode>(KDNode::build(tris, split_method));
+    this->bvh = std::unique_ptr<BVHNode>(BVHNode::build(tris, split_method));
 }
 
 void Mesh::SetMaterial(Material *m)
@@ -234,7 +234,7 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
             }
         }
         std::cout << "" << std::endl;
-        this->recomputeKDNode();
+        this->recomputeBVH();
         std::cout << "K-D Node for mesh computed" << std::endl;
     }
     else

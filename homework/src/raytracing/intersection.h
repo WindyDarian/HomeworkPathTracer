@@ -8,7 +8,7 @@
 class Material;
 class Geometry;
 class Scene;
-class KDNode;
+class BVHNode;
 
 
 class Intersection

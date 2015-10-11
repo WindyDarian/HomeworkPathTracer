@@ -3,7 +3,7 @@
 #include <openGL/drawable.h>
 #include <QList>
 #include <set>
-#include <raytracing/kdnode.h>
+#include <raytracing/bvhnode.h>
 
 
 class Triangle : public Geometry
@@ -42,8 +42,8 @@ public:
     void SetMaterial(Material *m);
     void create();
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
-    void recomputeKDNode();
-    void recomputeKDNode(KDNode::SplitMethod split_method);
+    void recomputeBVH();
+    void recomputeBVH(BVHNode::SplitMethod split_method);
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:
@@ -53,6 +53,6 @@ protected:
 private:
     QList<Triangle*> faces;
 
-    std::unique_ptr<KDNode> kdnode;  // K-D Node for optimization
+    std::unique_ptr<BVHNode> bvh;  // K-D Node for optimization
 
 };

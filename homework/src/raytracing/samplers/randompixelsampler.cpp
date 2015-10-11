@@ -2,7 +2,7 @@
 #include <iostream>
 #include <functional>
 
-RandomPixelSampler::RandomPixelSampler():PixelSampler(){}
+RandomPixelSampler::RandomPixelSampler():RandomPixelSampler(1){}
 
 RandomPixelSampler::RandomPixelSampler(int samples) : PixelSampler(samples), mersenne_generator(), unif_distribution(0,1){}
 
@@ -21,7 +21,7 @@ QList<glm::vec2> RandomPixelSampler::GetSamples(int x, int y)
     for (int i = 0; i < total_samples; i++)
     {
 
-            // for each cell generate one random point
+            // generate one random point
             result.append(glm::vec2(left + unif_distribution(mersenne_generator),
                                     top + unif_distribution(mersenne_generator)
                                     )

@@ -9,21 +9,22 @@
 #include <QElapsedTimer>
 #include <tbb/tbb.h>
 
-#include <raytracing/samplers/pixelsampler.h>
-#include <raytracing/samplers/uniformpixelsampler.h>
-#include <raytracing/samplers/randompixelsampler.h>
-#include <raytracing/samplers/stratifiedpixelsampler.h>
 
-#include <ctime>
 #include <iomanip>
 
 using namespace tbb;
 
 
 MyGL::MyGL(QWidget *parent)
-    : GLWidget277(parent)
+    : GLWidget277(parent),
+      simple_sampler(1),
+      uniform_sampler(4),
+      stratified_sampler(4),
+      random_sampler(4),
+      iw_stratified_sampler(4)
 {
     setFocusPolicy(Qt::ClickFocus);
+
 }
 
 MyGL::~MyGL()
@@ -129,7 +130,7 @@ void MyGL::GLDrawScene()
         }
     if (this->kdtree_bbox_visible)
     {
-        for (auto b :scene.boundingbox_kdnode)
+        for (auto b :scene.boundingbox_bvh)
         {
             prog_flat.setModelMatrix(glm::mat4(1.0f));
             prog_flat.draw(*this, *b);
@@ -225,7 +226,7 @@ void MyGL::SceneLoadDialog()
     integrator.intersection_engine = &intersection_engine;
     intersection_engine.scene = &scene;
 
-    scene.recomputeKDNode();
+    scene.recomputeBVH();
 }
 
 inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)
@@ -275,12 +276,7 @@ void MyGL::RaytraceScene()
         return;
     }
 
-    // Samplers, all default as 4*4 samples
-    UniformPixelSampler simple_sampler(1);
-    UniformPixelSampler uniform_sampler(4);
-    StratifiedPixelSampler stratified_sampler(4);
-    RandomPixelSampler random_sampler(4);
-
+    //iw_stratified_sampler.recalculateSamples(scene.camera.width, scene.camera.height);
 
     QElapsedTimer render_timer;
     render_timer.start();
@@ -304,11 +300,12 @@ void MyGL::RaytraceScene()
             {
                 //_renderpixel_normal(i,j,scene,intersection_engine);
                 //_renderpixel(i,j,this->scene,this->integrator);
-                //_renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
-                _renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
+                _renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &random_sampler);
-
                 //_renderpixel(i, j, this->scene, this->integrator, &simple_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &iw_stratified_sampler);
+
             }
         }
     #endif

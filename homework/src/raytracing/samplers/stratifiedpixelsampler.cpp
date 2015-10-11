@@ -2,7 +2,7 @@
 #include <iostream>
 #include <functional>
 
-StratifiedPixelSampler::StratifiedPixelSampler():PixelSampler(){}
+StratifiedPixelSampler::StratifiedPixelSampler():StratifiedPixelSampler(1){}
 
 StratifiedPixelSampler::StratifiedPixelSampler(int samples) : PixelSampler(samples), mersenne_generator(), unif_distribution(0,1){}
 

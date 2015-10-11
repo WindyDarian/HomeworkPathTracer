@@ -60,7 +60,7 @@ Intersection IntersectionEngine::GetIntersection(Ray r)
         }
     }*/
 
-    result = this->scene->kdnode_objects->GetIntersection(r);
+    result = this->scene->bvh->GetIntersection(r);
     if (result.t < 0)
         result = Intersection();
 

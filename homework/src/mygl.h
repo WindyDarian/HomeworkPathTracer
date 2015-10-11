@@ -14,6 +14,11 @@
 #include <scene/xmlreader.h>
 #include <raytracing/integrator.h>
 
+#include <raytracing/samplers/pixelsampler.h>
+#include <raytracing/samplers/uniformpixelsampler.h>
+#include <raytracing/samplers/randompixelsampler.h>
+#include <raytracing/samplers/stratifiedpixelsampler.h>
+#include <raytracing/samplers/imagewidestratifiedsampler.h>
 
 
 class MyGL
@@ -37,6 +42,14 @@ private:
 
     bool kdtree_bbox_visible = true;
     bool object_bbox_visible = true;
+
+    // Samplers, all default as 4*4 samples
+    UniformPixelSampler simple_sampler;
+    UniformPixelSampler uniform_sampler;
+    StratifiedPixelSampler stratified_sampler;
+    RandomPixelSampler random_sampler;
+    ImageWideStratifiedSampler iw_stratified_sampler;
+
 
 public:
     explicit MyGL(QWidget *parent = 0);

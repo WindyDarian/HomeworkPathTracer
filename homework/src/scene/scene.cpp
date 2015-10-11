@@ -51,7 +51,7 @@ void Scene::CreateTestScene()
     camera.create();
     film = Film(400, 400);
 
-    this->recomputeKDNode();
+    this->recomputeBVH();
 
 }
 
@@ -71,26 +71,26 @@ void Scene::Clear()
     camera = Camera();
     film = Film();
     pixel_sampler.reset(new UniformPixelSampler());
-    this->kdnode_objects.reset();
+    this->bvh.reset();
     for(auto b : this->boundingbox_objects)
     {
         delete b;
     }
     this->boundingbox_objects.clear();
-    for(auto b : this->boundingbox_kdnode)
+    for(auto b : this->boundingbox_bvh)
     {
         delete b;
     }
-    this->boundingbox_kdnode.clear();
+    this->boundingbox_bvh.clear();
 }
 
-void Scene::recomputeKDNode()
+void Scene::recomputeBVH()
 {
 
 
     // reset() automatically deletes old object and stores new one
 
-    this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_SAH));
+    this->bvh.reset(BVHNode::build(this->objects.toStdList(), BVHNode::SPLIT_SAH));
 
 
     //this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_EQUAL_COUNTS));
@@ -98,16 +98,16 @@ void Scene::recomputeKDNode()
 
 
     // update k-d node visualization
-    for(auto b : this->boundingbox_kdnode)
+    for(auto b : this->boundingbox_bvh)
     {
         delete b;
     }
-    this->boundingbox_kdnode.clear();
+    this->boundingbox_bvh.clear();
     std::list<BoundingBoxFrame*> b_frame;
-    this->kdnode_objects->appendBoundingBoxFrame(b_frame, glm::vec3(0.75f,0.75f,0.75f), 0.9f);
+    this->bvh->appendBoundingBoxFrame(b_frame, glm::vec3(0.75f,0.75f,0.75f), 0.9f);
     for (auto b : b_frame)
     {
         b->create();
-        this->boundingbox_kdnode.push_back(b);
+        this->boundingbox_bvh.push_back(b);
     }
 }

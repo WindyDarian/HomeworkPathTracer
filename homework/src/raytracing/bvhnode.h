@@ -16,15 +16,15 @@ class Intersection;
 
 // K-D Tree Node Class
 // I used it in both scene management and in mesh class
-class KDNode
+class BVHNode
 {
 public:
 
     enum SplitMethod { SPLIT_EQUAL_COUNTS, SPLIT_SAH};
 
-    static KDNode* build(const std::list<Geometry *> &objs, SplitMethod split_method);
+    static BVHNode* build(const std::list<Geometry *> &objs, SplitMethod split_method);
 
-    KDNode();
+    BVHNode();
 
     Intersection GetIntersection(const Ray& r) const; // TODO: make this and geometry const Ray&
 
@@ -39,8 +39,8 @@ public:
 
     //KDNode* left = nullptr;
     //KDNode* right = nullptr;
-    std::unique_ptr<KDNode> left = nullptr;
-    std::unique_ptr<KDNode> right = nullptr;
+    std::unique_ptr<BVHNode> left = nullptr;
+    std::unique_ptr<BVHNode> right = nullptr;
     BoundingBox bounding_box;
     Geometry* obj = nullptr; //the geometry contained in this node, only for leaf nodes
 
@@ -50,8 +50,8 @@ public:
     int split_axis = 0;
 
 private:
-    static KDNode* generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth = 0);
-    static KDNode* generateNode_sah(const std::list<Geometry *> &objs, int depth = 0);
+    static BVHNode* generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth = 0);
+    static BVHNode* generateNode_sah(const std::list<Geometry *> &objs, int depth = 0);
 
     // to prevent many intersections being created thus enhance the performance
     Intersection *calculateIntersection(const Ray& r) const;

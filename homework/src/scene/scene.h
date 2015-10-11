@@ -5,12 +5,12 @@
 #include <raytracing/samplers/pixelsampler.h>
 #include <scene/geometry/geometry.h>
 #include <scene/geometry/boundingboxframe.h>
-#include <raytracing/kdnode.h>
+#include <raytracing/bvhnode.h>
 #include <memory>
 
 class Geometry;
 class Material;
-class KDNode;
+class BVHNode;
 
 class Scene
 {
@@ -23,8 +23,8 @@ public:
     Camera camera;
     Film film;
     std::unique_ptr<PixelSampler> pixel_sampler;
-    std::unique_ptr<KDNode> kdnode_objects = nullptr;
-    QList<BoundingBoxFrame*> boundingbox_kdnode;
+    std::unique_ptr<BVHNode> bvh = nullptr;
+    QList<BoundingBoxFrame*> boundingbox_bvh;
 
 
     void SetCamera(const Camera &c);
@@ -32,5 +32,5 @@ public:
     void CreateTestScene();
     void Clear();
 
-    void recomputeKDNode();
+    void recomputeBVH();
 };

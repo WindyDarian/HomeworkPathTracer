@@ -1,18 +1,15 @@
-#include "kdnode.h"
+#include "bvhnode.h"
 
 #include <algorithm>
 #include <memory>
 
-// Just ignore this for my hw02
-// Because I wanted to render the dragon.obj after hw01 is done
-// it helped my Wahoo
 
-KDNode::KDNode()
+BVHNode::BVHNode()
 {
 
 }
 
-Intersection KDNode::GetIntersection(const Ray &r) const
+Intersection BVHNode::GetIntersection(const Ray &r) const
 {
 
     if ((!this->left) && this->right)
@@ -60,7 +57,7 @@ Intersection KDNode::GetIntersection(const Ray &r) const
     }
 }
 
-KDNode* KDNode::build(const std::list<Geometry *> & objs, SplitMethod split_method)
+BVHNode* BVHNode::build(const std::list<Geometry *> & objs, SplitMethod split_method)
 {
     if (objs.size() == 0)
     {
@@ -78,11 +75,11 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, SplitMethod split_meth
             objs_vec.push_back(obj);
         }
 
-        return KDNode::generateNode_equal_counts(objs_vec, 0, objs_vec.size(), 0);
+        return BVHNode::generateNode_equal_counts(objs_vec, 0, objs_vec.size(), 0);
     }
     else if ( split_method == SPLIT_SAH)
     {
-        return KDNode::generateNode_sah(objs, 0);
+        return BVHNode::generateNode_sah(objs, 0);
     }
 }
 
@@ -104,7 +101,7 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, SplitMethod split_meth
 //    }
 //}
 
-void KDNode::appendBoundingBoxFrame(std::list<BoundingBoxFrame *>& list, glm::vec3 color, float color_decay)
+void BVHNode::appendBoundingBoxFrame(std::list<BoundingBoxFrame *>& list, glm::vec3 color, float color_decay)
 {
     glm::vec3 newcolor = color * color_decay;
 
@@ -139,14 +136,14 @@ struct CenterComparasion
     }
 };
 
-KDNode *KDNode::generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth)
+BVHNode *BVHNode::generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth)
 {
     int size = end - start;
 
     //  empty
     if (size <= 0) return nullptr;
 
-    KDNode* node = new KDNode();
+    BVHNode* node = new BVHNode();
 
     //  contains unique node
     if (size == 1)
@@ -180,8 +177,8 @@ KDNode *KDNode::generateNode_equal_counts(std::vector<Geometry *> &objs, int sta
                      CenterComparasion(axis)
                      );
 
-    node->left.reset(KDNode::generateNode_equal_counts(objs, start, median_index + 1, depth + 1));
-    node->right.reset(KDNode::generateNode_equal_counts(objs, median_index + 1, end, depth + 1));
+    node->left.reset(BVHNode::generateNode_equal_counts(objs, start, median_index + 1, depth + 1));
+    node->right.reset(BVHNode::generateNode_equal_counts(objs, median_index + 1, end, depth + 1));
 
     if (node->left && node->right
             && node->left->bounding_box.max[axis] > node->right->bounding_box.min[axis])
@@ -199,7 +196,7 @@ struct SAHBucket
 };
 
 
-KDNode *KDNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
+BVHNode *BVHNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
 {
     // reference: p217,  physically based rendering 2nd edition
 
@@ -219,12 +216,12 @@ KDNode *KDNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
         {
             objs_copy.push_back(obj);
         }
-        KDNode* node = KDNode::generateNode_equal_counts(objs_copy, 0, size, depth);
+        BVHNode* node = BVHNode::generateNode_equal_counts(objs_copy, 0, size, depth);
         return node;
     }
 
 
-    KDNode* node = new KDNode();
+    BVHNode* node = new BVHNode();
 
     BoundingBox bbox_centers;
     // calculate bounding box for the node
@@ -323,8 +320,8 @@ KDNode *KDNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
     }
 
 
-    node->left.reset(KDNode::generateNode_sah(left_objs, depth + 1));
-    node->right.reset(KDNode::generateNode_sah(right_objs, depth + 1));
+    node->left.reset(BVHNode::generateNode_sah(left_objs, depth + 1));
+    node->right.reset(BVHNode::generateNode_sah(right_objs, depth + 1));
 
 
     if (node->left && node->right

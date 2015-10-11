@@ -1,3 +1,75 @@
+Recorded Data:
+All without TBB enabled
+
+
+
+
+
+
+
+
+
+
+
+Extra credits:
+
+1.SAH:
+
+raytracing/bvhnode.h
+
+Referenced p217 of physically based rendering 2nd edition
+I divide each node into several buckets and estimate costs to split from
+each bucket then choose the minimum one as the split plane.
+
+Times for my SAH
+  many_spheres.xml(4x4 uniform, no TBB) with SPLIT_EQUAL_COUNTS 48.235s
+  many_spheres.xml(4x4 uniform, no TBB) with SPLIT_SAH 46.721s
+  Wahoo.xml(4x4 uniform, no TBB) with SPLIT_EQUAL_COUNTS 48.739s
+  Wahoo.xml(4x4 uniform, no TBB) with SPLIT_SAH 40.992s
+  glass_dragon.xml(4x4 uniform, no TBB) with SPLIT_EQUAL_COUNTS 202.929s
+  glass_dragon.xml(4x4 uniform, no TBB) with SPLIT_SAH 153.790s
+
+
+2.Image-Wide Stratified Sampling:
+
+raytracing/samplers/imagewidestratifiedsampler.h
+
+min_distance for n*n sampler as 1/(2n),
+MIN_TRIES for each sample is 4, return point with max distance to other all points
+for each sample among the 4~100 tries
+
+(If the 100th(MAX_TRIES) attempt still have a distance to all other samples
+greater than min_distance then the point with the max distance in the 100 tries
+ will be returned)
+
+To calculate the min distance to all other samples in the image:
+ I constructed the sample grid in column major order from top-left to
+ bottom-right, so for each sample I only needs to check distance with points
+ satisfying one of these requirements:
+  1) samples in the current pixel;
+  2) samples in the right side (<min_distance to right edge) of the left pixel;
+  3) samples in the bottom side (<min_distance to right edge) of the upper pixel;
+  4) samples in the bottom-right of the upper-left pixel
+  5) samples in the top-right of the down-left pixel
+
+
+Recorded data:
+
+Image-Wide Stratified Sampler costs:
+
+  4x4 11.230 seconds
+
+
+
+
+
+
+
+
+
+
+
+
 This log is maintained by a human....
 So...
 
@@ -37,6 +109,17 @@ Wahoo NoSAH 48.739s
 
 glass_dragon NoSAH 202.929s
 glass_dragon SAH 153.790s
+
+Image-Wide Stratified Sampler Construction Time:
+
+4x4 11.230 seconds
+
+
+(min distance for n*n sampler as 1./2n,
+ min tries for each sample is 4, return point with max distance to other all points
+ for each sample among the 4~100 tries)
+
+
 
 
 预先知道的一点是，Many Spheres 用窝的方法会导致很多不能分割的东西所以

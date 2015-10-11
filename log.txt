@@ -12,11 +12,31 @@ Many_Spheres after optimizing my last raytracer but not kdtree
 (4 * stratified AA)
 47.782 seconds
 
+Many_Spheres after sah
+(4 * stratified AA)
+47.782 seconds
+
+glass_dragon without sah
+12.701 seconds
+
+glass_dragon with sah
+9.61 seconds
+
+
 
 44 seconds?~
+
+4x:
 
 Wahoo 用深度优先检测 53.841s
 Wahoo 用笨办法 54.508s
 嘛
+
+Wahoo SAH 40.992s
+Wahoo NoSAH 48.739s
+
+glass_dragon NoSAH 202.929s
+glass_dragon SAH 153.790s
+
 
 预先知道的一点是，Many Spheres 用窝的方法会导致很多不能分割的东西所以

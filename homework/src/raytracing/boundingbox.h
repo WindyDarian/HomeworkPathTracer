@@ -19,9 +19,10 @@ public:
     glm::vec3 min;
     glm::vec3 max;
     glm::vec3 getCenter() const;
+    float getSurfaceArea() const;
     bool valid;
 
-    void cacheCenter();
+    void cacheInfomation();
 
     bool isIntersected(const Ray& r) const;
 
@@ -31,8 +32,9 @@ public:
     BoundingBox getTransformedCopy(const glm::mat4& T) const;
 
 private:
-    bool center_valid = false;
+    bool is_cached = false;
     glm::vec3 center;
+    float surface_area = 0;
 
 };
 

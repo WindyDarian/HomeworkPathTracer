@@ -51,7 +51,7 @@ public:
 
 private:
     static KDNode* generateNode_equal_counts(std::vector<Geometry *> &objs, int start, int end, int depth = 0);
-    static KDNode* generateNode_sah(std::vector<Geometry *> &objs, int start, int end, int depth = 0);
+    static KDNode* generateNode_sah(const std::list<Geometry *> &objs, int depth = 0);
 
     // to prevent many intersections being created thus enhance the performance
     Intersection *calculateIntersection(const Ray& r) const;

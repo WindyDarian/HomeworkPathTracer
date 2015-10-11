@@ -89,7 +89,11 @@ void Scene::recomputeKDNode()
 
 
     // reset() automatically deletes old object and stores new one
-    this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_EQUAL_COUNTS));
+
+    this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_SAH));
+
+
+    //this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_EQUAL_COUNTS));
     std::cout << "K-D node for scene constructed" << std::endl;
 
 

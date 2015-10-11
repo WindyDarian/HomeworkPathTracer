@@ -305,10 +305,10 @@ void MyGL::RaytraceScene()
                 //_renderpixel_normal(i,j,scene,intersection_engine);
                 //_renderpixel(i,j,this->scene,this->integrator);
                 //_renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
-                //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
+                _renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &random_sampler);
 
-                _renderpixel(i, j, this->scene, this->integrator, &simple_sampler);
+                //_renderpixel(i, j, this->scene, this->integrator, &simple_sampler);
             }
         }
     #endif

@@ -29,6 +29,7 @@ public:
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:
     virtual BoundingBox calculateBoundingBox();
+    virtual glm::vec3 calculateCentroid();
 
 };
 
@@ -47,6 +48,7 @@ public:
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:
     virtual BoundingBox calculateBoundingBox();
+    virtual glm::vec3 calculateCentroid();
 
 private:
     QList<Triangle*> faces;

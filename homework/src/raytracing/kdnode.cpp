@@ -68,17 +68,21 @@ KDNode* KDNode::build(const std::list<Geometry *> & objs, SplitMethod split_meth
     }
 
 
-    std::vector<Geometry *> objs_vec;
-    objs_vec.reserve(objs.size());
-    for (auto obj : objs)
-    {
-        objs_vec.push_back(obj);
-    }
-
     if (split_method == SPLIT_EQUAL_COUNTS )
     {
 
+        std::vector<Geometry *> objs_vec;
+        objs_vec.reserve(objs.size());
+        for (auto obj : objs)
+        {
+            objs_vec.push_back(obj);
+        }
+
         return KDNode::generateNode_equal_counts(objs_vec, 0, objs_vec.size(), 0);
+    }
+    else if ( split_method == SPLIT_SAH)
+    {
+        return KDNode::generateNode_sah(objs, 0);
     }
 }
 
@@ -163,19 +167,21 @@ KDNode *KDNode::generateNode_equal_counts(std::vector<Geometry *> &objs, int sta
         auto b = objs[i]->getBoundingBox();
         node->bounding_box.merge(b);
     }
-    node->bounding_box.cacheCenter();
+    node->bounding_box.cacheInfomation();
 
 
 
     int median_index = (size - 1) / 2 + start;
+
+    // find the median and make left elements all smaller or equal than median (selection algorithm)
     std::nth_element(objs.begin() + start,
                      objs.begin() + median_index,
                      objs.begin() + end,
                      CenterComparasion(axis)
                      );
 
-    node->left = std::unique_ptr<KDNode>(KDNode::generateNode_equal_counts(objs, start, median_index + 1, depth + 1));
-    node->right = std::unique_ptr<KDNode>(KDNode::generateNode_equal_counts(objs, median_index + 1, end, depth + 1));
+    node->left.reset(KDNode::generateNode_equal_counts(objs, start, median_index + 1, depth + 1));
+    node->right.reset(KDNode::generateNode_equal_counts(objs, median_index + 1, end, depth + 1));
 
     if (node->left && node->right
             && node->left->bounding_box.max[axis] > node->right->bounding_box.min[axis])
@@ -185,26 +191,140 @@ KDNode *KDNode::generateNode_equal_counts(std::vector<Geometry *> &objs, int sta
 
 }
 
-KDNode *KDNode::generateNode_sah(std::vector<Geometry *> &objs, int start, int end, int depth)
+
+struct SAHBucket
 {
-    int size = end - start;
+    BoundingBox bbox;
+    std::list<Geometry *> items;
+};
+
+
+KDNode *KDNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
+{
+    // reference: p217,  physically based rendering 2nd edition
+
+
+    int size = objs.size();
 
     //  empty
     if (size <= 0) return nullptr;
 
-    KDNode* node = new KDNode();
 
-    //  contains unique node
-    if (size == 1)
+    // object size too small to make the cost of sah useful
+    if (size <= 4)
     {
-        node->obj = objs[start];
-        node->bounding_box = objs[start]->getBoundingBox();
+        std::vector<Geometry *> objs_copy;
+        objs_copy.reserve(size);
+        for(auto obj: objs)
+        {
+            objs_copy.push_back(obj);
+        }
+        KDNode* node = KDNode::generateNode_equal_counts(objs_copy, 0, size, depth);
         return node;
     }
 
 
+    KDNode* node = new KDNode();
 
-    // TODO
+    BoundingBox bbox_centers;
+    // calculate bounding box for the node
+    for (auto obj : objs)
+    {
+        auto b = obj->getBoundingBox();
+        node->bounding_box.merge(b);
+        bbox_centers.expand(obj->getCentroid());
+    }
+    node->bounding_box.cacheInfomation();
+    bbox_centers.cacheInfomation();
+
+
+
+    // divide the node into n buckets and calculate surface for each bucket
+    const int buckets_count = 12;
+    auto buckets = std::vector<SAHBucket>(buckets_count);
+
+
+    // use x,y,z,x,y,z as dividing axis
+    int axis = depth % 3;
+
+    node->split_axis = axis;
+
+    // throw every object into each bucket
+    float width = bbox_centers.max[axis] - bbox_centers.min[axis];
+    assert(width > 0);
+    for (auto obj : objs)
+    {
+        int pos = (obj->getCentroid()[axis] - bbox_centers.min[axis])
+                / width * buckets_count;
+        if (pos >= buckets_count) pos = buckets_count - 1;
+
+        buckets[pos].items.push_back(obj);
+        buckets[pos].bbox.merge(obj->getBoundingBox());
+    }
+
+    // calculate the relative arbitary intersection cost for each split point
+    std::vector<float> costs(buckets_count);
+    for (int i = 0; i < buckets_count - 1; i++)
+    {
+        BoundingBox bbox_l, bbox_r;
+        int count_l = 0;
+        int count_r = 0;
+        for (int j = 0; j <= i; ++j)
+        {
+            bbox_l.merge(buckets[j].bbox);
+            count_l += buckets[j].items.size();
+        }
+        for (int j = i+1; j < buckets_count; j++)
+        {
+            bbox_r .merge(buckets[j].bbox);
+            count_r += buckets[j].items.size();
+        }
+
+
+        costs[i] = (count_l * bbox_l.getSurfaceArea() + count_r * bbox_r.getSurfaceArea()) /
+                node->bounding_box.getSurfaceArea();
+    }
+
+    int min_pos = 0;
+    float cost_min = costs[0];
+    for (int i = 1; i < buckets_count - 1; i++)
+    {
+        if (costs[i] <  cost_min)
+        {
+            cost_min = costs[i];
+            min_pos = i;
+        }
+    }
+
+    std::list<Geometry*> left_objs;
+    std::list<Geometry*> right_objs;
+
+    for (int i = 0; i < buckets_count; i++ )
+    {
+        if (i <= min_pos)
+        {
+            left_objs.splice(left_objs.end(), buckets[i].items);
+        }
+        else
+        {
+            right_objs.splice(right_objs.end(), buckets[i].items);
+        }
+    }
+
+    if(left_objs.size()==0 && right_objs.size()>1)
+    {
+        left_objs.push_back(right_objs.front());
+        right_objs.pop_front();
+    }
+    else if(right_objs.size()==0 && left_objs.size()>1)
+    {
+        right_objs.push_front(left_objs.back());
+        left_objs.pop_back();
+    }
+
+
+    node->left.reset(KDNode::generateNode_sah(left_objs, depth + 1));
+    node->right.reset(KDNode::generateNode_sah(right_objs, depth + 1));
 
 
     if (node->left && node->right

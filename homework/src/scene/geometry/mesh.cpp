@@ -70,6 +70,11 @@ BoundingBox Triangle::calculateBoundingBox()
     return BoundingBox(this->points[0], this->points[1], this->points[2]);
 }
 
+glm::vec3 Triangle::calculateCentroid()
+{
+    return (this->points[0] + this->points[1] + this->points[2])/3.f;
+}
+
 //HAVE THEM IMPLEMENT THIS
 //The ray in this function is not transformed because it was *already* transformed in Mesh::GetIntersection
 Intersection Triangle::GetIntersection(const Ray &r)
@@ -162,7 +167,7 @@ Intersection Mesh::GetIntersection(const Ray &r)
 
 void Mesh::recomputeKDNode()
 {
-    this->recomputeKDNode(KDNode::SPLIT_EQUAL_COUNTS);
+    this->recomputeKDNode(KDNode::SPLIT_SAH);
 }
 
 void Mesh::recomputeKDNode(KDNode::SplitMethod split_method)
@@ -255,8 +260,23 @@ BoundingBox Mesh::calculateBoundingBox()
             b.expand(glm::vec3(this->transform.T() * glm::vec4(t->points[i], 1.f)));
     }
 
-    b.cacheCenter();
+    b.cacheInfomation();
     return b;
+}
+
+glm::vec3 Mesh::calculateCentroid()
+{
+    assert(this->faces.size()>0);
+    glm::vec3 result(0.f);
+    //getting bounding box in world space
+    for (auto t: this->faces)
+    {
+        result += t->getCentroid();
+    }
+    result/= this->faces.size();
+
+    return glm::vec3(this->transform.T() * glm::vec4(result, 1.f));
+
 }
 
 void Mesh::create(){

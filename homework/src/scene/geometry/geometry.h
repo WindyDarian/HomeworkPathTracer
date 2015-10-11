@@ -26,6 +26,15 @@ public:
     virtual Intersection GetIntersection(const Ray& r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 
+    virtual glm::vec3 getCentroid()
+    {
+        if (!centroid_valid)
+        {
+            this->centroid = calculateCentroid();
+            centroid_valid = true;
+        }
+        return centroid;
+    }
 
     const BoundingBox& getBoundingBox()
     {
@@ -46,5 +55,7 @@ public:
 
 protected:
     virtual BoundingBox calculateBoundingBox() = 0;
-
+    virtual glm::vec3 calculateCentroid(){return glm::vec3(this->transform.T() * glm::vec4(glm::vec3(0.f), 1.f));}
+    bool centroid_valid = false;
+    glm::vec3 centroid;
 };

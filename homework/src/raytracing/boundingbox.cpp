@@ -2,7 +2,7 @@
 
 #include <la.h>
 
-BoundingBox::BoundingBox():valid(false), center_valid(false)
+BoundingBox::BoundingBox():valid(false), is_cached(false)
 {
 }
 
@@ -10,7 +10,7 @@ BoundingBox::BoundingBox(const glm::vec3& min, const glm::vec3& max):
     min(glm::min(min,max)),
     max(glm::max(min,max)),
     valid(true),
-    center_valid(false)
+    is_cached(false)
 {
 }
 
@@ -18,27 +18,47 @@ BoundingBox::BoundingBox(const glm::vec3& v1, const glm::vec3& v2, const glm::ve
     min(glm::min(glm::min(v1,v2),v3)),
     max(glm::max(glm::max(v1,v2),v3)),
     valid(true),
-    center_valid(false)
+    is_cached(false)
 {
 }
 
+
+
 glm::vec3 BoundingBox::getCenter() const
 {
-    if (!this->center_valid){
+    if (!this->is_cached){
        return (min + max) * 0.5f;
     }
     return center;
 }
 
-void BoundingBox::cacheCenter()
+inline float calculate_surface(const glm::vec3& min, const glm::vec3& max)
+{
+    float a = max.x - min.x;
+    float b = max.y - min.y;
+    float c = max.z - min.z;
+
+    return (a * b + b * c + a * c) * 2.f ;
+}
+
+float BoundingBox::getSurfaceArea() const
+{
+    if (!this->is_cached){
+       return calculate_surface(min, max);
+    }
+    return surface_area;
+}
+
+void BoundingBox::cacheInfomation()
 {
     this->center = (min + max) * 0.5f;
-    this->center_valid = true;
+    this->surface_area = calculate_surface(min, max);
+    this->is_cached = true;
 }
 
 void BoundingBox::expand(const glm::vec3& point)
 {
-    this->center_valid = false;
+    this->is_cached = false;
     if (!this->valid)
     {
         this->min = point;
@@ -58,7 +78,7 @@ void BoundingBox::merge(const BoundingBox& box)
     if (!box.valid)
         return;
 
-    this->center_valid = false;
+    this->is_cached = false;
     if (!this->valid)
     {
         this->min = box.min;
@@ -94,7 +114,7 @@ BoundingBox BoundingBox::getTransformedCopy(const glm::mat4 &T) const
         b.expand(glm::vec3(T * v));
     }
 
-    b.cacheCenter();
+    b.cacheInfomation();
     return b;
 }
 

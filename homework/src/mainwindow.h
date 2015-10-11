@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QActionGroup>
 
 
 namespace Ui
@@ -36,5 +37,19 @@ private:
     QMenu *viewMenu;
     QAction *objectBBoxVisible;
     QAction *kdTreeBBoxVisible;
-
+    QMenu *samplerMenu;
+    QActionGroup *selectSampler;
+    QAction *uniformSampler;
+    QAction *randomSampler;
+    QAction *stratifiedSampler;
+    QAction *iwsSampler;
+    QActionGroup *selectAALevel;
+    QAction *aalevelOne;
+    QAction *aalevelTwo;
+    QAction *aalevelFour;
+    QMenu *bvhMenu;
+    QActionGroup *selectBVH;
+    QAction *noBVH;
+    QAction *splitEqualCounts;
+    QAction *splitSAH;
 };

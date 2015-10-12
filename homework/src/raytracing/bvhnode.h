@@ -22,6 +22,12 @@ public:
 
     enum SplitMethod { SPLIT_EQUAL_COUNTS, SPLIT_SAH};
 
+    static SplitMethod CurrentSplitMethodSettings;
+    static std::string GetCurrentSplitMethodText()
+    { if (CurrentSplitMethodSettings == SPLIT_EQUAL_COUNTS) return "SPLIT_EQUAL_COUNTS";
+        else return "SPLIT_SAH";}
+    static bool BVHIntersectionDisabled;
+
     static BVHNode* build(const std::list<Geometry *> &objs, SplitMethod split_method);
 
     BVHNode();

@@ -31,6 +31,10 @@ private slots:
     void on_objectbboxvisible_toggled(bool);
     void on_kdtreebboxvisible_toggled(bool);
 
+    void on_selectSampler_triggered(QAction*);
+    void on_selectAALevel_triggered(QAction*);
+    void on_selectBVH_triggered(QAction*);
+
 
 private:
     Ui::MainWindow *ui;
@@ -43,6 +47,7 @@ private:
     QAction *randomSampler;
     QAction *stratifiedSampler;
     QAction *iwsSampler;
+    QAction *sceneSampler;
     QActionGroup *selectAALevel;
     QAction *aalevelOne;
     QAction *aalevelTwo;

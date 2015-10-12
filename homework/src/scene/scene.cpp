@@ -90,11 +90,9 @@ void Scene::recomputeBVH()
 
     // reset() automatically deletes old object and stores new one
 
-    this->bvh.reset(BVHNode::build(this->objects.toStdList(), BVHNode::SPLIT_SAH));
+    this->bvh.reset(BVHNode::build(this->objects.toStdList(), BVHNode::CurrentSplitMethodSettings));
 
-
-    //this->kdnode_objects.reset(KDNode::build(this->objects.toStdList(), KDNode::SPLIT_EQUAL_COUNTS));
-    std::cout << "K-D node for scene constructed" << std::endl;
+    std::cout << "BVH node for scene constructed: " << BVHNode::GetCurrentSplitMethodText() << std::endl;
 
 
     // update k-d node visualization
@@ -104,7 +102,7 @@ void Scene::recomputeBVH()
     }
     this->boundingbox_bvh.clear();
     std::list<BoundingBoxFrame*> b_frame;
-    this->bvh->appendBoundingBoxFrame(b_frame, glm::vec3(0.75f,0.75f,0.75f), 0.9f);
+    this->bvh->appendBoundingBoxFrame(b_frame, glm::vec3(1.f,1.f,0.5f), 0.95f);
     for (auto b : b_frame)
     {
         b->create();

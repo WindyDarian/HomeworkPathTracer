@@ -29,38 +29,27 @@ Intersection IntersectionEngine::GetIntersection(Ray r)
 
     Intersection result;
 
-    /* // not using BVH
-    for (auto obj : scene->objects)
-    {
-        Intersection intersection = obj->GetIntersection(r);
-        if (intersection.object_hit == nullptr)
-            continue;   // missed this object
-
-        if (intersection.t < min_t && intersection.t > 0)
+    if (BVHNode::BVHIntersectionDisabled){
+        // not using BVH
+        for (auto obj : scene->objects)
         {
-            min_t = intersection.t;
-            result = intersection;
-        }
-    }*/
+            Intersection intersection = obj->GetIntersection(r);
+            if (intersection.object_hit == nullptr)
+                continue;   // missed this object
 
-    /*
-    // using BVH (old)
-    std::set<Geometry*> possible_objs;
-    this->scene->kdnode_objects->appendIntersections(possible_objs, r);
-    for (auto obj : possible_objs)
+            if (intersection.t < min_t && intersection.t > 0)
+            {
+                min_t = intersection.t;
+                result = intersection;
+            }
+        }
+    }
+    else
     {
-        Intersection intersection = obj->GetIntersection(r);
-        if (intersection.object_hit == nullptr)
-            continue;   // missed this object
 
-        if (intersection.t < min_t && intersection.t > 0)
-        {
-            min_t = intersection.t;
-            result = intersection;
-        }
-    }*/
+        result = this->scene->bvh->GetIntersection(r);
+    }
 
-    result = this->scene->bvh->GetIntersection(r);
     if (result.t < 0)
         result = Intersection();
 

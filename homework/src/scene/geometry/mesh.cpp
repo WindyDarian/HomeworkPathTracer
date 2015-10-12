@@ -125,29 +125,28 @@ Intersection Mesh::GetIntersection(const Ray &r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
 
-    float min_t = std::numeric_limits<float>::max();
     Intersection result;
 
-    /*
-    // Optimization: using K-D Node (old)
-    std::set<Geometry*> possible_objs;
-    this->kdnode->appendIntersections(possible_objs, r_obj);
-
-    for (auto tri: possible_objs)
+    if (BVHNode::BVHIntersectionDisabled)
     {
-        Intersection intersection = tri->GetIntersection(r_obj);
-        if (intersection.object_hit == nullptr)
-            continue;   // missed this triangle
-
-        if (intersection.t < min_t && intersection.t > 0)
+        float min_t = std::numeric_limits<float>::max();
+        for (auto tri : this->faces)
         {
-            min_t = intersection.t;
-            result = intersection;
+            Intersection intersection = tri->GetIntersection(r_obj);
+            if (intersection.object_hit == NULL)
+                continue;   // missed this triangle
+            if (intersection.t < min_t && intersection.t >= 0)
+            {
+                min_t = intersection.t;
+                result = intersection;
+            }
         }
     }
-    */
+    else
+    {
+        result = this->bvh->GetIntersection(r_obj);
+    }
 
-    result = this->bvh->GetIntersection(r_obj);
 
     if (result.object_hit == NULL || result.object_hit == nullptr || result.t < 0)
         return Intersection();
@@ -167,7 +166,9 @@ Intersection Mesh::GetIntersection(const Ray &r)
 
 void Mesh::recomputeBVH()
 {
-    this->recomputeBVH(BVHNode::SPLIT_SAH);
+    this->recomputeBVH(BVHNode::CurrentSplitMethodSettings);
+
+    std::cout << "BVH node for mesh constructed:" << BVHNode::GetCurrentSplitMethodText() << std::endl;
 }
 
 void Mesh::recomputeBVH(BVHNode::SplitMethod split_method)
@@ -235,7 +236,6 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
         }
         std::cout << "" << std::endl;
         this->recomputeBVH();
-        std::cout << "K-D Node for mesh computed" << std::endl;
     }
     else
     {

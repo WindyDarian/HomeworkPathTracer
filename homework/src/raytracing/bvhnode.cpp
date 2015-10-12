@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 
+BVHNode::SplitMethod BVHNode::CurrentSplitMethodSettings = SPLIT_SAH;
+bool BVHNode::BVHIntersectionDisabled = false;
 
 BVHNode::BVHNode()
 {

@@ -8,6 +8,7 @@ public:
     RandomPixelSampler();
     RandomPixelSampler(int samples);
     virtual QList<glm::vec2> GetSamples(int x, int y);
+    virtual void initialize(int width, int height) {}
 
 protected:
     std::mt19937 mersenne_generator;

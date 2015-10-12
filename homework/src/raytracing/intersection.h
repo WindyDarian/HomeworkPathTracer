@@ -32,5 +32,11 @@ public:
     IntersectionEngine();
     Scene *scene;
 
+    //std::unique_ptr<BVHNode> bvh = nullptr;
+    // my bvh is in Scene class
+    // because it is associated to a specific scene
+    // not the intersection engine
+    // and I feel it is better in this way.
+
     Intersection GetIntersection(Ray r);
 };

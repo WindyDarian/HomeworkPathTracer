@@ -42,9 +42,10 @@ private:
 
     bool kdtree_bbox_visible = true;
     bool object_bbox_visible = true;
+    PixelSampler* current_sampler = nullptr;
+    int current_sample_level = 4;
 
-    // Samplers, all default as 4*4 samples
-    UniformPixelSampler simple_sampler;
+    // Samplers
     UniformPixelSampler uniform_sampler;
     StratifiedPixelSampler stratified_sampler;
     RandomPixelSampler random_sampler;
@@ -52,6 +53,11 @@ private:
 
 
 public:
+
+
+    enum SamplerType{SAMPLER_UNIFORM, SAMPLER_RANDOM, SAMPLER_STRATIFIED, SAMPLER_IWS, SAMPLER_FROM_SCENE_FILE};
+    enum AALevelType{AA_ONEONE, AA_TWOTWO, AA_FOURFOUR};
+
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
 
@@ -67,6 +73,8 @@ public:
 
     void setKDTreeBBoxVisible(bool value){this->kdtree_bbox_visible = value;}
     void setObjectBBoxVisible(bool value){this->object_bbox_visible = value;}
+    void setSampler(SamplerType samplertype);
+    void setAALevel(AALevelType aaleveltype);
 
 
 protected:

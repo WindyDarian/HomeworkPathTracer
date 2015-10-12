@@ -14,4 +14,5 @@ public:
     void SetSampleCount(int samples){samples_sqrt = samples;}
     virtual ~PixelSampler(){}
     virtual QList<glm::vec2> GetSamples(int x, int y) = 0;
+    virtual void initialize(int width, int height) = 0;
 };

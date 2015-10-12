@@ -17,14 +17,15 @@ using namespace tbb;
 
 MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent),
-      simple_sampler(1),
-      uniform_sampler(4),
-      stratified_sampler(4),
-      random_sampler(4),
-      iw_stratified_sampler(4)
+      uniform_sampler(2),
+      stratified_sampler(2),
+      random_sampler(2),
+      iw_stratified_sampler(2)
 {
     setFocusPolicy(Qt::ClickFocus);
 
+    setAALevel(AA_TWOTWO);
+    setSampler(SAMPLER_UNIFORM);
 }
 
 MyGL::~MyGL()
@@ -278,10 +279,24 @@ void MyGL::RaytraceScene()
         return;
     }
 
+
+
+    PixelSampler* sampler = this->current_sampler;
+
+    if (!sampler)
+    {
+        sampler = scene.pixel_sampler.get();
+        assert(sampler);
+    }
+
+    sampler->initialize(scene.camera.width, scene.camera.height);
     //iw_stratified_sampler.recalculateSamples(scene.camera.width, scene.camera.height);
 
+
+    std::cout<< "Render started:" << std::endl;
     QElapsedTimer render_timer;
     render_timer.start();
+
 
     //#define TBB //Uncomment this line out to render your scene with multiple threads.
     //This is useful when debugging your raytracer with breakpoints.
@@ -291,7 +306,7 @@ void MyGL::RaytraceScene()
             for(unsigned int j = 0; j < scene.camera.height; j++)
             {
                 //_renderpixel_normal(i,j,scene,intersection_engine);
-                _renderpixel(i,j,this->scene,this->integrator);
+                _renderpixel(i, j, this->scene, this->integrator, sampler);
             }
         });
     #else
@@ -302,11 +317,13 @@ void MyGL::RaytraceScene()
             {
                 //_renderpixel_normal(i,j,scene,intersection_engine);
                 //_renderpixel(i,j,this->scene,this->integrator);
-                _renderpixel(i, j, this->scene, this->integrator, &uniform_sampler);
+
                 //_renderpixel(i, j, this->scene, this->integrator, &stratified_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &random_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &simple_sampler);
                 //_renderpixel(i, j, this->scene, this->integrator, &iw_stratified_sampler);
+
+                _renderpixel(i, j, this->scene, this->integrator, sampler);
 
             }
         }
@@ -319,4 +336,64 @@ void MyGL::RaytraceScene()
               << std::endl;
 
     scene.film.WriteImage(filepath);
+}
+
+void MyGL::setSampler(MyGL::SamplerType samplertype)
+{
+    switch (samplertype)
+    {
+    case SAMPLER_UNIFORM:
+        this->current_sampler = & this->uniform_sampler;
+        std::cout<< "Sampler changed to Uniform."<<std::endl;
+        break;
+
+    case SAMPLER_RANDOM:
+        this->current_sampler = & this->random_sampler;
+        std::cout<< "Sampler changed to Random."<<std::endl;
+        break;
+
+    case SAMPLER_STRATIFIED:
+        this->current_sampler = & this->stratified_sampler;
+        std::cout<< "Sampler changed to Stratified."<<std::endl;
+        break;
+
+    case SAMPLER_IWS:
+        this->current_sampler = & this->iw_stratified_sampler;
+        std::cout<< "Sampler changed to Image-Wide Stratified."<<std::endl;
+        break;
+
+    case SAMPLER_FROM_SCENE_FILE:
+        this->current_sampler = nullptr;
+        std::cout<< "Sampler changed to scene-defined."<<std::endl;
+        break;
+
+    }
+
+    if (this->current_sampler)
+    {
+        this->current_sampler->SetSampleCount(this->current_sample_level);
+    }
+}
+
+void MyGL::setAALevel(MyGL::AALevelType aaleveltype)
+{
+    switch (aaleveltype)
+    {
+    case AA_ONEONE:
+        this->current_sample_level = 1;
+        break;
+    case AA_TWOTWO:
+        this->current_sample_level = 2;
+        break;
+    case AA_FOURFOUR:
+        this->current_sample_level = 4;
+        break;
+    }
+    if (this->current_sampler)
+    {
+        this->current_sampler->SetSampleCount(this->current_sample_level);
+        std::cout<< "Sampling Level changed to "
+                 << this->current_sample_level <<  " x "
+                 << this->current_sample_level <<std::endl;
+    }
 }

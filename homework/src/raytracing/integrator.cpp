@@ -62,7 +62,12 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
             if (glm::length2(refraction) < accurancy)
             {
                 //total internal reflection
-                local_illumination = reflected_color;
+                if (reflective_flag)
+                    local_illumination = reflected_color;
+                else{
+                    Ray reflect_ray = Ray(out_origin_inside, glm::reflect(r.direction, -intersection.normal));
+                    local_illumination = TraceRay(reflect_ray, depth + 1) * intersection.color;
+                }
             }
             else
             {
@@ -101,9 +106,6 @@ glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
 
         local_illumination = intersection.color;  //later: * EvaluateReflectedEnergy * shadow afterwards
     }
-
-
-
 
     glm::vec3 color_sum(0.f);
     for (auto light:this->scene->lights)

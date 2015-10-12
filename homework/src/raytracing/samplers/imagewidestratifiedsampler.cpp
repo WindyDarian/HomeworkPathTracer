@@ -9,8 +9,14 @@ ImageWideStratifiedSampler::ImageWideStratifiedSampler(int samples)
       min_distance( .5f / samples)
 {}
 
-void ImageWideStratifiedSampler::recalculateSamples(int width, int height)
+void ImageWideStratifiedSampler::initialize(int width, int height)
 {
+    this->regenerateSamples(width, height);
+}
+
+void ImageWideStratifiedSampler::regenerateSamples(int width, int height)
+{
+    this->min_distance = .5f/samples_sqrt;
     const float max_float = std::numeric_limits<float>::max();
     int samples_per_pixel = samples_sqrt * samples_sqrt;
 

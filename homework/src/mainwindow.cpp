@@ -59,6 +59,12 @@ MainWindow::MainWindow(QWidget *parent) :
     this->iwsSampler = a;
     a->setActionGroup(selectSampler);
 
+    a = new QAction("Scene-Defined", viewMenu);
+    a->setCheckable(true);
+    samplerMenu->addAction(a);
+    this->sceneSampler = a;
+    a->setActionGroup(selectSampler);
+
     samplerMenu->addSeparator();
 
     selectAALevel = new QActionGroup( this );
@@ -68,13 +74,13 @@ MainWindow::MainWindow(QWidget *parent) :
     samplerMenu->addAction(a);
     this->aalevelOne = a;
     a->setActionGroup(selectAALevel);
-    a->setChecked(true);
 
     a = new QAction("2 x 2", viewMenu);
     a->setCheckable(true);
     samplerMenu->addAction(a);
     this->aalevelTwo = a;
     a->setActionGroup(selectAALevel);
+    a->setChecked(true);
 
     a = new QAction("4 x 4", viewMenu);
     a->setCheckable(true);
@@ -106,6 +112,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->splitSAH = a;
     a->setActionGroup(selectBVH);
     a->setChecked(true);
+
+
+    connect(selectSampler, SIGNAL(triggered(QAction*)),
+                     this, SLOT(on_selectSampler_triggered(QAction*)));
+    connect(selectAALevel, SIGNAL(triggered(QAction*)),
+                     this, SLOT(on_selectAALevel_triggered(QAction*)));
+    connect(selectBVH, SIGNAL(triggered(QAction*)),
+                     this, SLOT(on_selectBVH_triggered(QAction*)));
 
 }
 
@@ -147,6 +161,81 @@ void MainWindow::on_actionCamera_Controls_triggered()
 void MainWindow::on_kdtreebboxvisible_toggled(bool value)
 {
     ui->mygl->setKDTreeBBoxVisible(value);
+}
+
+void MainWindow::on_selectSampler_triggered(QAction * action)
+{
+    MyGL::SamplerType choice;
+    if (action == this->uniformSampler)
+    {
+        choice = MyGL::SAMPLER_UNIFORM;
+    }
+    else if (action == this->randomSampler)
+    {
+        choice = MyGL::SAMPLER_RANDOM;
+    }
+    else if (action == this->stratifiedSampler)
+    {
+        choice = MyGL::SAMPLER_STRATIFIED;
+    }
+    else if (action == this->iwsSampler)
+    {
+        choice = MyGL::SAMPLER_IWS;
+    }
+    else
+    {
+        choice = MyGL::SAMPLER_FROM_SCENE_FILE;
+    }
+
+    ui->mygl->setSampler(choice);
+}
+
+void MainWindow::on_selectAALevel_triggered(QAction * action)
+{
+    MyGL::AALevelType choice;
+    if (action == this->aalevelOne)
+    {
+        choice = MyGL::AA_ONEONE;
+    }
+    else if (action == this->aalevelTwo)
+    {
+        choice = MyGL::AA_TWOTWO;
+    }
+    else
+    {
+        choice = MyGL::AA_FOURFOUR;
+    }
+
+    ui->mygl->setAALevel(choice);
+}
+
+void MainWindow::on_selectBVH_triggered(QAction * action)
+{
+    if (action == this->noBVH)
+    {
+        BVHNode::BVHIntersectionDisabled = true;
+        std::cout << "BVH intersection test for scene and meshes disabled."<<
+                      std::endl;
+        return;
+    }
+    if (action == this->splitEqualCounts)
+    {
+        BVHNode::CurrentSplitMethodSettings = BVHNode::SPLIT_EQUAL_COUNTS;
+
+    }
+    else if (action == this->splitSAH)
+    {
+        BVHNode::CurrentSplitMethodSettings = BVHNode::SPLIT_SAH;
+    }
+
+    if (BVHNode::BVHIntersectionDisabled)
+    {
+        BVHNode::BVHIntersectionDisabled = false;
+        std::cout << "BVH intersection test enabled."<< std::endl;
+    }
+    std::cout << "BVH set to " << BVHNode::GetCurrentSplitMethodText() << std::endl;
+    std::cout << "Please RELOAD scene file to reconstruct BVH!" << std::endl;
+
 }
 
 void MainWindow::on_objectbboxvisible_toggled(bool value)

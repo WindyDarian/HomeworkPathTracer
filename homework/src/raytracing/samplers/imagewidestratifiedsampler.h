@@ -37,7 +37,7 @@ class ImageWideStratifiedSampler: public PixelSampler
 public:
     ImageWideStratifiedSampler();
     ImageWideStratifiedSampler(int samples);
-    void recalculateSamples(int width, int height);
+    virtual void initialize(int width, int height);
     virtual QList<glm::vec2> GetSamples(int x, int y);
 
 protected:
@@ -60,4 +60,6 @@ protected:
 
 
     std::unique_ptr<std::vector<std::vector<PixelSamples>>> cached_grid = nullptr;
+
+    void regenerateSamples(int width, int height);
 };

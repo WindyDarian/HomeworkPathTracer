@@ -9,6 +9,8 @@
 #include <scene/materials/phongmaterial.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
+#include <raytracing/samplers/randompixelsampler.h>
+#include <raytracing/samplers/imagewidestratifiedsampler.h>
 #include <QImage>
 
 void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Scene &scene, Integrator &integrator)
@@ -447,6 +449,14 @@ PixelSampler* XMLReader::LoadPixelSampler(QXmlStreamReader &xml_reader)
     else if(QStringRef::compare(type, QString("stratified")) == 0)
     {
         result = new StratifiedPixelSampler();
+    }
+    else if(QStringRef::compare(type, QString("random")) == 0)
+    {
+        result = new RandomPixelSampler();
+    }
+    else if(QStringRef::compare(type, QString("iws")) == 0)
+    {
+        result = new ImageWideStratifiedSampler();
     }
     else
     {

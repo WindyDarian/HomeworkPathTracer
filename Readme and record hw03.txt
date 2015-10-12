@@ -1,4 +1,3 @@
-﻿Ruoyu Fan
 
 -Extra credits I have done:
 SPLIT_SAH
@@ -78,8 +77,6 @@ Render Times:
       Image-wide Stratified: 171.208 sec (+ 11.202 sec)
       Image-wide Stratified: 221.524 sec (+ 11.315 sec) (SPLIT_EQUAL_COUNTS)
 
-
-
 Extra credits:
 
 1.SAH:
@@ -125,66 +122,3 @@ for up to 4x4 AA, this method is fine for now, I may use a K-D Tree to store and
 compare points or store sample points in a data file as improvement when larger
 resolution or AA level is needed; or to generate when rendering and delete
 sample blocks no longer needed in real time to save memory.
-
-
-
-
-
-
-
-
-
-
-This log is maintained by a human....
-So...
-
-Many_Spheres before optimizing my last raytracer and kdtree
-(4 * random AA)
-172.12 seconds
-Many_Spheres before optimizing my last raytracer and kdtree
-(4 * stratified AA)
-170.67 seconds
-
-Many_Spheres after optimizing my last raytracer but not kdtree
-(4 * stratified AA)
-47.782 seconds
-
-Many_Spheres after sah
-(4 * stratified AA)
-47.782 seconds
-
-glass_dragon without sah
-12.701 seconds
-
-glass_dragon with sah
-9.61 seconds
-
-
-
-44 seconds?~
-
-4x:
-
-Wahoo 用深度优先检测 53.841s
-Wahoo 用笨办法 54.508s
-嘛
-
-Wahoo SAH 40.992s
-Wahoo NoSAH 48.739s
-
-glass_dragon NoSAH 202.929s
-glass_dragon SAH 153.790s
-
-Image-Wide Stratified Sampler Construction Time:
-
-4x4 11.230 seconds
-
-
-(min distance for n*n sampler as 1./2n,
- min tries for each sample is 4, return point with max distance to other all points
- for each sample among the 4~100 tries)
-
-
-
-
-预先知道的一点是，Many Spheres 用窝的方法会导致很多不能分割的东西所以

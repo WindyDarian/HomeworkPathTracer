@@ -41,7 +41,9 @@ public:
 
     void appendBoundingBoxFrame(std::list<BoundingBoxFrame*>& list,
                                   glm::vec3 color,
-                                  float color_decay = 0.5f);
+                                  float color_decay = 0.5f,
+                                int maxdepth = 50,
+                                int depth = 0);
 
     //KDNode* left = nullptr;
     //KDNode* right = nullptr;

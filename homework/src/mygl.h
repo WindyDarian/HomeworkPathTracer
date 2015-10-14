@@ -42,6 +42,9 @@ private:
 
     bool kdtree_bbox_visible = true;
     bool object_bbox_visible = true;
+    bool mesh_bbox_visible = true;
+    bool triangle_bbox_visible = false;
+
     PixelSampler* current_sampler = nullptr;
     int current_sample_level = 4;
 
@@ -50,6 +53,7 @@ private:
     StratifiedPixelSampler stratified_sampler;
     RandomPixelSampler random_sampler;
     ImageWideStratifiedSampler iw_stratified_sampler;
+
 
 
 public:
@@ -73,6 +77,8 @@ public:
 
     void setKDTreeBBoxVisible(bool value){this->kdtree_bbox_visible = value;}
     void setObjectBBoxVisible(bool value){this->object_bbox_visible = value;}
+    void setMeshBBoxVisible(bool value){this->mesh_bbox_visible = value;}
+    void setTriangleBBoxVisible(bool value);
     void setSampler(SamplerType samplertype);
     void setAALevel(AALevelType aaleveltype);
 

@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QElapsedTimer>
 #include <tbb/tbb.h>
+#include <scene/geometry/mesh.h>
 
 
 #include <iomanip>
@@ -115,6 +116,36 @@ void MyGL::GLDrawScene()
             prog_flat.setModelMatrix(g->transform.T());
             prog_flat.draw(*this, *g);
         }
+
+        if (this->mesh_bbox_visible)
+        {
+
+            if (auto mesh = dynamic_cast<Mesh*>(g))
+            {
+
+                prog_flat.setModelMatrix(g->transform.T());
+                auto bboxes = mesh->getVisibleBoundingBoxesBVH();
+                for(BoundingBoxFrame* b: bboxes)
+                {
+                    prog_flat.draw(*this, *b);
+                }
+            }
+        }
+        if (this->triangle_bbox_visible)
+        {
+
+            if (auto mesh = dynamic_cast<Mesh*>(g))
+            {
+
+                prog_flat.setModelMatrix(g->transform.T());
+                auto bboxes = mesh->getVisibleBoundingBoxesTriangle();
+                for(BoundingBoxFrame* b: bboxes)
+                {
+                    prog_flat.draw(*this, *b);
+                }
+            }
+        }
+
     }
     for(Geometry *l : scene.lights)
     {
@@ -230,6 +261,18 @@ void MyGL::SceneLoadDialog()
     intersection_engine.scene = &scene;
 
     scene.recomputeBVH();
+
+
+    if(triangle_bbox_visible)
+    {
+        for(Geometry *g : scene.objects)
+        {
+            if (auto mesh = dynamic_cast<Mesh*>(g))
+            {
+                mesh->createVisibleBoundingBoxes();
+            }
+        }
+    }
 }
 
 inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)
@@ -336,6 +379,18 @@ void MyGL::RaytraceScene()
               << std::endl;
 
     scene.film.WriteImage(filepath);
+}
+
+void MyGL::setTriangleBBoxVisible(bool value)
+{
+    this->triangle_bbox_visible = value;
+    for(Geometry *g : scene.objects)
+    {
+        if (auto mesh = dynamic_cast<Mesh*>(g))
+        {
+            mesh->createVisibleBoundingBoxes();
+        }
+    }
 }
 
 void MyGL::setSampler(MyGL::SamplerType samplertype)

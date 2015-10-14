@@ -30,6 +30,8 @@ private slots:
 
     void on_objectbboxvisible_toggled(bool);
     void on_kdtreebboxvisible_toggled(bool);
+    void on_meshkdtreebboxvisible_toggled(bool);
+    void on_meshtrianglebboxvisible_toggled(bool);
 
     void on_selectSampler_triggered(QAction*);
     void on_selectAALevel_triggered(QAction*);
@@ -41,6 +43,8 @@ private:
     QMenu *viewMenu;
     QAction *objectBBoxVisible;
     QAction *kdTreeBBoxVisible;
+    QAction *meshKdTreeBBoxVisible;
+    QAction *meshTriangleBBoxVisible;
     QMenu *samplerMenu;
     QActionGroup *selectSampler;
     QAction *uniformSampler;

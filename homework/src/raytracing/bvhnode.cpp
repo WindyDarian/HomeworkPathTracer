@@ -103,19 +103,21 @@ BVHNode* BVHNode::build(const std::list<Geometry *> & objs, SplitMethod split_me
 //    }
 //}
 
-void BVHNode::appendBoundingBoxFrame(std::list<BoundingBoxFrame *>& list, glm::vec3 color, float color_decay)
+void BVHNode::appendBoundingBoxFrame(std::list<BoundingBoxFrame *> &list, glm::vec3 color,
+                                     float color_decay, int maxdepth, int depth)
 {
+    if (depth >= maxdepth) return;
     glm::vec3 newcolor = color * color_decay;
 
     if (this->left != nullptr)
     {
-        this->left->appendBoundingBoxFrame(list, newcolor, color_decay);
+        this->left->appendBoundingBoxFrame(list, newcolor, color_decay, maxdepth, depth + 1);
     }
 
     if (this->right != nullptr)
     {
 
-        this->right->appendBoundingBoxFrame(list, newcolor, color_decay);
+        this->right->appendBoundingBoxFrame(list, newcolor, color_decay, maxdepth, depth + 1);
     }
 
     list.push_back(new BoundingBoxFrame(this->bounding_box, color));

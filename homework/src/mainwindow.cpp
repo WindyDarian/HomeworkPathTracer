@@ -21,10 +21,24 @@ MainWindow::MainWindow(QWidget *parent) :
     kdTreeBBoxVisible->setChecked(true);
     viewMenu->addAction(kdTreeBBoxVisible);
 
+    meshKdTreeBBoxVisible = new QAction("Bounding Box (BVH Tree of Mesh, top 3 layers)", viewMenu);
+    meshKdTreeBBoxVisible->setCheckable(true);
+    meshKdTreeBBoxVisible->setChecked(true);
+    viewMenu->addAction(meshKdTreeBBoxVisible);
+
+    meshTriangleBBoxVisible = new QAction("Bounding Box (Triangle, may crash on big model)", viewMenu);
+    meshTriangleBBoxVisible->setCheckable(true);
+    meshTriangleBBoxVisible->setChecked(false);
+    viewMenu->addAction(meshTriangleBBoxVisible);
+
     connect(objectBBoxVisible, SIGNAL(toggled(bool)),
                      this, SLOT(on_objectbboxvisible_toggled(bool)));
     connect(kdTreeBBoxVisible, SIGNAL(toggled(bool)),
                      this, SLOT(on_kdtreebboxvisible_toggled(bool)));
+    connect(meshKdTreeBBoxVisible, SIGNAL(toggled(bool)),
+            this, SLOT(on_meshkdtreebboxvisible_toggled(bool)));
+    connect(meshTriangleBBoxVisible, SIGNAL(toggled(bool)),
+            this, SLOT(on_meshtrianglebboxvisible_toggled(bool)));
 
 
 
@@ -161,6 +175,16 @@ void MainWindow::on_actionCamera_Controls_triggered()
 void MainWindow::on_kdtreebboxvisible_toggled(bool value)
 {
     ui->mygl->setKDTreeBBoxVisible(value);
+}
+
+void MainWindow::on_meshkdtreebboxvisible_toggled(bool value)
+{
+    ui->mygl->setMeshBBoxVisible(value);
+}
+
+void MainWindow::on_meshtrianglebboxvisible_toggled(bool value)
+{
+    ui->mygl->setTriangleBBoxVisible(value);
 }
 
 void MainWindow::on_selectSampler_triggered(QAction * action)

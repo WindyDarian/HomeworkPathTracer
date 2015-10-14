@@ -56,6 +56,8 @@ public:
 protected:
     virtual BoundingBox calculateBoundingBox() = 0;
     virtual glm::vec3 calculateCentroid(){return glm::vec3(this->transform.T() * glm::vec4(glm::vec3(0.f), 1.f));}
+
     bool centroid_valid = false;
     glm::vec3 centroid;
+
 };

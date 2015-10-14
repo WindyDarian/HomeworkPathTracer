@@ -13,7 +13,7 @@ class Drawable
 {
 public:
     Drawable();
-    ~Drawable();
+    virtual ~Drawable();
 
     void recreate();
     virtual void create() = 0;  //This is a purely virtual function; it must be implemented by each subclass of Drawable.

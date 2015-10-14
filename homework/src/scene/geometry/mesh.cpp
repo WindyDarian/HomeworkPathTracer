@@ -164,6 +164,28 @@ Intersection Mesh::GetIntersection(const Ray &r)
     return Intersection(ipoint_world, normal_world, t_world, s_color, this);
 }
 
+Mesh::~Mesh()
+{
+    if(this->visible_bounding_boxes_bvh)
+    {
+        for (auto p: *this->visible_bounding_boxes_bvh)
+        {
+            delete p;
+        }
+        this->visible_bounding_boxes_bvh->clear();
+        this->visible_bounding_boxes_bvh.reset();
+    }
+    if(this->visible_bounding_boxes_triangle)
+    {
+        for (auto p: *this->visible_bounding_boxes_triangle)
+        {
+            delete p;
+        }
+        this->visible_bounding_boxes_triangle->clear();
+        this->visible_bounding_boxes_triangle.reset();
+    }
+}
+
 void Mesh::recomputeBVH()
 {
     this->recomputeBVH(BVHNode::CurrentSplitMethodSettings);
@@ -179,6 +201,21 @@ void Mesh::recomputeBVH(BVHNode::SplitMethod split_method)
         tris.push_back(tri);
     }
     this->bvh = std::unique_ptr<BVHNode>(BVHNode::build(tris, split_method));
+}
+
+std::list<BoundingBoxFrame*> &Mesh::getVisibleBoundingBoxesBVH()
+{
+    assert(this->visible_bounding_boxes_bvh);
+    return *this->visible_bounding_boxes_bvh;
+}
+
+std::list<BoundingBoxFrame *> &Mesh::getVisibleBoundingBoxesTriangle()
+{
+    if (!this->visible_bounding_boxes_triangle)
+    {
+        createVisibleBoundingBoxes();
+    }
+    return *this->visible_bounding_boxes_triangle;
 }
 
 void Mesh::SetMaterial(Material *m)
@@ -236,6 +273,7 @@ void Mesh::LoadOBJ(const QStringRef &filename, const QStringRef &local_path)
         }
         std::cout << "" << std::endl;
         this->recomputeBVH();
+        this->createVisibleBoundingBoxes_bvh();
     }
     else
     {
@@ -277,6 +315,40 @@ glm::vec3 Mesh::calculateCentroid()
 
     return glm::vec3(this->transform.T() * glm::vec4(result, 1.f));
 
+}
+
+void Mesh::createVisibleBoundingBoxes_bvh()
+{
+
+    if (!this->visible_bounding_boxes_bvh)
+    {
+        this->visible_bounding_boxes_bvh.reset(new std::list<BoundingBoxFrame*>());
+        this->bvh->appendBoundingBoxFrame(*this->visible_bounding_boxes_bvh, glm::vec3(0.5f,1.0f,1.0f), 0.95f, 3);
+        for (auto b: *this->visible_bounding_boxes_bvh)
+        {
+            b->create();
+        }
+    }
+}
+
+void Mesh::createVisibleBoundingBoxes_triangle()
+{
+    if(!this->visible_bounding_boxes_triangle)
+    {
+        this->visible_bounding_boxes_triangle.reset(new std::list<BoundingBoxFrame*>());
+        for (auto t: this->faces)
+        {
+            auto b = new BoundingBoxFrame(*t->bounding_box_ptr);
+            b->create();
+            this->visible_bounding_boxes_triangle->push_back(b);
+        }
+    }
+}
+
+void Mesh::createVisibleBoundingBoxes()
+{
+    this->createVisibleBoundingBoxes_bvh();
+    this->createVisibleBoundingBoxes_triangle();
 }
 
 void Mesh::create(){

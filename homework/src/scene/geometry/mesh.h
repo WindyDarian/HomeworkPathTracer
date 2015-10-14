@@ -1,5 +1,6 @@
 #pragma once
 #include <scene/geometry/geometry.h>
+#include <scene/geometry/boundingboxframe.h>
 #include <openGL/drawable.h>
 #include <QList>
 #include <set>
@@ -39,11 +40,16 @@ class Mesh : public Geometry
 {
 public:
     Intersection GetIntersection(const Ray& r);
+    virtual ~Mesh();
     void SetMaterial(Material *m);
     void create();
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
     void recomputeBVH();
     void recomputeBVH(BVHNode::SplitMethod split_method);
+
+    void createVisibleBoundingBoxes();
+    std::list<BoundingBoxFrame*> &getVisibleBoundingBoxesBVH();
+    std::list<BoundingBoxFrame*> &getVisibleBoundingBoxesTriangle();
 
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 protected:
@@ -53,6 +59,11 @@ protected:
 private:
     QList<Triangle*> faces;
 
-    std::unique_ptr<BVHNode> bvh;  // K-D Node for optimization
 
+    std::unique_ptr<BVHNode> bvh;  // K-D Node for optimization
+    std::unique_ptr<std::list<BoundingBoxFrame*>> visible_bounding_boxes_bvh = nullptr;
+    std::unique_ptr<std::list<BoundingBoxFrame*>> visible_bounding_boxes_triangle = nullptr;
+
+    void createVisibleBoundingBoxes_bvh();
+    void createVisibleBoundingBoxes_triangle();
 };

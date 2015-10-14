@@ -1,12 +1,13 @@
-
 -Extra credits I have done:
 SPLIT_SAH
 Image-Wide Stratified Sampling
 see the bottom of this file
 
 -Note:
-Use the menu to toggle render settings, remember to reload the scene file when
-switching splitting method for BVH
+Use the menu to toggle render settings, remember to
+  1) reload the scene file when switching splitting method for BVH
+  2) bbox for triangles is not visible by default, toggle in View menu
+      (if enabled it may crash on dragon.obj)
 
 I didn't make BoundingBox itself drawable because I think it is more efficient
 to use it as a pure calculation helper class (like Ray), I added a

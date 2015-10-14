@@ -68,7 +68,7 @@ Render Times:
       Uniform: 38.012 sec (49.121 sec when SPLIT_EQUAL_COUNTS)
       Random: 40.090 sec
       Stratified: 40.366 sec
-      Image-wide Stratified: 53.000 sec (+ 11.153 sample generation)
+      Image-wide Stratified: 39.494 sec (+ 11.153 sample generation)
     many_spheres.xml:
       Uniform: 44.781 sec (45.87 sec when SPLIT_EQUAL_COUNTS)
       Random: 45.479 sec

@@ -17,8 +17,10 @@ needs to be drawn
 
 -Recorded Data:
 I7-4720HQ Windows 10 x64
-All without TBB enabled, Debug Build (I had some problem with Release build when
-timing my process although solved now but it is a pain to render them all again)
+All without TBB enabled by default, Debug Build (I had some problem with Release
+build when timing my process although solved now but it is a pain to render them
+all again)
+
 Original data is in milliseconds.
 
 Render Times:
@@ -31,7 +33,7 @@ Render Times:
 
 1x1 with BVH (SPLIT_SAH):
     Wahoo.xml:
-      Uniform: 2.533 sec
+      Uniform: 2.533 sec (0.507 seconds with TBB)
       Random: 2.542 sec
       Stratified: 2.569 sec
       Image-Wide Stratified: 2.603 sec (+ 0.530 generation)
@@ -65,7 +67,8 @@ Render Times:
 
 4x4 with BVH (SPLIT_SAH):
     Wahoo.xml:
-      Uniform: 38.012 sec (49.121 sec when SPLIT_EQUAL_COUNTS)
+      Uniform: 38.012 sec (or 7.612s with TBB)
+             (49.121 sec (or 9.470s with TBB) when SPLIT_EQUAL_COUNTS)
       Random: 40.090 sec
       Stratified: 40.366 sec
       Image-wide Stratified: 39.494 sec (+ 11.153 sample generation)
@@ -75,7 +78,8 @@ Render Times:
       Stratified: 45.268 sec
       Image-wide Stratified: 45.637 sec (+ 11.168 sample generation)
     glass_dragons.xml:
-      Image-wide Stratified: 171.208 sec (+ 11.202 sec)
+      Image-wide Stratified: 171.208 sec (+ 11.202 sec) (SPLIT_SAH)
+      Image-wide Stratified: 33.707 sec (+ 10.972 sec) (SPLIT_SAH + TBB)
       Image-wide Stratified: 221.524 sec (+ 11.315 sec) (SPLIT_EQUAL_COUNTS)
 
 Extra credits:

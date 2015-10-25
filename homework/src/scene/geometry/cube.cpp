@@ -5,6 +5,12 @@
 static const int CUB_IDX_COUNT = 36;
 static const int CUB_VERT_COUNT = 24;
 
+void Cube::ComputeArea()
+{
+    //Extra credit to implement this
+    area = 0;
+}
+
 Intersection Cube::GetIntersection(const Ray &r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));

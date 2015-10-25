@@ -9,19 +9,19 @@
 #include <QElapsedTimer>
 #include <renderthread.h>
 #include <scene/geometry/mesh.h>
+#include <ctime>
 
 
 #include <iomanip>
 
-using namespace tbb;
 
 
 MyGL::MyGL(QWidget *parent)
     : GLWidget277(parent),
       uniform_sampler(2),
-      stratified_sampler(2),
-      random_sampler(2),
-      iw_stratified_sampler(2)
+      stratified_sampler(2,static_cast<unsigned int>(std::time(nullptr))),
+      random_sampler(2, static_cast<unsigned int>(std::time(nullptr)) + 1 ),
+      iw_stratified_sampler(2, static_cast<unsigned int>(std::time(nullptr)) + 2)
 {
     setFocusPolicy(Qt::ClickFocus);
 
@@ -316,12 +316,6 @@ void MyGL::RaytraceScene()
 
     PixelSampler* sampler = this->current_sampler;
 
-    if (!sampler)
-    {
-        sampler = scene.pixel_sampler.get();
-        assert(sampler);
-    }
-
     sampler->initialize(scene.camera.width, scene.camera.height);
     //iw_stratified_sampler.recalculateSamples(scene.camera.width, scene.camera.height);
 
@@ -498,9 +492,9 @@ void MyGL::setSampler(MyGL::SamplerType samplertype)
         std::cout<< "Sampler changed to Image-Wide Stratified."<<std::endl;
         break;
 
-    case SAMPLER_FROM_SCENE_FILE:
-        this->current_sampler = nullptr;
-        std::cout<< "Sampler changed to scene-defined."<<std::endl;
+    default:
+        this->current_sampler = & this->uniform_sampler;
+        std::cout<< "Sampler changed to Uniform."<<std::endl;
         break;
 
     }

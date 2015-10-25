@@ -4,7 +4,8 @@
 
 StratifiedPixelSampler::StratifiedPixelSampler():StratifiedPixelSampler(1){}
 
-StratifiedPixelSampler::StratifiedPixelSampler(int samples) : PixelSampler(samples), mersenne_generator(), unif_distribution(0,1){}
+StratifiedPixelSampler::StratifiedPixelSampler(unsigned int samples, unsigned int seed) : PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1){}
+
 
 QList<glm::vec2> StratifiedPixelSampler::GetSamples(int x, int y)
 {

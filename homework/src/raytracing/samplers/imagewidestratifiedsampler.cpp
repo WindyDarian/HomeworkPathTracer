@@ -2,12 +2,11 @@
 
 ImageWideStratifiedSampler::ImageWideStratifiedSampler():ImageWideStratifiedSampler(1){}
 
-ImageWideStratifiedSampler::ImageWideStratifiedSampler(int samples)
-    : PixelSampler(samples),
-      mersenne_generator(),
-      unif_distribution(0,1),
-      min_distance( .5f / samples)
+ImageWideStratifiedSampler::ImageWideStratifiedSampler(unsigned int samples, unsigned int seed) :
+    PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1),
+    min_distance( .5f / samples)
 {}
+
 
 void ImageWideStratifiedSampler::initialize(int width, int height)
 {

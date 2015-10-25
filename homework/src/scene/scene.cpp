@@ -7,8 +7,6 @@
 
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
-#include <scene/materials/lambertmaterial.h>
-#include <scene/materials/phongmaterial.h>
 
 Scene::Scene()
 {

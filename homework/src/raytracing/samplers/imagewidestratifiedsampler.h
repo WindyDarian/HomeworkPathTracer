@@ -36,7 +36,7 @@ class ImageWideStratifiedSampler: public PixelSampler
 {
 public:
     ImageWideStratifiedSampler();
-    ImageWideStratifiedSampler(int samples);
+    ImageWideStratifiedSampler(unsigned int samples, unsigned int seed);
     virtual void initialize(int width, int height);
     virtual QList<glm::vec2> GetSamples(int x, int y);
 

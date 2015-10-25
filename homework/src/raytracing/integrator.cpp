@@ -8,6 +8,24 @@ Integrator::Integrator():
     intersection_engine = NULL;
 }
 
+
+void Integrator::SetDepth(unsigned int depth)
+{
+    max_depth = depth;
+}
+
+glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
+{
+    //TODO
+}
+
+glm::vec3 Integrator::ShadowTest(const glm::vec3 &point, Geometry* light) const
+{
+    //TODO
+
+}
+
+/*
 //Basic ray trace
 glm::vec3 Integrator::TraceRay(Ray r, unsigned int depth)
 {
@@ -156,9 +174,4 @@ glm::vec3 Integrator::ShadowTest(const glm::vec3 &point, Geometry* light) const
         return glm::vec3(0.f);
     }
 
-}
-
-void Integrator::SetDepth(unsigned int depth)
-{
-    max_depth = depth;
-}
+}*/

@@ -73,11 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->iwsSampler = a;
     a->setActionGroup(selectSampler);
 
-    a = new QAction("Scene-Defined", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->sceneSampler = a;
-    a->setActionGroup(selectSampler);
 
     samplerMenu->addSeparator();
 
@@ -205,10 +200,6 @@ void MainWindow::on_selectSampler_triggered(QAction * action)
     else if (action == this->iwsSampler)
     {
         choice = MyGL::SAMPLER_IWS;
-    }
-    else
-    {
-        choice = MyGL::SAMPLER_FROM_SCENE_FILE;
     }
 
     ui->mygl->setSampler(choice);

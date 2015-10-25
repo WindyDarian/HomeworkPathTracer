@@ -4,7 +4,7 @@
 
 RandomPixelSampler::RandomPixelSampler():RandomPixelSampler(1){}
 
-RandomPixelSampler::RandomPixelSampler(int samples) : PixelSampler(samples), mersenne_generator(), unif_distribution(0,1){}
+RandomPixelSampler::RandomPixelSampler(unsigned int samples, unsigned int seed) : PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1){}
 
 QList<glm::vec2> RandomPixelSampler::GetSamples(int x, int y)
 {

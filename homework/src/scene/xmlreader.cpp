@@ -53,15 +53,9 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
                 {
                     integrator = LoadIntegrator(xml_reader);
                 }
-                else if(QString::compare(tag, QString("pixelSampler"), Qt::CaseInsensitive) == 0)
+                else if(QString::compare(tag, QString("pixelSampleLength"), Qt::CaseInsensitive) == 0)
                 {
-                    PixelSampler* sampler = LoadPixelSampler(xml_reader);
-                    if(sampler == NULL)
-                    {
-                        std::cout << "Did not properly load a pixel sampler!" << std::endl;
-                        return;
-                    }
-                    scene.pixel_sampler.reset(sampler);
+                    scene.sqrt_samples = LoadPixelSamples(xml_reader);
                 }
             }
         }
@@ -72,6 +66,15 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
             for(int j = 0; j < l.size(); j++)
             {
                 l[j]->SetMaterial(scene.materials[i]);
+            }
+        }
+
+        for(int i = 0; i < scene.bxdfs.size(); i++)
+        {
+            QList<Material*> l = bxdf_to_material_map.value(scene.bxdfs[i]->name);
+            for(int j = 0; j < l.size(); j++)
+            {
+                l[j]->bxdfs.append(scene.bxdfs[i]);
             }
         }
 
@@ -87,6 +90,7 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
             {
                 to_lights.append(g);
             }
+            g->ComputeArea();
         }
         for(Geometry *g : to_lights)
         {
@@ -120,6 +124,10 @@ Geometry* XMLReader::LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QL
     else if(QStringRef::compare(type, QString("cube")) == 0)
     {
         result = new Cube();
+    }
+    else if(QStringRef::compare(type, QString("disc")) == 0)
+    {
+      result = new Disc();
     }
     else
     {
@@ -174,111 +182,69 @@ Geometry* XMLReader::LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QL
 
 Material* XMLReader::LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef &local_path)
 {
-    Material* result;
-    //First check what type of material we're supposed to load
-    QXmlStreamAttributes attribs(xml_reader.attributes());
-    QStringRef type = attribs.value(QString(), QString("type"));
-    if(QStringRef::compare(type, QString("lambert")) == 0)
-    {
-        result = new LambertMaterial();
-    }
-    else if(QStringRef::compare(type, QString("phong")) == 0)
-    {
-        result = new PhongMaterial();
-        QStringRef spec_pow = attribs.value(QString(), QString("specularPower"));
-        if(QStringRef::compare(spec_pow, QString("")) != 0)
-        {
-            ((PhongMaterial*)result)->specular_power = spec_pow.toFloat();
-        }
-    }
-    else
-    {
-        std::cout << "Could not parse the material!" << std::endl;
-        return NULL;
-    }
+  Material* result;
+  //First check what type of material we're supposed to load
+  QXmlStreamAttributes attribs(xml_reader.attributes());
+  QStringRef type = attribs.value(QString(), QString("type"));
+  if(QStringRef::compare(type, QString("default")) == 0)
+  {
+      result = new Material();
+  }
+  else if(QStringRef::compare(type, QString("light")) == 0)
+  {
+      result = new LightMaterial();
+      result->is_light_source = true;
+      QStringRef intensity = attribs.value(QString(), QString("intensity"));
+      if(QStringRef::compare(intensity, QString("")) != 0)
+      {
+          result->intensity = intensity.toFloat();
+      }
+  }
+  else
+  {
+      std::cout << "Could not parse the material!" << std::endl;
+      return NULL;
+  }
 
-    result->name = attribs.value(QString(), QString("name")).toString();
+  result->name = attribs.value(QString(), QString("name")).toString();
 
-    while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("material")) != 0)
-    {
-        xml_reader.readNext();
-        QString tag(xml_reader.name().toString());
-        if(QString::compare(tag, QString("baseColor")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                result->base_color = ToVec3(xml_reader.text());
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("reflectivity")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                result->reflectivity = xml_reader.text().toFloat();
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("iorIn")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                result->refract_idx_in = xml_reader.text().toFloat();
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("iorOut")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                result->refract_idx_out = xml_reader.text().toFloat();
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("emissive")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                if(QStringRef::compare(xml_reader.text(), QString("false"), Qt::CaseInsensitive) == 0)
-                {
-                    result->emissive = false;
-                }
-                else if(QStringRef::compare(xml_reader.text(), QString("true"), Qt::CaseInsensitive) == 0)
-                {
-                    result->emissive = true;
-                }
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("texture")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                QString img_filepath = local_path.toString().append(xml_reader.text().toString());
-                QImage* texture = new QImage(img_filepath);
-                result->texture = texture;
-            }
-            xml_reader.readNext();
-        }
-        else if(QString::compare(tag, QString("normalMap")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                QString img_filepath = local_path.toString().append(xml_reader.text().toString());
-                QImage* texture = new QImage(img_filepath);
-                result->normal_map = texture;
-            }
-            xml_reader.readNext();
-        }
-    }
-    return result;
+  while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("material")) != 0)
+  {
+      xml_reader.readNext();
+      QString tag(xml_reader.name().toString());
+      if(QString::compare(tag, QString("baseColor")) == 0)
+      {
+          xml_reader.readNext();
+          if(xml_reader.isCharacters())
+          {
+              result->base_color = ToVec3(xml_reader.text());
+          }
+          xml_reader.readNext();
+      }
+      else if(QString::compare(tag, QString("bxdf")) == 0)
+      {
+          //Add the Material to the map of BxDF names to Materials so that we can assign it a BxDF later
+          xml_reader.readNext();
+          if(xml_reader.isCharacters())
+          {
+              QString bxdf_name = xml_reader.text().toString();
+              QList<Material*> list = map.value(bxdf_name);
+              list.append(result);
+              map.insert(bxdf_name, list);
+              xml_reader.readNext();
+
+          }
+      }
+      else if(QString::compare(tag, QString("texture")) == 0)
+      {
+          result->texture = LoadTextureFile(xml_reader, local_path);
+      }
+      else if(QString::compare(tag, QString("normalMap")) == 0)
+      {
+          result->normal_map = LoadTextureFile(xml_reader, local_path);
+      }
+  }
+  return result;
 }
 
 Camera XMLReader::LoadCamera(QXmlStreamReader &xml_reader)
@@ -436,49 +402,56 @@ Integrator XMLReader::LoadIntegrator(QXmlStreamReader &xml_reader)
     return result;
 }
 
-PixelSampler* XMLReader::LoadPixelSampler(QXmlStreamReader &xml_reader)
+unsigned int XMLReader::LoadPixelSamples(QXmlStreamReader &xml_reader)
 {
-    PixelSampler* result;
-    //First check what type of pixel sampler we're supposed to load
+    while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("pixelSampleLength")) != 0)
+    {
+        xml_reader.readNext();
+        if(xml_reader.isCharacters())
+        {
+            return xml_reader.text().toInt();
+        }
+        xml_reader.readNext();
+    }
+}
+
+
+QImage* XMLReader::LoadTextureFile(QXmlStreamReader &xml_reader, const QStringRef &local_path)
+{
+    xml_reader.readNext();
+    QImage* texture = NULL;
+    if(xml_reader.isCharacters())
+    {
+        QString img_filepath = local_path.toString().append(xml_reader.text().toString());
+        texture = new QImage(img_filepath);
+    }
+    xml_reader.readNext();
+    return texture;
+}
+
+
+BxDF* XMLReader::LoadBxDF(QXmlStreamReader &xml_reader)
+{
+    BxDF* result = NULL;
+    //First check what type of material we're supposed to load
     QXmlStreamAttributes attribs(xml_reader.attributes());
     QStringRef type = attribs.value(QString(), QString("type"));
-    if(QStringRef::compare(type, QString("uniform")) == 0)
+    if(QStringRef::compare(type, QString("lambert")) == 0)
     {
-        result = new UniformPixelSampler();
-    }
-    else if(QStringRef::compare(type, QString("stratified")) == 0)
-    {
-        result = new StratifiedPixelSampler();
-    }
-    else if(QStringRef::compare(type, QString("random")) == 0)
-    {
-        result = new RandomPixelSampler();
-    }
-    else if(QStringRef::compare(type, QString("iws")) == 0)
-    {
-        result = new ImageWideStratifiedSampler();
+        glm::vec3 diffuseColor(0.5f);
+        QStringRef color = attribs.value(QString(), QString("diffuseColor"));
+        if(QStringRef::compare(color, QString("")) != 0)
+        {
+            diffuseColor = ToVec3(color);
+        }
+        result = new LambertBxDF(diffuseColor);
     }
     else
     {
-        std::cout << "Could not parse the pixel sampler!" << std::endl;
+        std::cout << "Could not parse the BxDF!" << std::endl;
         return NULL;
     }
-
-    while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("pixelSampler")) != 0)
-    {
-        xml_reader.readNext();
-
-        QString tag(xml_reader.name().toString());
-        if(QString::compare(tag, QString("samples")) == 0)
-        {
-            xml_reader.readNext();
-            if(xml_reader.isCharacters())
-            {
-                result->SetSampleCount(xml_reader.text().toInt());
-            }
-            xml_reader.readNext();
-        }
-    }
+    result->name = attribs.value(QString(), QString("name")).toString();
     return result;
 }
 

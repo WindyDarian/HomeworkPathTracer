@@ -19,7 +19,8 @@ public:
 
     glm::vec3 point;      //The place at which the intersection occurred
     glm::vec3 normal;     //The surface normal at the point of intersection
-    float t;              //The parameterization for the ray (in world space) that generated this intersection.
+    glm::vec3 tangent;    //The surface tangent at the POI
+    glm::vec3 bitangent;  //The surface bitangent at the POI    float t;              //The parameterization for the ray (in world space) that generated this intersection.
                           //t is equal to the distance from the point of intersection to the ray's origin if the ray's direction is normalized.
     glm::vec3 color;
     Geometry* object_hit; //The object that the ray intersected, or nullptr if the ray hit nothing.
@@ -32,11 +33,6 @@ public:
     IntersectionEngine();
     Scene *scene;
 
-    //std::unique_ptr<BVHNode> bvh = nullptr;
-    // my bvh is in Scene class
-    // because it is associated to a specific scene
-    // not the intersection engine
-    // and I feel it is better in this way.
-
     Intersection GetIntersection(Ray r);
+    QList<Intersection> GetAllIntersections(Ray r);
 };

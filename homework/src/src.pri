@@ -27,13 +27,17 @@ SOURCES += \
     $$PWD/cameracontrolshelp.cpp \
     $$PWD/raytracing/samplers/stratifiedpixelsampler.cpp \
     $$PWD/raytracing/samplers/uniformpixelsampler.cpp \
-    $$PWD/scene/materials/phongmaterial.cpp \
-    $$PWD/scene/materials/lambertmaterial.cpp \
+    $$PWD/scene/geometry/disc.cpp \
+    $$PWD/scene/materials/bxdfs/lambertBxDF.cpp \
+    $$PWD/scene/materials/bxdfs/bxdf.cpp \
+    $$PWD/scene/materials/lightmaterial.cpp \
     $$PWD/raytracing/boundingbox.cpp \
     $$PWD/scene/geometry/boundingboxframe.cpp \
     $$PWD/raytracing/samplers/randompixelsampler.cpp \
     $$PWD/raytracing/samplers/imagewidestratifiedsampler.cpp \
-    $$PWD/raytracing/bvhnode.cpp
+    $$PWD/raytracing/bvhnode.cpp \
+    $$PWD/renderthread.cpp \
+    $$PWD/scene/geometry/geometry.cpp
 
 HEADERS += \
     $$PWD/mainwindow.h \
@@ -54,6 +58,7 @@ HEADERS += \
     $$PWD/openGL/glwidget277.h \
     $$PWD/openGL/shaderprogram.h \
     $$PWD/raytracing/intersection.h \
+    $$PWD/renderthread.h \
     $$PWD/raytracing/ray.h \
     $$PWD/scene/transform.h \
     $$PWD/scene/geometry/square.h \
@@ -66,8 +71,10 @@ HEADERS += \
     $$PWD/raytracing/samplers/pixelsampler.h \
     $$PWD/raytracing/samplers/stratifiedpixelsampler.h \
     $$PWD/raytracing/samplers/uniformpixelsampler.h \
-    $$PWD/scene/materials/lambertmaterial.h \
-    $$PWD/scene/materials/phongmaterial.h \
+    $$PWD/scene/geometry/disc.h \
+    $$PWD/scene/materials/bxdfs/lambertBxDF.h \
+    $$PWD/scene/materials/bxdfs/bxdf.h \
+    $$PWD/scene/materials/lightmaterial.h \
     $$PWD/raytracing/boundingbox.h \
     $$PWD/scene/geometry/boundingboxframe.h \
     $$PWD/raytracing/samplers/randompixelsampler.h \

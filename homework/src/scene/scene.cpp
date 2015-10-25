@@ -12,7 +12,6 @@
 
 Scene::Scene()
 {
-    pixel_sampler.reset(new UniformPixelSampler());
 }
 
 void Scene::SetCamera(const Camera &c)
@@ -24,32 +23,29 @@ void Scene::SetCamera(const Camera &c)
 
 void Scene::CreateTestScene()
 {
-    Material* lambert1 = new LambertMaterial(glm::vec3(1, 0, 0));
-    Material* lambert2 = new LambertMaterial(glm::vec3(0, 1, 0));
+  Material* diffuse1 = new Material(glm::vec3(1, 0, 0));
+  Material* diffuse2 = new Material(glm::vec3(0, 1, 0));
+  BxDF* lambertbxdf = new LambertBxDF(glm::vec3(1,1,1));
+  diffuse1->bxdfs.append(lambertbxdf);
+  diffuse2->bxdfs.append(lambertbxdf);
 
-    Cube* c = new Cube();
-    c->material = lambert1;
-    c->transform = Transform(glm::vec3(1,0,0), glm::vec3(0,0,45), glm::vec3(1,1,1));
-    c->create();
-    this->objects.append(c);
-    auto b = new BoundingBoxFrame(c->getBoundingBox());
-    b->create();
-    this->boundingbox_objects.append(b);
+  Cube* c = new Cube();
+  c->material = diffuse1;
+  c->transform = Transform(glm::vec3(1,0,0), glm::vec3(0,0,45), glm::vec3(1,1,1));
+  c->create();
+  this->objects.append(c);
 
-    Sphere* s = new Sphere();
-    s->material = lambert2;
-    s->transform = Transform(glm::vec3(-1,1,0), glm::vec3(0,0,0), glm::vec3(1,2,1));
-    s->create();
-    this->objects.append(s);
-    b = new BoundingBoxFrame(s->getBoundingBox());
-    b->create();
-    this->boundingbox_objects.append(b);
+  Sphere* s = new Sphere();
+  s->material = diffuse2;
+  s->transform = Transform(glm::vec3(-1,1,0), glm::vec3(0,0,0), glm::vec3(1,2,1));
+  s->create();
+  this->objects.append(s);
 
-    camera = Camera(400, 400);
-    camera.near_clip = 0.1f;
-    camera.far_clip = 100.0f;
-    camera.create();
-    film = Film(400, 400);
+  camera = Camera(400, 400);
+  camera.near_clip = 0.1f;
+  camera.far_clip = 100.0f;
+  camera.create();
+  film = Film(400, 400);
 
     this->recomputeBVH();
 
@@ -68,9 +64,14 @@ void Scene::Clear()
         delete m;
     }
     materials.clear();
+    for(BxDF* b : bxdfs)
+    {
+        delete b;
+    }
+    bxdfs.clear();
     camera = Camera();
     film = Film();
-    pixel_sampler.reset(new UniformPixelSampler());
+    
     this->bvh.reset();
     for(auto b : this->boundingbox_objects)
     {

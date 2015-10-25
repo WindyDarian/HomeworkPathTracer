@@ -7,7 +7,7 @@
 #include <QXmlStreamReader>
 #include <QFileDialog>
 #include <QElapsedTimer>
-#include <tbb/tbb.h>
+#include <renderthread.h>
 #include <scene/geometry/mesh.h>
 
 
@@ -160,7 +160,7 @@ void MyGL::GLDrawScene()
                 prog_flat.setModelMatrix(glm::mat4(1.0f));
                 prog_flat.draw(*this, *b);
 
-        }        
+        }
     }
     if (this->kdtree_bbox_visible)
     {
@@ -179,16 +179,6 @@ void MyGL::ResizeToSceneCamera()
 {
     this->setFixedWidth(scene.camera.width);
     this->setFixedHeight(scene.camera.height);
-//    if(scene.camera.aspect <= 618/432)
-//    {
-//        this->setFixedWidth(432 / scene.camera.aspect);
-//        this->setFixedHeight(432);
-//    }
-//    else
-//    {
-//        this->setFixedWidth(618);
-//        this->setFixedHeight(618 * scene.camera.aspect);
-//    }
     gl_camera = Camera(scene.camera);
 }
 
@@ -380,6 +370,97 @@ void MyGL::RaytraceScene()
 
     scene.film.WriteImage(filepath);
 }
+
+/*
+void MyGL::RaytraceScene()
+{
+    QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
+    if(filepath.length() == 0)
+    {
+        return;
+    }
+
+#define MULTITHREADED
+#ifdef MULTITHREADED
+    //Set up 16 (max) threads
+    unsigned int width = scene.camera.width;
+    unsigned int height = scene.camera.height;
+    unsigned int x_block_size = (width >= 4 ? width/4 : 1);
+    unsigned int y_block_size = (height >= 4 ? height/4 : 1);
+    unsigned int x_block_count = width > 4 ? width/x_block_size : 1;
+    unsigned int y_block_count = height > 4 ? height/y_block_size : 1;
+    if(x_block_count * x_block_size < width) x_block_count++;
+    if(y_block_count * y_block_size < height) y_block_count++;
+
+    unsigned int num_render_threads = x_block_count * y_block_count;
+    RenderThread **render_threads = new RenderThread*[num_render_threads];
+
+    //Launch the render threads we've made
+    for(unsigned int Y = 0; Y < y_block_count; Y++)
+    {
+        //Compute the columns of the image that the thread should render
+        unsigned int y_start = Y * y_block_size;
+        unsigned int y_end = glm::min((Y + 1) * y_block_size, height);
+        for(unsigned int X = 0; X < x_block_count; X++)
+        {
+            //Compute the rows of the image that the thread should render
+            unsigned int x_start = X * x_block_size;
+            unsigned int x_end = glm::min((X + 1) * x_block_size, width);
+            //Create and run the thread
+            render_threads[Y * x_block_count + X] = new RenderThread(x_start, x_end, y_start, y_end, 1, 5, &(scene.film), &(scene.camera), &(integrator));
+            render_threads[Y * x_block_count + X]->start();
+        }
+    }
+
+    bool still_running;
+    do
+    {
+        still_running = false;
+        for(unsigned int i = 0; i < num_render_threads; i++)
+        {
+            if(render_threads[i]->isRunning())
+            {
+                still_running = true;
+                break;
+            }
+        }
+        if(still_running)
+        {
+            //Free the CPU to let the remaining render threads use it
+            QThread::yieldCurrentThread();
+        }
+    }
+    while(still_running);
+
+    //Finally, clean up the render thread objects
+    for(unsigned int i = 0; i < num_render_threads; i++)
+    {
+        delete render_threads[i];
+    }
+    delete [] render_threads;
+
+#else
+    StratifiedPixelSampler pixel_sampler(scene.sqrt_samples);
+    for(unsigned int i = 0; i < scene.camera.width; i++)
+    {
+        for(unsigned int j = 0; j < scene.camera.height; j++)
+        {
+            QList<glm::vec2> sample_points = pixel_sampler->GetSamples(i, j);
+            glm::vec3 accum_color;
+            for(int a = 0; a < sample_points.size(); a++)
+            {
+                glm::vec3 color = integrator.TraceRay(scene.camera.Raycast(sample_points[a]), 0);
+                accum_color += color;
+            }
+            scene.film.pixels[i][j] = accum_color / (float)sample_points.size();
+        }
+    }
+#endif
+    scene.film.WriteImage(filepath);
+}
+
+
+*/
 
 void MyGL::setTriangleBBoxVisible(bool value)
 {

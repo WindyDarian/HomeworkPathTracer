@@ -1,0 +1,100 @@
+<HTML>
+	<head>
+		<title>
+			CIS 560 Assignment 4 - Direct Lighting Estimator
+		</title>
+	</head>
+	<body>
+		<h1 align = "center">
+			Direct Lighting Estimator
+		</h1>
+		<h2 align = "center">
+			CIS 560 Homework 4
+		</h2>
+		<h2 align = "center">
+			Due: Wednesday, October 28, 2015 at 11:59 PM
+		</h2>
+
+		<br/>
+
+		<h3>
+			1  Goal
+		</h3>
+		<p>
+			To transition into writing a Monte Carlo path tracer. We'll begin by writing a Monte Carlo estimator for the direct lighting of surfaces, which is very similar in appearance to a basic ray tracer with soft shadows.
+		</p>
+
+		<h3>
+			2  Supplied Code
+		</h3>
+		<p>
+			A new basecode utilizing Qt's multithreading classes rather than TBB. We'll provide implementations of the Camera class, all Geometry classes, and a basic IntersectionEngine class. Any additional functionality you want you'll have to implement yourself. Throughout the code you'll find comments that say "TODO"; the sections below outline how to fill these areas in. Note that as long as you implement the functionality necessary to estimate the direct lighting at a point, you may modify the provided functions as you wish. They are merely suggestions as to how you may structure your code for a modular path tracer, but if you want to write your program differently then you may.
+		</p>
+
+		<h3>
+			3  Requirements
+		</h3>
+		<h4>
+			3.1  New TraceRay (30 points)
+		</h4>
+		<p>
+			Begin by writing a subclass of Integrator called DirectLightingIntegrator. This class should implement TraceRay such that it finds the intersection of the given ray with the scene and then computes the direct lighting at that point of intersection. Among other things, this involves choosing a light source to sample and estimating the light that the intersection point recseives directly. You'll have to sample a random point on the light's surface to do this correctly. Your implementation will <b>not</b> use multiple importance sampling for this assignment.
+		<h4>
+			3.2  Material Class (10 points)
+		</h4>
+		<p>
+			For the Material class, implement the <i>EvaluateScatteredEnergy</i> function. You may leave the others unimplemented for now; they will be used in the next assignment. For now, these should just choose a random BxDF from the Material's list of BxDFs and return that BxDF's computation of EvaluateScatteredEnergy. The main reason for a Material to have these functions is so that later on it can combine several BxDFs to produce a color (e.g. a refractive BxDf and a reflective BxDF to simulate a glass material). 
+		</p>
+		<h4>
+			3.3  Lambert BxDF (5 points)
+		</h4>
+		<p>
+			Each instance of Material contains a list of BxDFs. A BxDF is a class that implements solutions to different BRDFs. Why the name BxDF? The "x" can stand for different words; for example, you could have a BTDF (bidirectional transmission distribution function) for a transparent material, or a BRDF (bidirectional reflectance distribution function) for an opaque material. In any case, implement the LambertBxDF's EvaluateScatteredEnergy function. The remaining BxDF functions will be implemented in the next assignment.
+		</p>
+		<h4>
+			3.4  Computing Solid Angle PDF (15 points)
+		</h4>
+		<p>
+			For the Geometry class, implement a function that evaluates the PDF of the geometry given a ray towards the geometry and the intersection from which that ray originates. This function may be generalized for the Geometry superclass, but it will rely on the computed area of the geometry, which is dependent on the type of geometry calling this function.
+		</p>
+		<h4>
+			3.5  Disc and SquarePlane Area (10 points)
+		</h4>
+		<p>
+			Implement the ComputeArea function for the Disc and SquarePlane classes. These two shapes are the only shapes we'll expect you to support as light sources; the rest will be extra credit. The area of the light source is necessary to compute the solid angle subtended by the shape.
+		</p>
+		<h4>
+			3.5  Sampling a point on a light's surface (15 points)
+		</h4>
+		<p>
+			For the Disc and SquarePlane classes, implement a function that takes in two random uniform variables (i.e. between 0 and 1) and returns an intersection on the surface of the shape. This will be used when sampling a random point on the surface of the geometry when it is a light source.
+		</p>
+		<h4>
+			3.7  GetIntersection: Storing the tangent and bitangent (15 points)
+		</h4>
+		<p>
+			For each Geometry subclass's GetIntersection method, have the returned Intersection return the tangent and bitangent (in world space) at the point of intersection. This will be used to convert rays from world to "local normal" space when plugging them into the EvaluateScatteredEnergy and PDF functions.
+		</p>
+		<h3>
+			4  Extra Credit (max 50 points)
+		</h3>
+		<h4>
+			4.1  Additional geometries as lights (max 30 points)
+		</h4>
+		<p>
+			For the remaining geometry functions, implement the ComputeArea function and the function to sample a random point on the light's surface. Note that for 3D shapes, the randomly sampled point should be on the near side of the shape relative to the input ray.
+		</p>
+		<h4>
+			4.2  Interesting features (max 30 points)
+		</h4>
+		<p>
+			Think of your own additions to this assignment and implement them! This may be something like another BxDF type, or a new form of geometry.
+		</p>
+		<h3>
+			5  Submission
+		</h3>
+		<p>
+			Submit your cleaned and zipped project on Canvas. Include your test scene renders in your submission. Also include a README to document your extra features!
+		</p>
+	</body>
+</HTML>

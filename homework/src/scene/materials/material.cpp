@@ -22,8 +22,23 @@ Material::Material(const glm::vec3 &color):
 
 glm::vec3 Material::EvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, const glm::vec3 &wiW, BxDFType flags) const
 {
-    //TODO
-    return glm::vec3(0);
+    glm::vec3 result(0.f);
+
+    for (auto bxdf: this->bxdfs)
+    {
+        // check if type match
+        if (!(bxdf->type & flags))
+            continue;
+
+        glm::mat3 trans = glm::transpose(glm::mat3(isx.tangent, isx.bitangent, isx.normal));
+        glm::vec3 wo = trans * woW;
+        glm::vec3 wi = trans * wiW;
+        result += bxdf->EvaluateScatteredEnergy(wo, wi);
+    }
+
+    result = result * isx.color;
+
+    return result;
 }
 
 glm::vec3 Material::SampleAndEvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, glm::vec3 &wiW_ret, float &pdf_ret, BxDFType flags) const

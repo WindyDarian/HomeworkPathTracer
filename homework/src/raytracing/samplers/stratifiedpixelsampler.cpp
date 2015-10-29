@@ -1,10 +1,16 @@
 #include <raytracing/samplers/stratifiedpixelsampler.h>
 #include <iostream>
 #include <functional>
+#include <ctime>
 
-StratifiedPixelSampler::StratifiedPixelSampler():StratifiedPixelSampler(1){}
+StratifiedPixelSampler::StratifiedPixelSampler():StratifiedPixelSampler(1, std::time(nullptr)){}
 
-StratifiedPixelSampler::StratifiedPixelSampler(unsigned int samples, unsigned int seed) : PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1){}
+StratifiedPixelSampler::StratifiedPixelSampler(unsigned int samples):StratifiedPixelSampler(samples, std::time(nullptr)){}
+
+StratifiedPixelSampler::StratifiedPixelSampler(unsigned int samples, unsigned int seed) : PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1)
+{
+
+}
 
 
 QList<glm::vec2> StratifiedPixelSampler::GetSamples(int x, int y)

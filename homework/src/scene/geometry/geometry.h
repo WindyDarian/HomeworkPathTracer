@@ -22,7 +22,10 @@ public:
         material = NULL;
     }
 
+
+
     virtual ~Geometry(){}
+    virtual Intersection pickSampleIntersection(float random1, float random2);
     virtual Intersection GetIntersection(const Ray& r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 
@@ -70,5 +73,9 @@ protected:
 
     bool centroid_valid = false;
     glm::vec3 centroid;
+
+    float area=0;
+
+    glm::vec3 computeLocalTangent(const glm::vec3& p0, const glm::vec3 &p1, const glm::vec3 &p2);
 
 };

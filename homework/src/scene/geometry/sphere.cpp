@@ -7,6 +7,15 @@
 static const int SPH_IDX_COUNT = 2280;  // 760 tris * 3
 static const int SPH_VERT_COUNT = 382;
 
+void Sphere::ComputeArea()
+{
+    //Extra credit to implement this
+    area = 0;
+}
+
+glm::vec3 Sphere::ComputeNormal(const glm::vec3 &P)
+{}
+
 Intersection Sphere::GetIntersection(const Ray& r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
@@ -34,6 +43,12 @@ Intersection Sphere::GetIntersection(const Ray& r)
 
     glm::vec3 ipoint(r_obj.origin + t * r_obj.direction);
     glm::vec3 inormal(glm::normalize(ipoint - center));
+    glm::vec3 itangent = glm::cross(glm::vec3(0,1,0), inormal);
+    if (fequal(glm::length2(itangent), 0.f))
+    {
+        itangent = glm::vec3(0,0,1);
+    }
+
 
     glm::vec3 ipoint_world(this->transform.T() * glm::vec4(ipoint, 1.f));
 
@@ -42,12 +57,14 @@ Intersection Sphere::GetIntersection(const Ray& r)
     glm::vec3 normal_world( normal4_world );
     normal_world = glm::normalize(normal_world);
 
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_world, 0.f)));
+    //bitangent computed in Intersection constructor
+
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
     glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
-
-    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
+    return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 
 }
 
@@ -187,6 +204,8 @@ glm::vec2 Sphere::GetUVCoordinates(const glm::vec3 &point)
 
    return uv;
 }
+
+
 
 BoundingBox Sphere::calculateBoundingBox()
 {

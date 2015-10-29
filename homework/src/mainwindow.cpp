@@ -42,67 +42,72 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    samplerMenu = new QMenu("Anti-Aliasing");
-    this->menuBar()->addMenu(samplerMenu);
-    QAction * a;
+//    samplerMenu = new QMenu("Anti-Aliasing");
+//    this->menuBar()->addMenu(samplerMenu);
+//    QAction * a;
 
-    selectSampler = new QActionGroup( this );
+//    selectSampler = new QActionGroup( this );
 
-    a = new QAction("Uniform", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->uniformSampler = a;
-    a->setActionGroup(selectSampler);
-    a->setChecked(true);
+//    a = new QAction("Uniform", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->uniformSampler = a;
+//    a->setActionGroup(selectSampler);
+//    a->setChecked(true);
 
-    a = new QAction("Random", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->randomSampler = a;
-    a->setActionGroup(selectSampler);
+//    a = new QAction("Random", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->randomSampler = a;
+//    a->setActionGroup(selectSampler);
 
-    a = new QAction("Stratified", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->stratifiedSampler = a;
-    a->setActionGroup(selectSampler);
+//    a = new QAction("Stratified", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->stratifiedSampler = a;
+//    a->setActionGroup(selectSampler);
 
-    a = new QAction("Image-Wide Stratified", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->iwsSampler = a;
-    a->setActionGroup(selectSampler);
+//    a = new QAction("Image-Wide Stratified", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->iwsSampler = a;
+//    a->setActionGroup(selectSampler);
 
 
-    samplerMenu->addSeparator();
+//    samplerMenu->addSeparator();
 
-    selectAALevel = new QActionGroup( this );
+//    selectAALevel = new QActionGroup( this );
 
-    a = new QAction("1 x 1", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->aalevelOne = a;
-    a->setActionGroup(selectAALevel);
+//    a = new QAction("1 x 1", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->aalevelOne = a;
+//    a->setActionGroup(selectAALevel);
 
-    a = new QAction("2 x 2", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->aalevelTwo = a;
-    a->setActionGroup(selectAALevel);
-    a->setChecked(true);
+//    a = new QAction("2 x 2", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->aalevelTwo = a;
+//    a->setActionGroup(selectAALevel);
+//    a->setChecked(true);
 
-    a = new QAction("4 x 4", viewMenu);
-    a->setCheckable(true);
-    samplerMenu->addAction(a);
-    this->aalevelFour = a;
-    a->setActionGroup(selectAALevel);
+//    a = new QAction("4 x 4", viewMenu);
+//    a->setCheckable(true);
+//    samplerMenu->addAction(a);
+//    this->aalevelFour = a;
+//    a->setActionGroup(selectAALevel);
+
+//    connect(selectSampler, SIGNAL(triggered(QAction*)),
+//                     this, SLOT(on_selectSampler_triggered(QAction*)));
+//    connect(selectAALevel, SIGNAL(triggered(QAction*)),
+//                     this, SLOT(on_selectAALevel_triggered(QAction*)));
 
 
     bvhMenu = new QMenu("BVH Settings");
     this->menuBar()->addMenu(bvhMenu);
 
     selectBVH = new QActionGroup( this );
-
+    QAction * a;
     a = new QAction("No BVH", viewMenu);
     a->setCheckable(true);
     bvhMenu->addAction(a);
@@ -123,10 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     a->setChecked(true);
 
 
-    connect(selectSampler, SIGNAL(triggered(QAction*)),
-                     this, SLOT(on_selectSampler_triggered(QAction*)));
-    connect(selectAALevel, SIGNAL(triggered(QAction*)),
-                     this, SLOT(on_selectAALevel_triggered(QAction*)));
+
     connect(selectBVH, SIGNAL(triggered(QAction*)),
                      this, SLOT(on_selectBVH_triggered(QAction*)));
 
@@ -134,9 +136,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete bvhMenu;
-    delete samplerMenu;
-    delete viewMenu;
+    if(bvhMenu) delete bvhMenu;
+    if(samplerMenu) delete samplerMenu;
+    if(viewMenu) delete viewMenu;
     delete ui;
 }
 

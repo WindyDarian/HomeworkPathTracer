@@ -1,5 +1,18 @@
 #include <scene/geometry/square.h>
 
+void SquarePlane::ComputeArea()
+{
+    float area_local = 1.f;
+    auto scale = transform.getScale();
+    area = area_local * scale.x * scale.y;
+}
+
+glm::vec3 SquarePlane::ComputeNormal(const glm::vec3 &P)
+{
+        return glm::vec3(0,0,1);
+}
+
+
 Intersection SquarePlane::GetIntersection(const Ray& r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
@@ -32,7 +45,12 @@ Intersection SquarePlane::GetIntersection(const Ray& r)
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
     glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
-    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
+
+    glm::vec4 tangent_o(1,0,0,0);
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * tangent_o));
+    //bitangent computed in Intersection constructor
+
+    return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }
 
 void SquarePlane::create()
@@ -79,6 +97,21 @@ glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
 
     return uv;
 }
+
+Intersection SquarePlane::pickSampleIntersection(float random1, float random2)
+{
+    auto point_obj = glm::vec3(random1 - 0.5f, random2 - 0.5f, 0.f);
+    auto point = glm::vec3(this->transform.T() *
+                     glm::vec4(point_obj, 1.f));
+    auto normal = glm::vec3(this->transform.invTransT() *
+                            glm::vec4(0,0,1.f,0.f));
+    auto tangent = glm::vec3(this->transform.invTransT() *
+                            glm::vec4(1.f,0,0,0.f));
+    auto color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(point_obj), this->material->texture);
+
+    return Intersection(point, normal, tangent, 0.f, color, this);
+}
+
 
 BoundingBox SquarePlane::calculateBoundingBox()
 {

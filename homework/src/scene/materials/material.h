@@ -31,8 +31,6 @@ public:
     glm::vec3 Rho(const Intersection &isx, const glm::vec3 &wo, int num_samples, BxDFType flags = BSDF_ALL) const {return EvaluateHemisphereScatteredEnergy(isx, wo, num_samples, flags);}
 
 
-
-
     //Returns the RGB color stored in the input image as a vec3 with values ranging from 0 to 1.
     //Note that this is a STATIC function, so you don't need to call it from an instance of Material
     static glm::vec3 GetImageColor(const glm::vec2 &uv_coord, const QImage * const &image);

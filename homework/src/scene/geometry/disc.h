@@ -6,10 +6,15 @@
 class Disc : public Geometry
 {
 public:
-    Intersection GetIntersection(Ray r);
+    Intersection GetIntersection(const Ray& r);
     virtual glm::vec2 GetUVCoordinates(const glm::vec3 &point);
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     void create();
 
     virtual void ComputeArea();
+    virtual Intersection pickSampleIntersection(float random1, float random2);
+
+protected:
+    virtual BoundingBox calculateBoundingBox();
+
 };

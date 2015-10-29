@@ -6,6 +6,7 @@ class RandomPixelSampler:public PixelSampler
 {
 public:
     RandomPixelSampler();
+    RandomPixelSampler(unsigned int samples);
     RandomPixelSampler(unsigned int samples, unsigned int seed);
     virtual QList<glm::vec2> GetSamples(int x, int y);
     virtual void initialize(int width, int height) {}

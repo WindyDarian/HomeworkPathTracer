@@ -20,6 +20,8 @@
 #include <raytracing/samplers/stratifiedpixelsampler.h>
 #include <raytracing/samplers/imagewidestratifiedsampler.h>
 
+#include <memory>
+
 
 class MyGL
     : public GLWidget277

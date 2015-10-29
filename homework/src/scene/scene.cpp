@@ -7,6 +7,7 @@
 
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
+#include <scene/materials/bxdfs/lambertBxDF.h>
 
 Scene::Scene()
 {

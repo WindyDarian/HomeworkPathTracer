@@ -8,6 +8,11 @@ class SquarePlane : public Geometry
     Intersection GetIntersection(const Ray& r);
     void create();
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
+
+
+    virtual Intersection pickSampleIntersection(float random1, float random2);
+    virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
+    virtual void ComputeArea();
 protected:
     virtual BoundingBox calculateBoundingBox();
 };

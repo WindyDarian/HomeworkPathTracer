@@ -1,8 +1,11 @@
 #include "randompixelsampler.h"
 #include <iostream>
 #include <functional>
+#include <ctime>
 
-RandomPixelSampler::RandomPixelSampler():RandomPixelSampler(1){}
+RandomPixelSampler::RandomPixelSampler():RandomPixelSampler(1, std::time(nullptr)){}
+
+RandomPixelSampler::RandomPixelSampler(unsigned int samples):RandomPixelSampler(samples, std::time(nullptr)){}
 
 RandomPixelSampler::RandomPixelSampler(unsigned int samples, unsigned int seed) : PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1){}
 

@@ -23,6 +23,9 @@ public:
     void create();//This does nothing because individual triangles are not rendered with OpenGL;
                             //they are rendered all together in their Mesh.
 
+    virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
+    virtual void ComputeArea();
+
     glm::vec3 GetNormal(const glm::vec3 &position);//Returns the interpolation of the triangle's three normals
                                                     //based on the point inside the triangle that is given.
     glm::vec4 GetNormal(const glm::vec4 &position);
@@ -46,6 +49,9 @@ public:
     void LoadOBJ(const QStringRef &filename, const QStringRef &local_path);
     void recomputeBVH();
     void recomputeBVH(BVHNode::SplitMethod split_method);
+
+    virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
+    virtual void ComputeArea();
 
     void createVisibleBoundingBoxes();
     std::list<BoundingBoxFrame*> &getVisibleBoundingBoxesBVH();

@@ -4,14 +4,18 @@
 #include <scene/geometry/sphere.h>
 #include <scene/geometry/square.h>
 #include <scene/geometry/boundingboxframe.h>
+#include <scene/geometry/disc.h>
+#include <scene/materials/material.h>
+#include <scene/materials/lightmaterial.h>
+#include <scene/materials/bxdfs/bxdf.h>
+#include <scene/materials/bxdfs/lambertBxDF.h>
 #include <iostream>
-#include <scene/materials/lambertmaterial.h>
-#include <scene/materials/phongmaterial.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
 #include <raytracing/samplers/randompixelsampler.h>
 #include <raytracing/samplers/imagewidestratifiedsampler.h>
 #include <QImage>
+
 
 void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Scene &scene, Integrator &integrator)
 {
@@ -20,6 +24,7 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
         QXmlStreamReader xml_reader;
         xml_reader.setDevice(&file);
         QMap<QString, QList<Geometry*>> material_to_geometry_map;
+        QMap<QString, QList<Material*>> bxdf_to_material_map;//Key is the bxdf's name
         while(!xml_reader.isEndDocument())
         {
             xml_reader.readNext();
@@ -42,12 +47,21 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
                 }
                 else if(QString::compare(tag, QString("material")) == 0)
                 {
-                    Material* material = LoadMaterial(xml_reader, local_path);
+                    Material* material = LoadMaterial(xml_reader, local_path, bxdf_to_material_map);
                     if(material == NULL)
                     {
                         return;
                     }
                     scene.materials.append(material);
+                }
+                else if(QString::compare(tag, QString("bxdf")) == 0)
+                {
+                    BxDF* bxdf = LoadBxDF(xml_reader);
+                    if(bxdf == NULL)
+                    {
+                        return;
+                    }
+                    scene.bxdfs.append(bxdf);
                 }
                 else if(QString::compare(tag, QString("integrator")) == 0)
                 {
@@ -86,7 +100,7 @@ void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Sce
             auto b = new BoundingBoxFrame(g->getBoundingBox());
             b->create();
             scene.boundingbox_objects.append(b);
-            if(g->material->emissive)
+            if(g->material->is_light_source)
             {
                 to_lights.append(g);
             }
@@ -127,7 +141,7 @@ Geometry* XMLReader::LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QL
     }
     else if(QStringRef::compare(type, QString("disc")) == 0)
     {
-      result = new Disc();
+        result = new Disc();
     }
     else
     {
@@ -180,72 +194,73 @@ Geometry* XMLReader::LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QL
     return result;
 }
 
-Material* XMLReader::LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef &local_path)
+Material* XMLReader::LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef &local_path, QMap<QString, QList<Material *> > &map)
 {
-  Material* result;
-  //First check what type of material we're supposed to load
-  QXmlStreamAttributes attribs(xml_reader.attributes());
-  QStringRef type = attribs.value(QString(), QString("type"));
-  if(QStringRef::compare(type, QString("default")) == 0)
-  {
-      result = new Material();
-  }
-  else if(QStringRef::compare(type, QString("light")) == 0)
-  {
-      result = new LightMaterial();
-      result->is_light_source = true;
-      QStringRef intensity = attribs.value(QString(), QString("intensity"));
-      if(QStringRef::compare(intensity, QString("")) != 0)
-      {
-          result->intensity = intensity.toFloat();
-      }
-  }
-  else
-  {
-      std::cout << "Could not parse the material!" << std::endl;
-      return NULL;
-  }
+    Material* result;
+    //First check what type of material we're supposed to load
+    QXmlStreamAttributes attribs(xml_reader.attributes());
+    QStringRef type = attribs.value(QString(), QString("type"));
+    if(QStringRef::compare(type, QString("default")) == 0)
+    {
+        result = new Material();
+    }
+    else if(QStringRef::compare(type, QString("light")) == 0)
+    {
+        result = new LightMaterial();
+        result->is_light_source = true;
+        QStringRef intensity = attribs.value(QString(), QString("intensity"));
+        if(QStringRef::compare(intensity, QString("")) != 0)
+        {
+            result->intensity = intensity.toFloat();
+        }
+    }
+    else
+    {
+        std::cout << "Could not parse the material!" << std::endl;
+        return NULL;
+    }
 
-  result->name = attribs.value(QString(), QString("name")).toString();
+    result->name = attribs.value(QString(), QString("name")).toString();
 
-  while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("material")) != 0)
-  {
-      xml_reader.readNext();
-      QString tag(xml_reader.name().toString());
-      if(QString::compare(tag, QString("baseColor")) == 0)
-      {
-          xml_reader.readNext();
-          if(xml_reader.isCharacters())
-          {
-              result->base_color = ToVec3(xml_reader.text());
-          }
-          xml_reader.readNext();
-      }
-      else if(QString::compare(tag, QString("bxdf")) == 0)
-      {
-          //Add the Material to the map of BxDF names to Materials so that we can assign it a BxDF later
-          xml_reader.readNext();
-          if(xml_reader.isCharacters())
-          {
-              QString bxdf_name = xml_reader.text().toString();
-              QList<Material*> list = map.value(bxdf_name);
-              list.append(result);
-              map.insert(bxdf_name, list);
-              xml_reader.readNext();
+    while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("material")) != 0)
+    {
+        xml_reader.readNext();
+        QString tag(xml_reader.name().toString());
+        if(QString::compare(tag, QString("baseColor")) == 0)
+        {
+            xml_reader.readNext();
+            if(xml_reader.isCharacters())
+            {
+                result->base_color = ToVec3(xml_reader.text());
+            }
+            xml_reader.readNext();
+        }
+        else if(QString::compare(tag, QString("bxdf")) == 0)
+        {
+            //Add the Material to the map of BxDF names to Materials so that we can assign it a BxDF later
+            xml_reader.readNext();
+            if(xml_reader.isCharacters())
+            {
+                QString bxdf_name = xml_reader.text().toString();
+                QList<Material*> list = map.value(bxdf_name);
+                list.append(result);
+                map.insert(bxdf_name, list);
+                xml_reader.readNext();
 
-          }
-      }
-      else if(QString::compare(tag, QString("texture")) == 0)
-      {
-          result->texture = LoadTextureFile(xml_reader, local_path);
-      }
-      else if(QString::compare(tag, QString("normalMap")) == 0)
-      {
-          result->normal_map = LoadTextureFile(xml_reader, local_path);
-      }
-  }
-  return result;
+            }
+        }
+        else if(QString::compare(tag, QString("texture")) == 0)
+        {
+            result->texture = LoadTextureFile(xml_reader, local_path);
+        }
+        else if(QString::compare(tag, QString("normalMap")) == 0)
+        {
+            result->normal_map = LoadTextureFile(xml_reader, local_path);
+        }
+    }
+    return result;
 }
+
 
 Camera XMLReader::LoadCamera(QXmlStreamReader &xml_reader)
 {

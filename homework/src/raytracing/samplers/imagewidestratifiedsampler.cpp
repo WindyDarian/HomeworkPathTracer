@@ -1,6 +1,13 @@
 #include "imagewidestratifiedsampler.h"
+#include <ctime>
 
-ImageWideStratifiedSampler::ImageWideStratifiedSampler():ImageWideStratifiedSampler(1){}
+ImageWideStratifiedSampler::ImageWideStratifiedSampler():ImageWideStratifiedSampler(1, std::time(nullptr)){}
+
+ImageWideStratifiedSampler::ImageWideStratifiedSampler(unsigned int samples):
+ ImageWideStratifiedSampler(samples, std::time(nullptr))
+{}
+
+
 
 ImageWideStratifiedSampler::ImageWideStratifiedSampler(unsigned int samples, unsigned int seed) :
     PixelSampler(samples), mersenne_generator(seed), unif_distribution(0,1),

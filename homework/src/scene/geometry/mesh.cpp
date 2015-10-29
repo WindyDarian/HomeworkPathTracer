@@ -3,6 +3,19 @@
 #include <tinyobj/tiny_obj_loader.h>
 #include <iostream>
 
+
+void Triangle::ComputeArea()
+{
+    //Extra credit to implement this
+    area = 0;
+}
+
+void Mesh::ComputeArea()
+{
+    //Extra credit to implement this
+    area = 0;
+}
+
 Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3):
     Triangle(p1, p2, p3, glm::vec3(1), glm::vec3(1), glm::vec3(1), glm::vec2(0), glm::vec2(0), glm::vec2(0))
 {
@@ -113,9 +126,12 @@ Intersection Triangle::GetIntersection(const Ray &r)
         return Intersection();
     }
 
+    glm::vec3 inormal = this->GetNormal(ipoint);
+    glm::vec3 itangent = this->computeLocalTangent(this->points[0], this->points[1], this->points[2]);
 
     return Intersection(ipoint,
-                        this->GetNormal(ipoint),
+                        inormal,
+                        itangent,
                         t,
                         glm::vec3(1.f),
                         this);
@@ -157,11 +173,13 @@ Intersection Mesh::GetIntersection(const Ray &r)
     glm::vec3 normal_world( normal4_world );
     normal_world = glm::normalize(normal_world);
 
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(result.tangent, 0)));
+
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
     glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
 
-    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
+    return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }
 
 Mesh::~Mesh()
@@ -201,6 +219,11 @@ void Mesh::recomputeBVH(BVHNode::SplitMethod split_method)
         tris.push_back(tri);
     }
     this->bvh = std::unique_ptr<BVHNode>(BVHNode::build(tris, split_method));
+}
+
+glm::vec3 Mesh::ComputeNormal(const glm::vec3 &P)
+{
+
 }
 
 std::list<BoundingBoxFrame*> &Mesh::getVisibleBoundingBoxesBVH()
@@ -394,3 +417,7 @@ void Mesh::create(){
 
 //This does nothing because individual triangles are not rendered with OpenGL; they are rendered all together in their Mesh.
 void Triangle::create(){}
+
+glm::vec3 Triangle::ComputeNormal(const glm::vec3 &P)
+{
+}

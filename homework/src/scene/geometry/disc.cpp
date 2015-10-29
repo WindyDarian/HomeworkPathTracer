@@ -2,14 +2,42 @@
 
 void Disc::ComputeArea()
 {
-    //TODO
-    area = 0;
+    auto scale = transform.getScale();
+    area = PI * 0.25f * scale.x * scale.y;
 }
 
-Intersection Disc::GetIntersection(Ray r)
+Intersection Disc::pickSampleIntersection(float random1, float random2)
+{
+    // sqrt to make sample evenly distributed
+    float d = glm::sqrt(random1);
+    float angle = random2 * TWO_PI;
+
+    auto point_obj = glm::vec3(d * glm::cos(angle), d * glm::sin(angle), 0.f) * 0.5f;
+
+    auto point = glm::vec3(this->transform.T() *
+                     glm::vec4(point_obj, 1.f));
+    auto normal = glm::vec3(this->transform.invTransT() *
+                            glm::vec4(0,0,1.f,0.f));
+    auto tangent = glm::vec3(this->transform.invTransT() *
+                            glm::vec4(1.f,0,0,0.f));
+    auto color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(point_obj), this->material->texture);
+
+    return Intersection(point, normal, tangent, 0.f, color, this);
+
+}
+
+BoundingBox Disc::calculateBoundingBox()
+{
+    BoundingBox b(glm::vec3(-0.5f, -0.5f, 0.0f),
+                  glm::vec3(0.5f, 0.5f, 0.0f));
+    return b.getTransformedCopy(this->transform.T());
+
+}
+
+Intersection Disc::GetIntersection(const Ray &r)
 {
     //Transform the ray
-    Ray r_loc = r.GetTransformedCopy(transform.invT());
+    Ray r_loc = r.getTransformedCopy(transform.invT());
     Intersection result;
 
     //Ray-plane intersection
@@ -23,8 +51,11 @@ Intersection Disc::GetIntersection(Ray r)
         result.normal = glm::normalize(glm::vec3(transform.invTransT() * glm::vec4(ComputeNormal(glm::vec3(P)), 0)));
         result.object_hit = this;
         result.t = glm::distance(result.point, r.origin);
-        result.texture_color = Material::GetImageColorInterp(GetUVCoordinates(glm::vec3(P)), material->texture);
-        //TODO: Store the tangent and bitangent
+        result.color = Material::GetImageColorInterp(GetUVCoordinates(glm::vec3(P)), material->texture);
+
+        result.tangent = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(1,0,0,0)));
+        result.bitangent = glm::cross(result.normal, result.tangent);
+
         return result;
     }
     return result;

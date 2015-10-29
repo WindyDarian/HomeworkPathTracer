@@ -11,12 +11,14 @@ Intersection::Intersection():
     object_hit = nullptr;
 }
 
-Intersection::Intersection(glm::vec3 point, glm::vec3 normal, float t , glm::vec3 surface_color, Geometry* object_hit):
+Intersection::Intersection(glm::vec3 point, glm::vec3 normal, glm::vec3 tangent, float t , glm::vec3 surface_color, Geometry* object_hit):
     point(point),
     normal(normal),
     t(t),
     object_hit(object_hit),
-    color(surface_color)
+    color(surface_color),
+    tangent(tangent),
+    bitangent(glm::cross(normal, tangent))
 {}
 
 IntersectionEngine::IntersectionEngine()

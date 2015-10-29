@@ -6,6 +6,7 @@ class StratifiedPixelSampler : public PixelSampler
 {
 public:
     StratifiedPixelSampler();
+    StratifiedPixelSampler(unsigned int samples);
     StratifiedPixelSampler(unsigned int samples, unsigned int seed);
     virtual QList<glm::vec2> GetSamples(int x, int y);
     virtual void initialize(int width, int height) {}

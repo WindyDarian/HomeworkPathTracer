@@ -52,19 +52,19 @@ Intersection Cube::GetIntersection(const Ray &r)
     glm::vec3 ipoint(r_obj.origin + t * r_obj.direction);
 
     glm::vec3 ipoint_world(this->transform.T() * glm::vec4(ipoint, 1.f));
-    glm::vec4 normal4_world(this->transform.invTransT() * glm::vec4(this->getNormal(ipoint),0.f) );
+    auto normal_and_tangent_o = this->getNormalAndTangent(ipoint);
 
-    glm::vec3 normal_world(normal4_world);
-    normal_world = glm::normalize(normal_world);
+    glm::vec3 normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_and_tangent_o.first,0.f)));
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_and_tangent_o.second, 0.f)));
+    //bitangent computed in Intersection constructor
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
     glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
 
-    return Intersection(ipoint_world, normal_world, t_world, s_color, this);
+    return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }
-
-glm::vec3 Cube::getNormal(const glm::vec3& point) const
+std::pair<glm::vec3, glm::vec3> Cube::getNormalAndTangent(const glm::vec3& point)
 {
     auto axis_and_sign = this->getFaceNormalAxisAndDirection(point);
 
@@ -72,7 +72,17 @@ glm::vec3 Cube::getNormal(const glm::vec3& point) const
     normal[axis_and_sign.first] = 1;
     normal *= axis_and_sign.second;
 
-    return normal;
+    // compute tangent
+    glm::vec3 sp0(0.f), sp1(0.f), sp2(0.f);
+    sp0[axis_and_sign.first] = .5f * axis_and_sign.second;
+    sp1[axis_and_sign.first] = .5f * axis_and_sign.second;
+    sp2[axis_and_sign.first] = .5f * axis_and_sign.second;
+    sp1[(axis_and_sign.first + 1) % 3] = 0.25f;
+    sp2[(axis_and_sign.first + 2) % 3] = 0.25f;
+
+    glm::vec3 tangent = computeLocalTangent(sp0,sp1,sp2) ;
+
+    return std::pair<glm::vec3, glm::vec3>(normal, tangent);
 }
 
 std::pair<int, int> Cube::getFaceNormalAxisAndDirection(const glm::vec3 &point) const
@@ -311,6 +321,12 @@ glm::vec2 Cube::GetUVCoordinates(const glm::vec3 &point)
     d.y *= o.y;
 
     return p1 + d;
+}
+
+
+glm::vec3 Cube::ComputeNormal(const glm::vec3 &P)
+{
+
 }
 
 BoundingBox Cube::calculateBoundingBox()

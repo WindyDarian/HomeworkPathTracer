@@ -21,7 +21,7 @@ win32 {
     CONFIG += console
     CONFIG(debug)
     {
-    LIBS += windows_ia32_gcc_mingw4.8.1_debug/tbb_debug.dll
+    #LIBS += windows_ia32_gcc_mingw4.8.1_debug/tbb_debug.dll
     }
 }
 

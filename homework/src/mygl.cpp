@@ -25,8 +25,8 @@ MyGL::MyGL(QWidget *parent)
 {
     setFocusPolicy(Qt::ClickFocus);
 
-    setAALevel(AA_TWOTWO);
-    setSampler(SAMPLER_UNIFORM);
+//    setAALevel(AA_TWOTWO);
+//    setSampler(SAMPLER_UNIFORM);
 }
 
 MyGL::~MyGL()
@@ -304,6 +304,7 @@ inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator, Pix
     }
 }
 
+/* old
 void MyGL::RaytraceScene()
 {
     QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
@@ -364,8 +365,8 @@ void MyGL::RaytraceScene()
 
     scene.film.WriteImage(filepath);
 }
+*/
 
-/*
 void MyGL::RaytraceScene()
 {
     QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
@@ -454,7 +455,7 @@ void MyGL::RaytraceScene()
 }
 
 
-*/
+
 
 void MyGL::setTriangleBBoxVisible(bool value)
 {

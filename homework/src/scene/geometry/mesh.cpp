@@ -177,7 +177,7 @@ Intersection Mesh::GetIntersection(const Ray &r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
+    glm::vec3 s_color = Material::GetImageColorInterp(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
 
     return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }

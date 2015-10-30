@@ -6,7 +6,7 @@ Intersection::Intersection():
     tangent(glm::vec3(0)),
     bitangent(glm::vec3(0)),
     t(-1),
-    color(1.f)
+    texture_color(1.f)
 {
     object_hit = nullptr;
 }
@@ -16,7 +16,7 @@ Intersection::Intersection(glm::vec3 point, glm::vec3 normal, glm::vec3 tangent,
     normal(normal),
     t(t),
     object_hit(object_hit),
-    color(surface_color),
+    texture_color(surface_color),
     tangent(tangent),
     bitangent(glm::cross(normal, tangent))
 {}

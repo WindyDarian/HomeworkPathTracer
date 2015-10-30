@@ -10,6 +10,7 @@
 #include <renderthread.h>
 #include <scene/geometry/mesh.h>
 #include <ctime>
+#include <raytracing/directlightingintegrator.h>
 
 
 #include <iomanip>
@@ -70,8 +71,9 @@ void MyGL::initializeGL()
 
     //Test scene data initialization
     scene.CreateTestScene();
-    integrator.scene = &scene;
-    integrator.intersection_engine = &intersection_engine;
+    integrator.reset(new DirectLightingIntegrator());
+    integrator->scene = &scene;
+    integrator->intersection_engine = &intersection_engine;
     intersection_engine.scene = &scene;
     ResizeToSceneCamera();
 }
@@ -242,12 +244,15 @@ void MyGL::SceneLoadDialog()
     QStringRef local_path = filepath.leftRef(i+1);
     //Reset all of our objects
     scene.Clear();
-    integrator = Integrator();
+
     intersection_engine = IntersectionEngine();
     //Load new objects based on the XML file chosen.
-    xml_reader.LoadSceneFromFile(file, local_path, scene, integrator);
-    integrator.scene = &scene;
-    integrator.intersection_engine = &intersection_engine;
+    Integrator* new_integrator = nullptr;
+    xml_reader.LoadSceneFromFile(file, local_path, scene, new_integrator);
+
+    integrator.reset(new_integrator);
+    integrator->scene = &scene;
+    integrator->intersection_engine = &intersection_engine;
     intersection_engine.scene = &scene;
 
     scene.recomputeBVH();
@@ -402,7 +407,7 @@ void MyGL::RaytraceScene()
             unsigned int x_start = X * x_block_size;
             unsigned int x_end = glm::min((X + 1) * x_block_size, width);
             //Create and run the thread
-            render_threads[Y * x_block_count + X] = new RenderThread(x_start, x_end, y_start, y_end, 1, 5, &(scene.film), &(scene.camera), &(integrator));
+            render_threads[Y * x_block_count + X] = new RenderThread(x_start, x_end, y_start, y_end, scene.sqrt_samples, 5, &(scene.film), &(scene.camera), integrator.get());
             render_threads[Y * x_block_count + X]->start();
         }
     }

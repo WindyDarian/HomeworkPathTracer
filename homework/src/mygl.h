@@ -39,7 +39,7 @@ private:
 
     Scene scene;
     XMLReader xml_reader;
-    Integrator integrator;
+    std::unique_ptr<Integrator> integrator;
     IntersectionEngine intersection_engine;
 
     bool kdtree_bbox_visible = true;

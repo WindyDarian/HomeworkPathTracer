@@ -43,7 +43,7 @@ Intersection SquarePlane::GetIntersection(const Ray& r)
     normal_world = glm::normalize(normal_world);
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
-    glm::vec3 s_color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(ipoint), this->material->texture);
+    glm::vec3 s_color = Material::GetImageColorInterp(this->GetUVCoordinates(ipoint), this->material->texture);
 
 
     glm::vec4 tangent_o(1,0,0,0);
@@ -103,11 +103,11 @@ Intersection SquarePlane::pickSampleIntersection(float random1, float random2)
     auto point_obj = glm::vec3(random1 - 0.5f, random2 - 0.5f, 0.f);
     auto point = glm::vec3(this->transform.T() *
                      glm::vec4(point_obj, 1.f));
-    auto normal = glm::vec3(this->transform.invTransT() *
-                            glm::vec4(0,0,1.f,0.f));
-    auto tangent = glm::vec3(this->transform.invTransT() *
-                            glm::vec4(1.f,0,0,0.f));
-    auto color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(point_obj), this->material->texture);
+    auto normal = glm::normalize(glm::vec3(this->transform.invTransT() *
+                            glm::vec4(0,0,1.f,0.f)));
+    auto tangent = glm::normalize(glm::vec3(this->transform.invTransT() *
+                            glm::vec4(1.f,0,0,0.f)));
+    auto color = Material::GetImageColorInterp(this->GetUVCoordinates(point_obj), this->material->texture);
 
     return Intersection(point, normal, tangent, 0.f, color, this);
 }

@@ -10,6 +10,7 @@
 #include <scene/materials/bxdfs/bxdf.h>
 #include <scene/materials/bxdfs/lambertBxDF.h>
 #include <iostream>
+#include <raytracing/directlightingintegrator.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
 #include <raytracing/samplers/randompixelsampler.h>
@@ -17,7 +18,7 @@
 #include <QImage>
 
 
-void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Scene &scene, Integrator &integrator)
+void XMLReader::LoadSceneFromFile(QFile &file, const QStringRef &local_path, Scene &scene, Integrator* &integrator)
 {
     if(file.open(QIODevice::ReadOnly))
     {
@@ -390,14 +391,19 @@ Transform XMLReader::LoadTransform(QXmlStreamReader &xml_reader)
     return Transform(t, r, s);
 }
 
-Integrator XMLReader::LoadIntegrator(QXmlStreamReader &xml_reader)
+Integrator* XMLReader::LoadIntegrator(QXmlStreamReader &xml_reader)
 {
-    Integrator result;
+    Integrator* result;
 
     //First check what type of integrator we're supposed to load
     QXmlStreamAttributes attribs(xml_reader.attributes());
     QStringRef type = attribs.value(QString(), QString("type"));
     bool is_mesh = false;
+
+    //if (QString::compare(type, QString("direct")) == 0)
+    // just creating a DirectLightIntegrator for now
+
+    result = new DirectLightingIntegrator();
 
     while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("integrator")) != 0)
     {
@@ -409,7 +415,7 @@ Integrator XMLReader::LoadIntegrator(QXmlStreamReader &xml_reader)
             xml_reader.readNext();
             if(xml_reader.isCharacters())
             {
-                result.SetDepth(xml_reader.text().toInt());
+                result->SetDepth(xml_reader.text().toInt());
             }
             xml_reader.readNext();
         }

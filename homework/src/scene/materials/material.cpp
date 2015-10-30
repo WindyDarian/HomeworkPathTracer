@@ -36,7 +36,7 @@ glm::vec3 Material::EvaluateScatteredEnergy(const Intersection &isx, const glm::
         result += bxdf->EvaluateScatteredEnergy(wo, wi);
     }
 
-    result = result * isx.color;
+    result = result * isx.texture_color * this->base_color;
 
     return result;
 }
@@ -54,11 +54,6 @@ glm::vec3 Material::EvaluateHemisphereScatteredEnergy(const Intersection &isx, c
     //TODO
     return glm::vec3(0);
 }
-
-
-
-
-
 
 
 

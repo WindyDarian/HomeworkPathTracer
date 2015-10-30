@@ -33,7 +33,7 @@
 			<rotate>0 90 0</rotate>
 			<scale>10 10 1</scale>
 		</transform>
-		<material>red_diffuse</material>
+		<material>red_diffuse</material>=
 	</geometry>
 
 	<geometry type="square" name="Ceiling">
@@ -111,7 +111,7 @@
 		<bxdf>specular_reflective1</bxdf>
 	</material>
 
-	<material type="light" name="emissive_material" intensity="50">
+	<material type="light" name="emissive_material" intensity="10">
 		<baseColor>1 1 1</baseColor>
 	</material>
 
@@ -122,6 +122,6 @@
 		<maxDepth>5</maxDepth>
 	</integrator>
 
-	<pixelSampleLength>10</pixelSampleLength>
+	<pixelSampleLength>1</pixelSampleLength>
 
 </scene>

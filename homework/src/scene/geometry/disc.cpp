@@ -16,11 +16,11 @@ Intersection Disc::pickSampleIntersection(float random1, float random2)
 
     auto point = glm::vec3(this->transform.T() *
                      glm::vec4(point_obj, 1.f));
-    auto normal = glm::vec3(this->transform.invTransT() *
-                            glm::vec4(0,0,1.f,0.f));
-    auto tangent = glm::vec3(this->transform.invTransT() *
-                            glm::vec4(1.f,0,0,0.f));
-    auto color = glm::vec3(this->material->base_color) * Material::GetImageColor(this->GetUVCoordinates(point_obj), this->material->texture);
+    auto normal = glm::normalize(glm::vec3(this->transform.invTransT() *
+                            glm::vec4(0,0,1.f,0.f)));
+    auto tangent = glm::normalize(glm::vec3(this->transform.invTransT() *
+                            glm::vec4(1.f,0,0,0.f)));
+    auto color = Material::GetImageColorInterp(this->GetUVCoordinates(point_obj), this->material->texture);
 
     return Intersection(point, normal, tangent, 0.f, color, this);
 
@@ -51,7 +51,7 @@ Intersection Disc::GetIntersection(const Ray &r)
         result.normal = glm::normalize(glm::vec3(transform.invTransT() * glm::vec4(ComputeNormal(glm::vec3(P)), 0)));
         result.object_hit = this;
         result.t = glm::distance(result.point, r.origin);
-        result.color = Material::GetImageColorInterp(GetUVCoordinates(glm::vec3(P)), material->texture);
+        result.texture_color = Material::GetImageColorInterp(GetUVCoordinates(glm::vec3(P)), material->texture);
 
         result.tangent = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(1,0,0,0)));
         result.bitangent = glm::cross(result.normal, result.tangent);

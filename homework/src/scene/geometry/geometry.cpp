@@ -12,8 +12,6 @@ float Geometry::RayPDF(const Intersection &isx, const Ray &ray)
         return 0;
     }
 
-    //Add more here
-
     glm::vec3 d = ray.origin - isx.point;
     float r2 = glm::length2(d);
     if (r2 <= 0)

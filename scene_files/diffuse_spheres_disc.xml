@@ -33,7 +33,7 @@
 			<rotate>0 90 0</rotate>
 			<scale>10 10 1</scale>
 		</transform>
-		<material>red_diffuse</material>
+		<material>red_diffuse</material>=
 	</geometry>
 
 	<geometry type="square" name="Ceiling">
@@ -70,7 +70,7 @@
 		<material>white_diffuse</material>
 	</geometry>
 
-	<geometry type="square" name="Light Source">
+	<geometry type="disc" name="Light Source">
 		<transform>
 			<translate>0 4.5 0</translate>
 			<rotate>90 0 0</rotate>

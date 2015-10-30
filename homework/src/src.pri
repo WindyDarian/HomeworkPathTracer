@@ -37,7 +37,8 @@ SOURCES += \
     $$PWD/raytracing/samplers/imagewidestratifiedsampler.cpp \
     $$PWD/raytracing/bvhnode.cpp \
     $$PWD/renderthread.cpp \
-    $$PWD/scene/geometry/geometry.cpp
+    $$PWD/scene/geometry/geometry.cpp \
+    $$PWD/raytracing/directlightingintegrator.cpp
 
 HEADERS += \
     $$PWD/mainwindow.h \
@@ -79,4 +80,5 @@ HEADERS += \
     $$PWD/scene/geometry/boundingboxframe.h \
     $$PWD/raytracing/samplers/randompixelsampler.h \
     $$PWD/raytracing/samplers/imagewidestratifiedsampler.h \
-    $$PWD/raytracing/bvhnode.h
+    $$PWD/raytracing/bvhnode.h \
+    $$PWD/raytracing/directlightingintegrator.h

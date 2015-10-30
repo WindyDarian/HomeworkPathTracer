@@ -1,7 +1,10 @@
 #include <scene/geometry/geometry.h>
 
-Intersection Geometry::pickSampleIntersection(float random1, float random2)
-{return Intersection();}
+
+Intersection Geometry::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+{
+    return Intersection();
+}
 
 float Geometry::RayPDF(const Intersection &isx, const Ray &ray)
 {
@@ -34,8 +37,8 @@ glm::vec3 Geometry::computeLocalTangent(const glm::vec3 &p0, const glm::vec3 &p1
     auto duv1 = this->GetUVCoordinates(p1) - p0uv;
     auto duv2 = this->GetUVCoordinates(p2) - p0uv;
 
-    glm::vec3 tangent = (duv2.y * dp1 - duv1.y * dp2) /
-            (duv2.y * duv1.x - duv1.y * duv2.x);
+    glm::vec3 tangent = glm::normalize( (duv2.y * dp1 - duv1.y * dp2) /
+            (duv2.y * duv1.x - duv1.y * duv2.x));
 
     return tangent;
 }

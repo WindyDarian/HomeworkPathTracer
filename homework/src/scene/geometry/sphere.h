@@ -13,6 +13,12 @@ public:
 
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     virtual void ComputeArea();
+
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
+
 protected:
     virtual BoundingBox calculateBoundingBox();
+
+private:
+    glm::vec3 pickSamplePointLocal(std::function<float()> &randomf);
 };

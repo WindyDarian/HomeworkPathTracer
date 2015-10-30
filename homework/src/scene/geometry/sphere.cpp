@@ -9,8 +9,68 @@ static const int SPH_VERT_COUNT = 382;
 
 void Sphere::ComputeArea()
 {
-    //Extra credit to implement this
-    area = 0;
+    // in this program we only have initial transform.scale that can change size
+
+    // pi/6 of cube;
+    float xy = 1.f;
+    float yz = 1.f;
+    float zx = 1.f;
+
+    auto scale = this->transform.getScale();
+
+    this->area = PI / 6.f * (xy * 2 * scale.x * scale.y +
+            yz * 2 * scale.y * scale.z +
+            zx * 2 * scale.y * scale.z);
+
+}
+
+
+glm::vec3 Sphere::pickSamplePointLocal(std::function<float ()> &randomf)
+{
+    float theta = randomf() * TWO_PI;
+    float u = 2.f * randomf() - 1.f;
+    float sqrt_1_minus_u2 = glm::sqrt(1.f - glm::pow(u, 2.f));
+
+    glm::vec3 point_local(
+        sqrt_1_minus_u2 * glm::cos(theta) * 0.5f,
+                sqrt_1_minus_u2 * glm::sin(theta) * 0.5f,
+                u * 0.5f);
+
+    return point_local;
+}
+
+Intersection Sphere::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+{
+    glm::vec3 point_world, normal_world, tangent_world;
+    while (true)
+    {
+        //using rejection sampling to make sure
+        glm::vec3 point_local = this->pickSamplePointLocal(randomf);
+
+        glm::vec3 inormal(glm::normalize(point_local));
+
+        if (target_point)
+        {
+            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
+            if (glm::dot(inormal, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
+                continue;
+        }
+
+        glm::vec3 itangent = glm::cross(glm::vec3(0,1,0), inormal);
+        if (fequal(glm::length2(itangent), 0.f))
+        {
+            itangent = glm::vec3(0,0,1);
+        }
+
+        point_world = glm::vec3(this->transform.T() * glm::vec4(point_local, 1.f));
+        normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(inormal, 0.f)));
+
+        tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(itangent, 0.f)));
+
+        return Intersection(point_world, normal_world, tangent_world,
+                            0.f, Material::GetImageColorInterp(this->GetUVCoordinates(point_local), this->material->texture),
+                            this);
+    }
 }
 
 glm::vec3 Sphere::ComputeNormal(const glm::vec3 &P)
@@ -215,3 +275,4 @@ BoundingBox Sphere::calculateBoundingBox()
     BoundingBox b(glm::vec3(-0.5f),glm::vec3(0.5f));
     return b.getTransformedCopy(this->transform.T());
 }
+

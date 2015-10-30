@@ -7,8 +7,66 @@ static const int CUB_VERT_COUNT = 24;
 
 void Cube::ComputeArea()
 {
-    //Extra credit to implement this
-    area = 0;
+    // in this program we only have initial transform.scale that can change size
+    float xy = 1.f;
+    float yz = 1.f;
+    float zx = 1.f;
+
+    auto scale = this->transform.getScale();
+
+    this->area = xy * 2 * scale.x * scale.y +
+            yz * 2 * scale.y * scale.z +
+            zx * 2 * scale.y * scale.z;
+
+}
+
+glm::vec3 Cube::pickSamplePointLocal(std::function<float ()>& randomf)
+{
+    auto r1 = randomf();
+    auto r2 = randomf();
+    auto r3 = randomf();
+    auto r4 = randomf();
+
+    int axis = int(r1 * 3);
+    if (axis > 2) axis = 2; // not gonna happen but
+    int sign = int(r2 * 2);
+    if (sign >= 1) sign = 1;
+        else sign = -1;
+
+    glm::vec3 point_local(0.f);
+    point_local[axis] = 0.5f * sign;
+    point_local[(axis + 1) % 3] = r3 - 0.5f;
+    point_local[(axis + 2) % 3] = r4 - 0.5f;
+
+    return point_local;
+}
+
+Intersection Cube::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+{
+    glm::vec3 point_world, normal_world, tangent_world;
+    while (true)
+    {
+        //using rejection sampling to make sure samples are on the near side to target as req
+        glm::vec3 point_local = this->pickSamplePointLocal(randomf);
+
+        auto normal_and_tangent = this->getNormalAndTangent(point_local);
+
+        if (target_point)
+        {
+            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
+            if (glm::dot(normal_and_tangent.first, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
+                continue;
+        }
+
+        point_world = glm::vec3(this->transform.T() * glm::vec4(point_local, 1.f));
+        normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_and_tangent.first, 0.f)));
+
+        tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_and_tangent.second, 0.f)));
+
+        return Intersection(point_world, normal_world, tangent_world,
+                            0.f, Material::GetImageColorInterp(this->GetUVCoordinates(point_local), this->material->texture),
+                            this);
+    }
 }
 
 Intersection Cube::GetIntersection(const Ray &r)
@@ -111,6 +169,7 @@ std::pair<int, int> Cube::getFaceNormalAxisAndDirection(const glm::vec3 &point) 
     }
     return std::pair<int, int>(normal_axis, normal_sign);
 }
+
 
 
 //These are functions that are only defined in this cpp file. They're used for organizational purposes

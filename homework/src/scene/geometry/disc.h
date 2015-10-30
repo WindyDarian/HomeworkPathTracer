@@ -12,7 +12,9 @@ public:
     void create();
 
     virtual void ComputeArea();
-    virtual Intersection pickSampleIntersection(float random1, float random2);
+
+    // target_point is used for volume lights
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
 
 protected:
     virtual BoundingBox calculateBoundingBox();

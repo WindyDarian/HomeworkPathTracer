@@ -3,7 +3,6 @@
 
 
 DirectLightingIntegrator::DirectLightingIntegrator():Integrator(),
-    sample_num(1),
     mersenne_generator(std::time(nullptr)),
     unif_distribution(0,1)
 {
@@ -31,8 +30,7 @@ glm::vec3 DirectLightingIntegrator::TraceRay(Ray r, unsigned int depth)
     glm::vec3 color(0.f);
 
     if (intersection.object_hit->material->is_light_source)
-        color = intersection.object_hit->material->EvaluateScatteredEnergy(intersection, dummy, -r.direction)
-                / intersection.object_hit->RayPDF(intersection, r);
+        color = intersection.object_hit->material->EvaluateScatteredEnergy(intersection, dummy, -r.direction) ;
 
     for (auto light:this->scene->lights)
     {
@@ -44,9 +42,12 @@ glm::vec3 DirectLightingIntegrator::TraceRay(Ray r, unsigned int depth)
         for(int i = 0; i < sample_num; i++)
         {
 
-            float r1 = unif_distribution(mersenne_generator);
-            float r2 = unif_distribution(mersenne_generator);
-            Intersection light_sample = light->pickSampleIntersection(r1,r2);
+            //float r1 = unif_distribution(mersenne_generator);
+            //float r2 = unif_distribution(mersenne_generator);
+
+            std::function<float()> random_function = std::bind(&generateRandom, this);
+            //Intersection light_sample = light->pickSampleIntersection(r1,r2);
+            Intersection light_sample = light->pickSampleIntersection(random_function, &intersection.point);
 
             glm::vec3 wiW = glm::normalize(light_sample.point - intersection.point);
             Ray out_ray = Ray(out_origin_outside, wiW);
@@ -71,5 +72,10 @@ glm::vec3 DirectLightingIntegrator::TraceRay(Ray r, unsigned int depth)
 
     return color;
 
+}
+
+float DirectLightingIntegrator::generateRandom()
+{
+    return unif_distribution(mersenne_generator);
 }
 

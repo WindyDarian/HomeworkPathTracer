@@ -2,6 +2,7 @@
 
 void SquarePlane::ComputeArea()
 {
+    // in this program we only have initial transform.scale that can change size so
     float area_local = 1.f;
     auto scale = transform.getScale();
     area = area_local * scale.x * scale.y;
@@ -98,20 +99,21 @@ glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
     return uv;
 }
 
-Intersection SquarePlane::pickSampleIntersection(float random1, float random2)
+Intersection SquarePlane::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
 {
-    auto point_obj = glm::vec3(random1 - 0.5f, random2 - 0.5f, 0.f);
-    auto point = glm::vec3(this->transform.T() *
-                     glm::vec4(point_obj, 1.f));
-    auto normal = glm::normalize(glm::vec3(this->transform.invTransT() *
-                            glm::vec4(0,0,1.f,0.f)));
-    auto tangent = glm::normalize(glm::vec3(this->transform.invTransT() *
-                            glm::vec4(1.f,0,0,0.f)));
-    auto color = Material::GetImageColorInterp(this->GetUVCoordinates(point_obj), this->material->texture);
+     float random1 = randomf();
+     float random2 = randomf();
+     auto point_obj = glm::vec3(random1 - 0.5f, random2 - 0.5f, 0.f);
+     auto point = glm::vec3(this->transform.T() *
+                      glm::vec4(point_obj, 1.f));
+     auto normal = glm::normalize(glm::vec3(this->transform.invTransT() *
+                             glm::vec4(0,0,1.f,0.f)));
+     auto tangent = glm::normalize(glm::vec3(this->transform.invTransT() *
+                             glm::vec4(1.f,0,0,0.f)));
+     auto color = Material::GetImageColorInterp(this->GetUVCoordinates(point_obj), this->material->texture);
 
-    return Intersection(point, normal, tangent, 0.f, color, this);
+     return Intersection(point, normal, tangent, 0.f, color, this);
 }
-
 
 BoundingBox SquarePlane::calculateBoundingBox()
 {

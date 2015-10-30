@@ -2,12 +2,16 @@
 
 void Disc::ComputeArea()
 {
+    // in this program we only have initial transform.scale that can change size so
     auto scale = transform.getScale();
     area = PI * 0.25f * scale.x * scale.y;
 }
 
-Intersection Disc::pickSampleIntersection(float random1, float random2)
+Intersection Disc::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
 {
+    float random1 = randomf();
+    float random2 = randomf();
+
     // sqrt to make sample evenly distributed
     float d = glm::sqrt(random1);
     float angle = random2 * TWO_PI;

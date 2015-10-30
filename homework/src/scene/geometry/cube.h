@@ -12,6 +12,7 @@ public:
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     virtual void ComputeArea();
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
 
 protected:
     virtual BoundingBox calculateBoundingBox();
@@ -21,5 +22,6 @@ private:
 
     float bounds[3][2] = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}};
     std::vector<glm::vec3> vertexes;
+    glm::vec3 pickSamplePointLocal(std::function<float()> &randomf);
 
 };

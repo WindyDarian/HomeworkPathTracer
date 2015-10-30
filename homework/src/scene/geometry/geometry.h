@@ -7,6 +7,8 @@
 #include <scene/transform.h>
 #include <raytracing/boundingbox.h>
 #include <memory>
+#include <random>
+#include <functional>
 
 class Intersection;//Forward declaration because Intersection and Geometry cross-include each other
 class Material;
@@ -25,7 +27,7 @@ public:
 
 
     virtual ~Geometry(){}
-    virtual Intersection pickSampleIntersection(float random1, float random2);
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
     virtual Intersection GetIntersection(const Ray& r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 

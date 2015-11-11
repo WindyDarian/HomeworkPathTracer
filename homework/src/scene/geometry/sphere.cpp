@@ -7,20 +7,30 @@
 static const int SPH_IDX_COUNT = 2280;  // 760 tris * 3
 static const int SPH_VERT_COUNT = 382;
 
+
+//Add these functions to your sphere.cpp file
+//Make sure UniformCodePDF is put at the top of the file; it's not a member of the Sphere class.
+
+float UniformConePdf(float cosThetaMax)
+{
+    return 1.f / (2.f * PI * (1.f - cosThetaMax));
+}
+
+const float p_ellipsoid = 1.6075f;
+const float p_ellipsoid_inv = 1.0f / 1.6075f;
+
 void Sphere::ComputeArea()
 {
-    // in this program we only have initial transform.scale that can change size
-
-    // pi/6 of cube;
-    float xy = 1.f;
-    float yz = 1.f;
-    float zx = 1.f;
-
     auto scale = this->transform.getScale();
 
-    this->area = PI / 6.f * (xy * 2 * scale.x * scale.y +
-            yz * 2 * scale.y * scale.z +
-            zx * 2 * scale.y * scale.z);
+    float xp = glm::pow(1.f * scale.x, p_ellipsoid);
+    float yp = glm::pow(1.f * scale.y, p_ellipsoid);
+    float zp = glm::pow(1.f * scale.z, p_ellipsoid);
+
+    // near approxmiate of ellipsoid area
+    this->area = PI * 4.f *
+            glm::pow((xp * yp + xp * zp + yp * zp) / 3.f,
+                     p_ellipsoid_inv);
 
 }
 
@@ -28,13 +38,12 @@ void Sphere::ComputeArea()
 glm::vec3 Sphere::pickSamplePointLocal(std::function<float ()> &randomf)
 {
     float theta = randomf() * TWO_PI;
-    float u = 2.f * randomf() - 1.f;
-    float sqrt_1_minus_u2 = glm::sqrt(1.f - glm::pow(u, 2.f));
+    float phi = glm::acos(2.f * randomf() - 1.f);
 
     glm::vec3 point_local(
-        sqrt_1_minus_u2 * glm::cos(theta) * 0.5f,
-                sqrt_1_minus_u2 * glm::sin(theta) * 0.5f,
-                u * 0.5f);
+                glm::sin(phi) * glm::cos(theta) * 0.5f,
+                glm::sin(phi) * glm::sin(theta) * 0.5f,
+                glm::cos(phi) * 0.5f);
 
     return point_local;
 }
@@ -44,17 +53,21 @@ Intersection Sphere::pickSampleIntersection(std::function<float ()> randomf, con
     glm::vec3 point_world, normal_world, tangent_world;
     while (true)
     {
-        //using rejection sampling to make sure
+
         glm::vec3 point_local = this->pickSamplePointLocal(randomf);
 
         glm::vec3 inormal(glm::normalize(point_local));
 
-        if (target_point)
-        {
-            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
-            if (glm::dot(inormal, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
-                continue;
-        }
+        //If make sure it samples the front face to illuminated object, the area factor in pdf also needs to be changed
+        // to the front area. So I decided not to use that. So in high sample count it will be correct although there maybe
+        // lots of noises forr low sample count.
+//        if (target_point)
+//        {
+//            using rejection sampling to make sure samples are on the near side to target as req
+//            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
+//            if (glm::dot(inormal, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
+//                continue;
+//        }
 
         glm::vec3 itangent = glm::cross(glm::vec3(0,1,0), inormal);
         if (fequal(glm::length2(itangent), 0.f))
@@ -276,3 +289,17 @@ BoundingBox Sphere::calculateBoundingBox()
     return b.getTransformedCopy(this->transform.T());
 }
 
+
+
+float Sphere::RayPDF(const Intersection &isx, const Ray &ray) {
+    glm::vec3 Pcenter = transform.position();
+    float radius = 0.5f*(transform.getScale().x + transform.getScale().y + transform.getScale().z)/3.0f;
+    // Return uniform weight if point inside sphere
+    if (glm::distance2(isx.point, Pcenter) - radius*radius < 1e-4f)
+        return Geometry::RayPDF(isx, ray);
+
+    // Compute general sphere weight
+    float sinThetaMax2 = radius*radius / glm::distance2(isx.point, Pcenter);
+    float cosThetaMax = glm::sqrt(glm::max(0.f, 1.f - sinThetaMax2));
+    return UniformConePdf(cosThetaMax);
+}

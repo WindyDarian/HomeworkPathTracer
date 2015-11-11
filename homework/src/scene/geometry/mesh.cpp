@@ -2,18 +2,75 @@
 #include <la.h>
 #include <tinyobj/tiny_obj_loader.h>
 #include <iostream>
+#include <ctime>
+
+// triangle area
+inline float tri_area(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3)
+{
+    return glm::length(glm::cross(p2-p1,p3-p1)) / 2;
+}
 
 
 void Triangle::ComputeArea()
 {
-    //Extra credit to implement this
-    area = 0;
+    // Since local area is not needed and not called,
+    // I just calculate (and store for weighted sampling)
+    // and sum them in mesh::ComputeArea()
+    area = tri_area(points[0], points[1], points[2]);
 }
 
 void Mesh::ComputeArea()
 {
-    //Extra credit to implement this
-    area = 0;
+    area = 0.f;
+    auto size = this->faces.count();
+
+    this->tri_areas.clear();
+    this->tri_areas.reserve(size);
+
+    for(int i = 0; i < size; i++)
+    {
+        auto tri = faces[i];
+        auto p0w = glm::vec3(this->transform.T() * glm::vec4(tri->points[0],1.f));
+        auto p1w = glm::vec3(this->transform.T() * glm::vec4(tri->points[1],1.f));
+        auto p2w = glm::vec3(this->transform.T() * glm::vec4(tri->points[2],1.f));
+        float area_tri = tri_area(p0w, p1w, p2w);
+
+        this->tri_areas.append(area_tri);
+
+        area += area_tri;
+    }
+
+    // generate weight distribution for triangle areas
+    std::vector<float> indices;
+    indices.reserve(faces.size());
+    for (int i = 0; i <= faces.size(); i++) indices.push_back(i);
+    this->tri_area_distribution.reset(
+                new std::piecewise_constant_distribution<float>(indices.begin(), indices.end(), tri_areas.begin()));
+}
+
+Intersection Mesh::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+{
+    // first pick a triangle using weighted destribution
+    int index = static_cast<int>((*this->tri_area_distribution)(*mersenne_generator_ptr));
+    if (index >= faces.size()) index = faces.size() - 1; //although this not gonna happen
+    Triangle* random_triangle = this->faces[index];
+
+    // get the intersection from the weighted sampled triangle
+    Intersection result_local = random_triangle->pickSampleIntersection(randomf, nullptr);
+
+
+    glm::vec3 ipoint_world(this->transform.T() * glm::vec4(result_local.point, 1.f));
+    glm::vec4 normal4_world(this->transform.invTransT() * glm::vec4(result_local.normal,0.f));
+
+    glm::vec3 normal_world( normal4_world );
+    normal_world = glm::normalize(normal_world);
+
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(result_local.tangent, 0)));
+
+    glm::vec3 s_color = Material::GetImageColorInterp(result_local.object_hit->GetUVCoordinates(result_local.point), this->material->texture);
+
+    return Intersection(ipoint_world, normal_world, tangent_world, 0.f , s_color, this);
+
 }
 
 Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3):
@@ -137,6 +194,31 @@ Intersection Triangle::GetIntersection(const Ray &r)
                         this);
 }
 
+Intersection Triangle::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+{
+    // sample a random point on a triangle
+    glm::vec3 v1 = points[1] - points[0];
+    glm::vec3 v2 = points[2] - points[0];
+    float r1 = randomf();
+    float r2 = randomf();
+    if (r1 + r2 > 1.0f)
+    {
+        r1 = 1.0f - r1;
+        r2 = 1.0f - r2;
+    }
+    glm::vec3 ipoint = points[0] + v1 * r1 + v2 * r2;
+
+    glm::vec3 inormal = this->GetNormal(ipoint);
+    glm::vec3 itangent = this->computeLocalTangent(this->points[0], this->points[1], this->points[2]);
+
+    return Intersection(ipoint,
+                        inormal,
+                        itangent,
+                        0.f,
+                        glm::vec3(1.f),
+                        this);
+}
+
 Intersection Mesh::GetIntersection(const Ray &r)
 {
     Ray r_obj(r.getTransformedCopy(this->transform.invT()));
@@ -180,6 +262,11 @@ Intersection Mesh::GetIntersection(const Ray &r)
     glm::vec3 s_color = Material::GetImageColorInterp(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
 
     return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
+}
+
+Mesh::Mesh():Geometry()
+{
+
 }
 
 Mesh::~Mesh()

@@ -1,5 +1,15 @@
 #include <scene/geometry/geometry.h>
+#include <ctime>
+#include <random>
 
+std::unique_ptr<std::mt19937> Geometry::mersenne_generator_ptr(new std::mt19937(std::time(nullptr)));
+
+Geometry::Geometry():
+    name("GEOMETRY"), transform(),
+      bounding_box_ptr(nullptr)
+{
+        material = NULL;
+}
 
 Intersection Geometry::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
 {
@@ -42,3 +52,5 @@ glm::vec3 Geometry::computeLocalTangent(const glm::vec3 &p0, const glm::vec3 &p1
 
     return tangent;
 }
+
+

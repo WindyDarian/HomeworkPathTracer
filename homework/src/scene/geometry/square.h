@@ -9,7 +9,6 @@ class SquarePlane : public Geometry
     void create();
     glm::vec2 GetUVCoordinates(const glm::vec3 &point);
 
-    // target_point is used for volume lights
     virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     virtual void ComputeArea();

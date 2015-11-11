@@ -13,7 +13,6 @@ public:
 
     virtual void ComputeArea();
 
-    // target_point is used for volume lights
     virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
 
 protected:

@@ -46,17 +46,21 @@ Intersection Cube::pickSampleIntersection(std::function<float ()> randomf, const
     glm::vec3 point_world, normal_world, tangent_world;
     while (true)
     {
-        //using rejection sampling to make sure samples are on the near side to target as req
+
         glm::vec3 point_local = this->pickSamplePointLocal(randomf);
 
         auto normal_and_tangent = this->getNormalAndTangent(point_local);
 
-        if (target_point)
-        {
-            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
-            if (glm::dot(normal_and_tangent.first, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
-                continue;
-        }
+        //If make sure it samples the front face to illuminated object, the area factor in pdf also needs to be changed
+        // to the front area. So I decided not to use that. So in high sample count it will be correct although there maybe
+        // lots of noises forr low sample count.
+//        if (target_point)
+//        {
+//            //using rejection sampling to make sure samples are on the near side to target as req
+//            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
+//            if (glm::dot(normal_and_tangent.first, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
+//                continue;
+//        }
 
         point_world = glm::vec3(this->transform.T() * glm::vec4(point_local, 1.f));
         normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_and_tangent.first, 0.f)));

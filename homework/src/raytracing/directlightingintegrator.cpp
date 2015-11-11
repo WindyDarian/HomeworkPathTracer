@@ -4,7 +4,9 @@
 
 DirectLightingIntegrator::DirectLightingIntegrator():Integrator(),
     mersenne_generator(std::time(nullptr)),
-    unif_distribution(0,1)
+    unif_distribution(0,1),
+    sample_num(5)
+  //sample_num(20)
 {
 
 }
@@ -24,20 +26,18 @@ glm::vec3 DirectLightingIntegrator::TraceRay(Ray r, unsigned int depth)
     if (!intersection.object_hit)
         return glm::vec3(0,0,0);
 
+
+    if (intersection.object_hit->material->is_light_source)
+        return intersection.object_hit->material->base_color * intersection.texture_color;
+
     glm::vec3 out_origin_outside = intersection.point + intersection.normal * accurancy;
     //glm::vec3 out_origin_inside = intersection.point - intersection.normal * accurancy;
 
     glm::vec3 color(0.f);
 
-    if (intersection.object_hit->material->is_light_source)
-        color = intersection.object_hit->material->EvaluateScatteredEnergy(intersection, dummy, -r.direction) ;
 
     for (auto light:this->scene->lights)
     {
-
-        if (light == intersection.object_hit)
-            continue;
-
         glm::vec3 scolor(0.f);
         for(int i = 0; i < sample_num; i++)
         {

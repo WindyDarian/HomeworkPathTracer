@@ -9,7 +9,6 @@
 #include <memory>
 #include <random>
 #include <functional>
-
 class Intersection;//Forward declaration because Intersection and Geometry cross-include each other
 class Material;
 
@@ -17,12 +16,7 @@ class Material;
 class Geometry : public Drawable
 {
 public:
-    Geometry():
-    name("GEOMETRY"), transform(),
-      bounding_box_ptr(nullptr)
-    {
-        material = NULL;
-    }
+    Geometry();
 
 
 
@@ -79,5 +73,6 @@ protected:
     float area=0;
 
     glm::vec3 computeLocalTangent(const glm::vec3& p0, const glm::vec3 &p1, const glm::vec3 &p2);
+    static std::unique_ptr<std::mt19937> mersenne_generator_ptr;
 
 };

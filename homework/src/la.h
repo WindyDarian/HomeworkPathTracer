@@ -55,8 +55,3 @@ inline bool fequal(T a, T b, T epsilon = 0.0001){
     return diff / (std::abs(a) + std::abs(b)) < epsilon;
 }
 
-/// triangle area
-inline float tri_area(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3)
-{
-    return glm::length(glm::cross(p2-p1,p3-p1)) / 2;
-}

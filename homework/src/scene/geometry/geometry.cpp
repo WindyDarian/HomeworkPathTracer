@@ -11,7 +11,7 @@ Geometry::Geometry():
         material = NULL;
 }
 
-Intersection Geometry::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection Geometry::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
     return Intersection();
 }
@@ -34,7 +34,7 @@ float Geometry::RayPDF(const Intersection &isx, const Ray &ray)
     if (costheta<=0)
         return 0;
 
-    assert(area > 0);
+    Q_ASSERT(area > 0);
 
     return r2 / (area * costheta);
 }
@@ -47,8 +47,19 @@ glm::vec3 Geometry::computeLocalTangent(const glm::vec3 &p0, const glm::vec3 &p1
     auto duv1 = this->GetUVCoordinates(p1) - p0uv;
     auto duv2 = this->GetUVCoordinates(p2) - p0uv;
 
-    glm::vec3 tangent = glm::normalize( (duv2.y * dp1 - duv1.y * dp2) /
-            (duv2.y * duv1.x - duv1.y * duv2.x));
+    glm::vec3 f1 = (duv2.y * dp1 - duv1.y * dp2);
+    float f2 = (duv2.y * duv1.x - duv1.y * duv2.x);
+    glm::vec3 tangent;
+
+    if (fequal(glm::length2(f1), 0.f) || fequal(f2, 0.f))
+    {
+       tangent = glm::normalize(dp1 + dp2);
+    }
+    else
+    {
+        tangent= glm::normalize( f1 / f2 );
+    }
+
 
     return tangent;
 }

@@ -12,6 +12,7 @@
 #include <scene/materials/bxdfs/lambertBxDF.h>
 #include <iostream>
 #include <raytracing/directlightingintegrator.h>
+#include <raytracing/misintegrator.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/stratifiedpixelsampler.h>
 #include <raytracing/samplers/randompixelsampler.h>
@@ -201,8 +202,10 @@ Geometry* XMLReader::LoadGeometry(QXmlStreamReader &xml_reader, QMap<QString, QL
     return result;
 }
 
+
 Material* XMLReader::LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef &local_path, QMap<QString, QList<Material *> > &map)
 {
+    //FIXME: BXDF in weightedmaterial may be disordered, guess need to use a list of pair instead of map?
     Material* result;
     bool weighted_material = false;
     //First check what type of material we're supposed to load
@@ -280,7 +283,13 @@ Material* XMLReader::LoadMaterial(QXmlStreamReader &xml_reader, const QStringRef
                 weight = xml_reader.text().toFloat();
             }
             ((WeightedMaterial*)result)->bxdf_weights.append(weight);
+            xml_reader.readNext();
+
         }
+    }
+    if (weighted_material)
+    {
+        ((WeightedMaterial*)result)->resetWeightDistribution();
     }
     return result;
 }
@@ -423,9 +432,9 @@ Integrator* XMLReader::LoadIntegrator(QXmlStreamReader &xml_reader)
     bool is_mesh = false;
 
     //if (QString::compare(type, QString("direct")) == 0)
-    // just creating a DirectLightIntegrator for now
+    // just creating a Integrator for now
 
-    result = new DirectLightingIntegrator();
+    result = new MISIntegrator();
 
     while(!xml_reader.isEndElement() || QStringRef::compare(xml_reader.name(), QString("integrator")) != 0)
     {

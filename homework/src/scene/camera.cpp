@@ -89,9 +89,9 @@ glm::mat4 Camera::PerspectiveProjectionMatrix() const
     float top = this->near_clip * tan_halffovy;
     float right = this->near_clip * tan_halffovy * this->aspect;
 
-    assert(!fequal(top,0.f));
-    assert(!fequal(right,0.f));
-    assert(!fequal(this->far_clip-this->near_clip,0.f));
+    Q_ASSERT(!fequal(top,0.f));
+    Q_ASSERT(!fequal(right,0.f));
+    Q_ASSERT(!fequal(this->far_clip-this->near_clip,0.f));
 
       // mapping near to -1, far to 1 for this projection matrix
     float m33 = - (this->far_clip + this->near_clip) / (this->far_clip - this->near_clip);

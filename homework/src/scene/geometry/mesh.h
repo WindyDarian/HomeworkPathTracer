@@ -14,7 +14,7 @@ public:
     Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3, const glm::vec3 &n1, const glm::vec3 &n2, const glm::vec3 &n3);
     Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3, const glm::vec3 &n1, const glm::vec3 &n2, const glm::vec3 &n3, const glm::vec2 &t1, const glm::vec2 &t2, const glm::vec2 &t3);
     Intersection GetIntersection(const Ray& r);
-     virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
+     virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_normal = nullptr);
 
 
     glm::vec3 points[3];
@@ -58,7 +58,7 @@ public:
 
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     virtual void ComputeArea();
-    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_normal = nullptr);
 
     void createVisibleBoundingBoxes();
     std::list<BoundingBoxFrame*> &getVisibleBoundingBoxesBVH();

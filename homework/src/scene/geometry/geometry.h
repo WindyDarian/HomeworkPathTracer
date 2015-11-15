@@ -21,7 +21,7 @@ public:
 
 
     virtual ~Geometry(){}
-    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_normal = nullptr);
     virtual Intersection GetIntersection(const Ray& r) = 0;
     virtual void SetMaterial(Material* m){material = m;}
 

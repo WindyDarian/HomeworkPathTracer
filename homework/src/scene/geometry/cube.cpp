@@ -41,7 +41,7 @@ glm::vec3 Cube::pickSamplePointLocal(std::function<float ()>& randomf)
     return point_local;
 }
 
-Intersection Cube::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection Cube::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
     glm::vec3 point_world, normal_world, tangent_world;
     while (true)
@@ -122,7 +122,8 @@ Intersection Cube::GetIntersection(const Ray &r)
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    glm::vec3 s_color = Material::GetImageColorInterp(this->GetUVCoordinates(ipoint), this->material->texture);
+    glm::vec2 uv = this->GetUVCoordinates(ipoint);
+    glm::vec3 s_color = Material::GetImageColorInterp(uv, this->material->texture);
 
     return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }

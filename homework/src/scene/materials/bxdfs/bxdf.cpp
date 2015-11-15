@@ -1,11 +1,13 @@
 #include <scene/materials/bxdfs/bxdf.h>
+#include <raytracing/sampling.h>
 
-glm::vec3 BxDF::SampleAndEvaluateScatteredEnergy(const glm::vec3 &wo, glm::vec3 &wi_ret, float rand1, float rand2, float &pdf_ret) const
+glm::vec3 BxDF::SampleAndEvaluateScatteredEnergy(const glm::vec3 &wo, glm::vec3 &wi_ret, float &pdf_ret) const
 {
-    //TODO
-    wi_ret = glm::vec3(0);
-    pdf_ret = 0.0f;
-    return glm::vec3(0);
+        // cosine weighted hemisphere sampling
+        wi_ret = sampling::cosine_hemisphere();
+        //pdf_ret = PDF(wo, wi_ret);
+
+        return EvaluateScatteredEnergy(wo, wi_ret, pdf_ret);
 }
 
 glm::vec3 BxDF::EvaluateHemisphereScatteredEnergy(const glm::vec3 &wo, int num_samples, const glm::vec2* samples) const
@@ -16,6 +18,7 @@ glm::vec3 BxDF::EvaluateHemisphereScatteredEnergy(const glm::vec3 &wo, int num_s
 
 float BxDF::PDF(const glm::vec3 &wo, const glm::vec3 &wi) const
 {
-    //TODO
-    return 0.0f;
+    if (wo.z * wi.z > 0)
+        return wi.z * INV_PI;//costheta
+    else return 0.f;
 }

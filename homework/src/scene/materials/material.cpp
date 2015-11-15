@@ -1,6 +1,7 @@
 #include <scene/materials/material.h>
 #include <QColor>
 #include <math.h>
+#include <raytracing/sampling.h>
 
 Material::Material() :
     Material(glm::vec3(0.5f, 0.5f, 0.5f))
@@ -20,21 +21,35 @@ Material::Material(const glm::vec3 &color):
 
 
 
-glm::vec3 Material::EvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, const glm::vec3 &wiW, BxDFType flags) const
+glm::vec3 Material::EvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, const glm::vec3 &wiW, float &pdf_ret, BxDFType flags) const
 {
+    pdf_ret = 0.f;
+
     glm::vec3 result(0.f);
 
-    for (auto bxdf: this->bxdfs)
+    if (this->bxdfs.count() == 0)
     {
-        // check if type match
-        if (!(bxdf->type & flags))
-            continue;
-
-        glm::mat3 trans = glm::transpose(glm::mat3(isx.tangent, isx.bitangent, isx.normal));
-        glm::vec3 wo = trans * woW;
-        glm::vec3 wi = trans * wiW;
-        result += bxdf->EvaluateScatteredEnergy(wo, wi);
+        pdf_ret = 0.f;
+        return glm::vec3(0.f);
     }
+
+    int i = sampling::rand_int(bxdfs.count());
+
+    auto bxdf = bxdfs[i];
+
+    // check if type match // guess this may cause darker if an object has different type of BxDFs
+    // but pick random one until match may cause endless loop if there is just..none match
+    if (!(bxdf->type & flags))
+    {
+        pdf_ret = 0.f;
+        return glm::vec3(0.f);
+    }
+
+    glm::mat3 trans = glm::transpose(glm::mat3(isx.tangent, isx.bitangent, isx.normal));
+    glm::vec3 wo = trans * woW;
+    glm::vec3 wi = trans * wiW;
+    result += bxdf->EvaluateScatteredEnergy(wo, wi, pdf_ret);
+
 
     result = result * isx.texture_color * this->base_color;
 
@@ -43,10 +58,49 @@ glm::vec3 Material::EvaluateScatteredEnergy(const Intersection &isx, const glm::
 
 glm::vec3 Material::SampleAndEvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, glm::vec3 &wiW_ret, float &pdf_ret, BxDFType flags) const
 {
-    //TODO
-    wiW_ret = glm::vec3(0);
-    pdf_ret = 0.0f;
-    return glm::vec3(0);
+
+    if (this->bxdfs.count() == 0)
+    {
+        wiW_ret = glm::vec3(0.f);
+        pdf_ret = 0.f;
+        return glm::vec3(0.f);
+    }
+
+    int i = sampling::rand_int(bxdfs.count());
+
+    auto bxdf = bxdfs[i];
+
+    // check if type match
+    if (!(bxdf->type & flags))
+    {
+        wiW_ret = glm::vec3(0.f);
+        pdf_ret = 0.f;
+        return glm::vec3(0.f);
+    }
+
+    glm::mat3 local_to_world = glm::mat3(isx.tangent, isx.bitangent, isx.normal);
+    glm::mat3 world_to_local = glm::transpose(local_to_world);
+
+    glm::vec3 wo = world_to_local * woW;
+    glm::vec3 wi_ret;
+    glm::vec3 result = bxdf->SampleAndEvaluateScatteredEnergy(wo, wi_ret, pdf_ret);
+
+    wiW_ret = local_to_world * wi_ret;
+    result = result * isx.texture_color * this->base_color;
+
+    return result;
+
+
+//    glm::mat3 local_to_world(isx.tangent, isx.bitangent, isx.normal);
+
+//    // cosine weighted hemisphere sampling
+//    glm::vec3 wiO = sampling::cosine_hemisphere();
+//    wiW_ret = local_to_world * wiO;
+
+//    float costheta = glm::dot(local_to_world * glm::vec3(0.f, 0.f, 1.f), woW);
+//    pdf_ret = costheta * INV_PI;
+
+//    return EvaluateScatteredEnergy(isx, woW, wiW_ret, flags);
 }
 
 glm::vec3 Material::EvaluateHemisphereScatteredEnergy(const Intersection &isx, const glm::vec3 &wo, int num_samples, BxDFType flags) const

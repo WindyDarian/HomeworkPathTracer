@@ -1,0 +1,89 @@
+<HTML>
+	<head>
+		<title>
+			CIS 560 Assignment 5 - Multiple Importance Sampling and Indirect Lighting
+		</title>
+	</head>
+	<body>
+		<h1 align = "center">
+			Multiple Importance Sampling and Indirect Lighting
+		</h1>
+		<h2 align = "center">
+			CIS 560 Homework 5
+		</h2>
+		<h2 align = "center">
+			Due: Wednesday, November 4, 2015 at 11:59 PM
+		</h2>
+
+		<br/>
+
+		<h3>
+			1  Goal
+		</h3>
+		<p>
+			To write an efficient Monte Carlo path tracer that evaluates all incoming light in a scene, not just direct lighting.
+		</p>
+
+		<h3>
+			2  Supplied Code
+		</h3>
+		<p>
+			An updated version of the XMLReader class has been provided. This new XMLReader can handle specular reflection BRDFs and glossy microfacet BRDFs. Basic declarations of the SpecularReflectionBxDF, BlinnMicrofacetBxDF, and WeightedMaterial classes have also been provided. We have also provided implementations of a random point sampling function and the RayPDF function for the Sphere class so you can test your multiple importance sampling with the veach_mis.xml scene. You'll find both of these at the top of the provided sphere_codebits.cpp file, though you'll need to add or rename a function in the Transform class that returns its private member variable scale (it's called getScale() in sphere_codebits.cpp). You may also wish to call ResizeToSceneCamera() just before update() is called in MyGL::SceneLoadDialog so that scenes without a 1:1 aspect ratio show up properly.
+		</p>
+
+		<h3>
+			3  Requirements
+		</h3>
+		<h4>
+			3.1  Multiple Importance Sampling (20 points)
+		</h4>
+		<p>
+			In your DirectLightingIntegrator's TraceRay function, implement multiple importance sampling so that each ray samples both the light source's PDF and the intersected Geometry's BRDF's PDF. This will require you to, among other things, implement each BxDF's SampleAndEvaluateScatteredEnergy function. You should use the Power Heuristic for your MIS weighting function. A good scene to use to test your multiple importance sampling is veach_mis.xml, which you may recognize from the lecture slides.
+		<h4>
+		<h4>
+			3.2  New BxDFs (20 points)
+		</h4>
+		<p>
+			For the SpecularReflectionBxDF and BlinnMicrofacetBxDF classes, implement the EvaluateScatteredEnergy and SampleAndEvaluateScatteredEnergy functions. Unlike the LambertBxDF's ESE function, these BxDFs' ESE outputs <i>do</i> depend on the relative directions of &omega;o and &omega;i.
+		<h4>
+		<h4>
+			3.3  WeightedMaterial (10 points)
+		</h4>
+		<p>
+			When choosing a BxDF to sample in EvaluateScatteredEnergy, use each BxDF's weight as its probability of being chosen. For example, if a WeightedMaterial had a LambertBxDF with a weight of 0.3 and a SpecularReflectionBxDF with a weight of 0.7, then for uniform random variables with a value in the rang [0, 0.3), the LambertBxDF would be sampled, while the SpecularReflectionBxDF would be sampled for values in the range [0.3, 1). Additionally, if you forgot to do so in homework 4, make sure you transform &omega;o and &omega;i into local normal space before passing them into a BxDF's EvaluateScatteredEnergy.
+		<h4>
+		<h4>
+			3.4  Total Lighting Estimation (40 points)
+		</h4>
+		<p>
+			Write a new Integrator class (or Integrator function) that estimates <b>both</b> the direct and indirect light a point in your scene receives. You should use multiple importance sampling just like you did in the direct lighting integrator, based on each point's BxDFs' PDFs and the light sources' PDFs. Note that this step <i>can</i> be written recursively, but we ask you <b>not</b> to implement it that way. Instead, you should keep track of the ray (&omega;i) you're currently tracing as well as its currently accumulated color. Each time you evaluate the Li portion of the Light Transport Equation, you should update your tracked ray to be a new &omega;i and should multiply into its stored color the brdf() and |dot| portions of the LTE. Note that since you're already estimating the direct illumination at each iteration, when a ray does hit a light source (for depths > 0), its contribution is ignored because it was just sampled in the last iteration. You will terminate your ray iteration loop using Russian Roulette termination, as outlined below.
+		<h4>
+		<h4>
+			3.5  Russian Roulette (10 points)
+		</h4>
+		<p>
+			Begin your light estimation function with a float called throughput; it will begin with a value of 1. At each iteration of the light estimation loop, multiply the ray's throughput by the maximum RGB component of the brdf()*|dot| components of the LTE. At every iteration of light estimation past a depth of 2 (we don't want to terminate rays too early), generate a uniform random variable and compare it to your ray's throughput. If the uniform random number is greater than the throughput, stop iteration on the ray.
+		<h4>
+		<h3>
+			4  Extra Credit (max 50 points)
+		</h3>
+		<h4>
+			4.1  Fresnel materials and specular transmission BxDF (max 30 points)
+		</h4>
+		<p>
+			Implement a specular transmission (refraction) BxDF, and then implement a material that weights a reflective and refractive component based on Fresnel's Law of Reflection. Render scenes that use this material.
+		</p>
+		<h4>
+			4.2  Interesting features (max 50 points)
+		</h4>
+		<p>
+			Think of your own additions to this assignment and implement them! This may be something like another BxDF/Material type, or more rendering optimizations. Make sure to document any additions you make!
+		</p>
+		<h3>
+			5  Submission
+		</h3>
+		<p>
+			Submit your cleaned and zipped project on Canvas. Include your test scene renders in your submission. Also include a README to document your extra features!
+		</p>
+	</body>
+</HTML>

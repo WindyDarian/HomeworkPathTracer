@@ -1,5 +1,6 @@
 #pragma once
 #include <scene/materials/material.h>
+#include <memory>
 
 //Unlike a default Material, the WeightedMaterial has a set of floats that weight each BxDF this Material contains
 //It is assumed by this class that the sum of all the weights is 1.
@@ -14,10 +15,14 @@ public:
     WeightedMaterial(const glm::vec3 &color);
 //Functions
     //Given an intersection with some Geometry, evaluate the scattered energy at isx given a world-space wo and wi for all BxDFs we contain that match the input flags
-    virtual glm::vec3 EvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, const glm::vec3 &wiW, BxDFType flags = BSDF_ALL) const;
+    virtual glm::vec3 EvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, const glm::vec3 &wiW, float& pdf_ret, BxDFType flags = BSDF_ALL) const;
 
     //Given an intersection with some Geometry, generate a world-space wi then evaluate the scattered energy along the world-space wo.
     virtual glm::vec3 SampleAndEvaluateScatteredEnergy(const Intersection &isx, const glm::vec3 &woW, glm::vec3 &wiW_ret, float &pdf_ret, BxDFType flags = BSDF_ALL) const;
 //Members
     QList<float> bxdf_weights;
+    void resetWeightDistribution();
+
+private:
+    std::unique_ptr<std::piecewise_constant_distribution<float>> weight_distribution;
 };

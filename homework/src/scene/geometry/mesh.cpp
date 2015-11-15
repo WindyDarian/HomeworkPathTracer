@@ -48,7 +48,7 @@ void Mesh::ComputeArea()
                 new std::piecewise_constant_distribution<float>(indices.begin(), indices.end(), tri_areas.begin()));
 }
 
-Intersection Mesh::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection Mesh::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
     // first pick a triangle using weighted destribution
     int index = static_cast<int>((*this->tri_area_distribution)(*mersenne_generator_ptr));
@@ -186,6 +186,7 @@ Intersection Triangle::GetIntersection(const Ray &r)
     glm::vec3 inormal = this->GetNormal(ipoint);
     glm::vec3 itangent = this->computeLocalTangent(this->points[0], this->points[1], this->points[2]);
 
+
     return Intersection(ipoint,
                         inormal,
                         itangent,
@@ -194,7 +195,7 @@ Intersection Triangle::GetIntersection(const Ray &r)
                         this);
 }
 
-Intersection Triangle::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection Triangle::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
     // sample a random point on a triangle
     glm::vec3 v1 = points[1] - points[0];
@@ -261,6 +262,7 @@ Intersection Mesh::GetIntersection(const Ray &r)
 
     glm::vec3 s_color = Material::GetImageColorInterp(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
 
+
     return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 }
 
@@ -315,7 +317,6 @@ glm::vec3 Mesh::ComputeNormal(const glm::vec3 &P)
 
 std::list<BoundingBoxFrame*> &Mesh::getVisibleBoundingBoxesBVH()
 {
-    assert(this->visible_bounding_boxes_bvh);
     return *this->visible_bounding_boxes_bvh;
 }
 
@@ -414,7 +415,6 @@ BoundingBox Mesh::calculateBoundingBox()
 
 glm::vec3 Mesh::calculateCentroid()
 {
-    assert(this->faces.size()>0);
     glm::vec3 result(0.f);
     //getting bounding box in world space
     for (auto t: this->faces)

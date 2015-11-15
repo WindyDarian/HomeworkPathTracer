@@ -23,9 +23,9 @@ void Sphere::ComputeArea()
 {
     auto scale = this->transform.getScale();
 
-    float xp = glm::pow(1.f * scale.x, p_ellipsoid);
-    float yp = glm::pow(1.f * scale.y, p_ellipsoid);
-    float zp = glm::pow(1.f * scale.z, p_ellipsoid);
+    float xp = glm::pow(.5f * scale.x, p_ellipsoid);
+    float yp = glm::pow(.5f * scale.y, p_ellipsoid);
+    float zp = glm::pow(.5f * scale.z, p_ellipsoid);
 
     // near approxmiate of ellipsoid area
     this->area = PI * 4.f *
@@ -48,42 +48,36 @@ glm::vec3 Sphere::pickSamplePointLocal(std::function<float ()> &randomf)
     return point_local;
 }
 
-Intersection Sphere::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection Sphere::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
     glm::vec3 point_world, normal_world, tangent_world;
-    while (true)
+
+    glm::vec3 point_local = this->pickSamplePointLocal(randomf);
+
+    glm::vec3 inormal(glm::normalize(point_local));
+
+
+    glm::vec3 itangent = glm::cross(glm::vec3(0,1,0), inormal);
+    if (fequal(glm::length2(itangent), 0.f))
     {
-
-        glm::vec3 point_local = this->pickSamplePointLocal(randomf);
-
-        glm::vec3 inormal(glm::normalize(point_local));
-
-        //If make sure it samples the front face to illuminated object, the area factor in pdf also needs to be changed
-        // to the front area. So I decided not to use that. So in high sample count it will be correct although there maybe
-        // lots of noises forr low sample count.
-//        if (target_point)
-//        {
-//            using rejection sampling to make sure samples are on the near side to target as req
-//            auto target_local = this->transform.invT() * glm::vec4(*target_point, 1.f);
-//            if (glm::dot(inormal, target_local.xyz()) < 0 || fequal(glm::length2(target_local.xyz()), 0.f))
-//                continue;
-//        }
-
-        glm::vec3 itangent = glm::cross(glm::vec3(0,1,0), inormal);
-        if (fequal(glm::length2(itangent), 0.f))
-        {
-            itangent = glm::vec3(0,0,1);
-        }
-
-        point_world = glm::vec3(this->transform.T() * glm::vec4(point_local, 1.f));
-        normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(inormal, 0.f)));
-
-        tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(itangent, 0.f)));
-
-        return Intersection(point_world, normal_world, tangent_world,
-                            0.f, Material::GetImageColorInterp(this->GetUVCoordinates(point_local), this->material->texture),
-                            this);
+        itangent = glm::vec3(0,0,1);
     }
+
+    point_world = glm::vec3(this->transform.T() * glm::vec4(point_local, 1.f));
+    normal_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(inormal, 0.f)));
+
+    if(target_normal && glm::dot(*target_normal,normal_world) > 0)
+    {
+        normal_world *= -1.f;
+    }
+
+    tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(itangent, 0.f)));
+
+    glm::vec2 uv = this->GetUVCoordinates(point_local);
+    return Intersection(point_world, normal_world, tangent_world,
+                        0.f, Material::GetImageColorInterp(uv, this->material->texture),
+                        this);
+
 }
 
 glm::vec3 Sphere::ComputeNormal(const glm::vec3 &P)
@@ -130,12 +124,13 @@ Intersection Sphere::GetIntersection(const Ray& r)
     glm::vec3 normal_world( normal4_world );
     normal_world = glm::normalize(normal_world);
 
-    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(normal_world, 0.f)));
+    glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(itangent, 0.f)));
     //bitangent computed in Intersection constructor
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
 
-    glm::vec3 s_color = Material::GetImageColorInterp(this->GetUVCoordinates(ipoint), this->material->texture);
+    glm::vec2 uv = this->GetUVCoordinates(ipoint);
+    glm::vec3 s_color = Material::GetImageColorInterp(uv, this->material->texture);
 
     return Intersection(ipoint_world, normal_world, tangent_world, t_world, s_color, this);
 
@@ -269,9 +264,21 @@ void Sphere::create()
 
 glm::vec2 Sphere::GetUVCoordinates(const glm::vec3 &point)
 {
-   float phi = std::atan2(point.z, point.x);
+   glm::vec3 p = glm::normalize(point);
+
+   bool is_top = fequal(p.x, 0.f) && fequal(p.z, 0.f);
+
+   if (is_top)
+   {
+       if (p.y >= 0)
+        return glm::vec2(.5f, 0.f);
+       else return glm::vec2(.5f, 1.f);
+   }
+
+
+   float phi = std::atan2(p.z, p.x);
    if (phi < 0) phi += TWO_PI;
-   float theta = glm::acos(point.y * 2); //map y to (-1, 1)
+   float theta = glm::acos(p.y); //map y to (-1, 1)
 
    glm::vec2 uv( 1 - phi / TWO_PI, 1 - theta / PI);
 
@@ -302,4 +309,5 @@ float Sphere::RayPDF(const Intersection &isx, const Ray &ray) {
     float sinThetaMax2 = radius*radius / glm::distance2(isx.point, Pcenter);
     float cosThetaMax = glm::sqrt(glm::max(0.f, 1.f - sinThetaMax2));
     return UniformConePdf(cosThetaMax);
+    //return Geometry::RayPDF(isx, ray);
 }

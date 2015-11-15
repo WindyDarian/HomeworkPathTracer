@@ -20,12 +20,17 @@
 
 #include <QMatrix4x4>
 
+#include <random>
+
 
 static const float PI = 3.14159265358979323846f;
 static const float TWO_PI = 2 * PI;
 static const float INV_PI = 1.0f / PI;
 static const float DEG2RAD = PI / 180.f;
 static const float RAD2DEG = 180.f / PI;
+static const float PI_OVER_2 = PI * 0.5f;
+static const float PI_OVER_4 = PI * 0.25f;
+
 
 /// 277 linear algebra namespace
 namespace la

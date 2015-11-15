@@ -56,10 +56,10 @@
 
 	<geometry type="sphere" name="Yellow Sphere">
 		<transform>
-			<translate>0 -2 0</translate>
+			<translate>0 -3 0</translate>
 			<scale>2 2 2</scale>
 		</transform>
-		<material>yellow_diffuse</material>
+		<material>glass</material>
 	</geometry>
 
 	<geometry type="sphere" name="White Sphere">
@@ -67,61 +67,16 @@
 			<translate>-3 0 2</translate>
 			<scale>4 4 4</scale>
 		</transform>
-		<material>SpecularReflective_Material</material>
+		<material>white_diffuse</material>
 	</geometry>
 
-	<geometry type="cube" name="Scott Box">
+	<geometry type="sphere" name="Light Source">
 		<transform>
 			<translate>0 0 0</translate>
-			<scale>1 2 1</scale>
-			<rotate>30 60 0</rotate>
-		</transform>
-		<material>textured_uv</material>
-	</geometry>
-
-	<geometry type="disc" name="dddisk">
-		<transform>
-			<translate>1.25 0 0</translate>
-			<scale>1 2 1</scale>
-			<rotate>-45 0 -10</rotate>
-		</transform>
-		<material>textured_uv</material>
-	</geometry>
-
-	<geometry type="square" name="wtfsquare">
-		<transform>
-			<translate>-2 -3.5 0</translate>
+			<rotate>0 0 0</rotate>
 			<scale>2 2 2</scale>
-			<rotate>-45 0 10</rotate>
-		</transform>
-		<material>textured_uv</material>
-	</geometry>
-
-	<geometry type="obj" name="Wahoo">
-		<filename>wahoo.obj</filename>
-		<transform>
-			<translate>2 -4 0</translate>
-			<scale>0.3 0.3 0.3</scale>
-		</transform>
-		<material>wahoo_diffuse</material>
-	</geometry>
-
-	<geometry type="square" name="Light Source">
-		<transform>
-			<translate>0 4.5 0</translate>
-			<rotate>90 0 0</rotate>
-			<scale>3 3 3</scale>
 		</transform>
 		<material>emissive_material</material>
-	</geometry>
-
-	<geometry type="disc" name="Light Source">
-		<transform>
-			<translate>2 -4.5 0.5</translate>
-			<rotate>-90 0 0</rotate>
-			<scale>3 1 3</scale>
-		</transform>
-		<material>emissive_material2</material>
 	</geometry>
 
 	<material type="default" name="white_diffuse">
@@ -151,47 +106,53 @@
 		<bxdf>lambert1</bxdf>
 	</material>
 
-	<material type="default" name="textured_uv">
-		<baseColor>1 1 1</baseColor>
-		<texture>uv_test.bmp</texture>
-		<bxdf>lambert1</bxdf>
-	</material>
+    <material type="default" name="SpecularReflective_Material">
+        <baseColor>1 1 1</baseColor>
+        <bxdf>specular2</bxdf>
+    </material>
 
+    <material type="default" name="SpecularTransmission_Material">
+        <baseColor>1 1 1</baseColor>
+        <bxdf>specular1</bxdf>
+    </material>
 
-	<material type="default" name="reflective_white">
-		<baseColor>1 1 1</baseColor>
-		<bxdf>specular_reflective1</bxdf>
-	</material>
+    <material type="default" name="Blinn_Exp50">
+        <baseColor>0.25 1 0.25</baseColor>
+        <bxdf>blinn1</bxdf>
+    </material>
 
-	<material type="default" name="wahoo_diffuse">
-		<baseColor>1 1 1</baseColor>
-		<texture>wahoo.bmp</texture>
-		<bxdf>lambert1</bxdf>
-	</material>
+    <material type="weighted" name="plastic_material">
+        <baseColor>1 1 1</baseColor>
+        <bxdf>lambert1</bxdf><weight>0.5</weight>
+        <bxdf>blinn1</bxdf><weight>0.5</weight>
+    </material>
+
+    <material type="weighted" name="glass">
+        <baseColor>1 1 1</baseColor>
+        <bxdf>specular1</bxdf><weight>0.5</weight>
+        <bxdf>specular1</bxdf><weight>0.5</weight>
+    </material>
 
 	<material type="light" name="emissive_material" intensity="20">
 		<baseColor>1 1 1</baseColor>
 	</material>
 
-	<material type="light" name="emissive_material2" intensity="20">
-		<baseColor>1 0 0.5</baseColor>
-	</material>
-
-	<material type="default" name="SpecularReflective_Material">
-		<baseColor>1 1 1</baseColor>
-		<bxdf>specular1</bxdf>
-	</material>
-
-	<bxdf type="specularReflection" name="specular1" diffuseColor="1 1 1">
-	</bxdf>
-
 	<bxdf type="lambert" name="lambert1" diffuseColor="1 1 1">
 	</bxdf>
+
+	<bxdf type="specularReflection" name="specular1" reflectionColor="1 1 1">
+	</bxdf>
+
+    <bxdf type="specularReflection" name="specular2" reflectionColor="1 1 1">
+    </bxdf>
+
+    <bxdf type="blinnMicrofacet" name="blinn1" diffuseColor="1 1 1" exponent="50">
+    </bxdf>
 
 	<integrator type="raytrace">
 		<maxDepth>5</maxDepth>
 	</integrator>
 
-	<pixelSampleLength>5</pixelSampleLength>
+	<pixelSampleLength>8</pixelSampleLength>
 
 </scene>

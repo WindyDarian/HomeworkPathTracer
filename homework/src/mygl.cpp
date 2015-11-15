@@ -268,6 +268,9 @@ void MyGL::SceneLoadDialog()
             }
         }
     }
+
+    ResizeToSceneCamera();
+    update();
 }
 
 inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)

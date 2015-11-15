@@ -99,7 +99,7 @@ glm::vec2 SquarePlane::GetUVCoordinates(const glm::vec3 &point)
     return uv;
 }
 
-Intersection SquarePlane::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_point)
+Intersection SquarePlane::pickSampleIntersection(std::function<float ()> randomf, const glm::vec3 *target_normal)
 {
      float random1 = randomf();
      float random2 = randomf();

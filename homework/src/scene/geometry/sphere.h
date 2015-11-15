@@ -14,7 +14,7 @@ public:
     virtual glm::vec3 ComputeNormal(const glm::vec3 &P);
     virtual void ComputeArea();
     virtual float RayPDF(const Intersection &isx, const Ray &ray);
-    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_point = nullptr);
+    virtual Intersection pickSampleIntersection(std::function<float()> randomf, const glm::vec3* target_normal = nullptr);
 
 protected:
     virtual BoundingBox calculateBoundingBox();

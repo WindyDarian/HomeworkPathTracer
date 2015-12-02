@@ -80,6 +80,8 @@ Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3
     {
         normals[i] = plane_normal;
     }
+
+
 }
 
 
@@ -91,6 +93,8 @@ Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3
 Triangle::Triangle(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3, const glm::vec3 &n1, const glm::vec3 &n2, const glm::vec3 &n3, const glm::vec2 &t1, const glm::vec2 &t2, const glm::vec2 &t3)
 {
     plane_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+    if (plane_normal.x != plane_normal.x || plane_normal.y!= plane_normal.y|| plane_normal.z != plane_normal.z)
+        this->tri_valid = false;
     points[0] = p1;
     points[1] = p2;
     points[2] = p3;
@@ -128,11 +132,18 @@ glm::vec4 Triangle::GetNormal(const glm::vec4 &position)
 
 glm::vec2 Triangle::GetUVCoordinates(const glm::vec3 &point)
 {
+    if (!tri_valid)
+        return glm::vec2(0,0);
     float S = tri_area(points[0], points[1], points[2]);
     float S1 = tri_area(point, points[1], points[2]);
     float S2 = tri_area(point, points[2], points[0]);
     float S3 = tri_area(point, points[0], points[1]);
-    return this->uvs[0] * S1/S + this->uvs[1] * S2/S + this->uvs[2] * S3/S;
+    if (fequal(S,0.f))
+        return glm::vec2(0,0);
+
+    auto UV = this->uvs[0] * S1/S + this->uvs[1] * S2/S + this->uvs[2] * S3/S;
+    Q_ASSERT(UV.x>= 0 && UV.y >= 0);
+    return UV ;
 }
 
 BoundingBox Triangle::calculateBoundingBox()
@@ -149,6 +160,9 @@ glm::vec3 Triangle::calculateCentroid()
 //The ray in this function is not transformed because it was *already* transformed in Mesh::GetIntersection
 Intersection Triangle::GetIntersection(const Ray &r)
 {
+    if (!tri_valid)
+        return Intersection();
+
     glm::vec3 v01(this->points[1] - this->points[0]);
     glm::vec3 v12(this->points[2] - this->points[1]);
     glm::vec3 v20(this->points[0] - this->points[2]);
@@ -186,6 +200,7 @@ Intersection Triangle::GetIntersection(const Ray &r)
     glm::vec3 inormal = this->GetNormal(ipoint);
     glm::vec3 itangent = this->computeLocalTangent(this->points[0], this->points[1], this->points[2]);
 
+    Q_ASSERT(ipoint.x == ipoint.x);
 
     return Intersection(ipoint,
                         inormal,
@@ -211,6 +226,8 @@ Intersection Triangle::pickSampleIntersection(std::function<float ()> randomf, c
 
     glm::vec3 inormal = this->GetNormal(ipoint);
     glm::vec3 itangent = this->computeLocalTangent(this->points[0], this->points[1], this->points[2]);
+
+
 
     return Intersection(ipoint,
                         inormal,
@@ -259,6 +276,8 @@ Intersection Mesh::GetIntersection(const Ray &r)
     glm::vec3 tangent_world = glm::normalize(glm::vec3(this->transform.invTransT() * glm::vec4(result.tangent, 0)));
 
     float t_world = glm::dot(ipoint_world - r.origin, r.direction);
+
+    Q_ASSERT(t_world==t_world);
 
     glm::vec3 s_color = Material::GetImageColorInterp(result.object_hit->GetUVCoordinates(result.point), this->material->texture);
 

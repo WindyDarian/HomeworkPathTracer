@@ -36,7 +36,7 @@ public:
 protected:
     virtual BoundingBox calculateBoundingBox();
     virtual glm::vec3 calculateCentroid();
-
+    bool tri_valid = true;
 
 };
 

@@ -252,11 +252,20 @@ BVHNode *BVHNode::generateNode_sah(const std::list<Geometry *> &objs, int depth)
 
     // throw every object into each bucket
     float width = bbox_centers.max[axis] - bbox_centers.min[axis];
-    Q_ASSERT(width > 0);
+
+    //Q_ASSERT(width > 0);
     for (auto obj : objs)
     {
-        int pos = (obj->getCentroid()[axis] - bbox_centers.min[axis])
+        int pos;
+        if (width > 0)
+        {
+            pos = (obj->getCentroid()[axis] - bbox_centers.min[axis])
                 / width * buckets_count;
+        }
+        else
+        {
+            pos = 0;
+        }
         if (pos >= buckets_count) pos = buckets_count - 1;
 
         buckets[pos].items.push_back(obj);

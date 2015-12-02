@@ -383,6 +383,12 @@ void MyGL::RaytraceScene()
         return;
     }
 
+
+    std::cout<< "Render started:" << std::endl;
+    QElapsedTimer render_timer;
+    render_timer.start();
+
+
 #define MULTITHREADED
 #ifdef MULTITHREADED
     //Set up 16 (max) threads
@@ -459,6 +465,12 @@ void MyGL::RaytraceScene()
         }
     }
 #endif
+
+    int render_time = render_timer.elapsed();
+    std::cout << "Render completed. Total time: "
+              << std::setprecision(9) << render_time/1000.0
+              << " seconds. (" << render_time << " millseconds.)"
+              << std::endl;
     scene.film.WriteImage(filepath);
 }
 

@@ -1,0 +1,90 @@
+# Blender MTL File: 'None'
+# Material Count: 7
+
+newmtl Sail.001
+Ns 17.647059
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.326734 0.227230 0.172930
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 3
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\shiptexture.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture.png
+
+newmtl ShipThings_Mirror.001
+Ns 80.392157
+Ka 0.508251 0.508251 0.508251
+Kd 0.800000 0.800000 0.800000
+Ks 0.462043 0.321370 0.244594
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 6
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\shiptexture.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture.png
+
+newmtl ShipThings_cannon.001
+Ns 80.392157
+Ka 0.042904 0.042904 0.042904
+Kd 0.800000 0.800000 0.800000
+Ks 0.462043 0.321370 0.244594
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 6
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\shiptexture.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture.png
+
+newmtl ShipThings_wood.001
+Ns 49.019608
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.331550 0.230600 0.175500
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 3
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\shiptexture.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shiptexture.png
+
+newmtl Shipbody.001
+Ns 49.019608
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.331550 0.230600 0.175500
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 3
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\shipbody.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shipbody_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\shipbody.png
+
+newmtl Wood.001
+Ns 49.019608
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.331550 0.230600 0.175500
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.000000
+illum 3
+map_Kd C:\Windy\projects\maya\Project1\sourceimages\wood.png
+map_Bump C:\\Windy\\projects\\maya\\Project1\\sourceimages\\wood_normal.png
+map_d C:\\Windy\\projects\\maya\\Project1\\sourceimages\\wood.png
+
+newmtl lambert1
+Ns 92.156863
+Ka 1.000000 1.000000 1.000000
+Kd 0.400000 0.400000 0.400000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

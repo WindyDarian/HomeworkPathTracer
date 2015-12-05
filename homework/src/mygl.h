@@ -14,6 +14,8 @@
 #include <scene/xmlreader.h>
 #include <raytracing/integrator.h>
 
+#include <renderthread.h>
+
 #include <raytracing/samplers/pixelsampler.h>
 #include <raytracing/samplers/uniformpixelsampler.h>
 #include <raytracing/samplers/randompixelsampler.h>
@@ -57,6 +59,14 @@ private:
     ImageWideStratifiedSampler iw_stratified_sampler;
 
 
+    bool is_rendering = false;
+    QImage progressive_scene;
+    GLuint progressive_position_buffer;
+    QOpenGLShaderProgram progressive_render_program;
+
+    std::vector<RenderThread*> render_threads;
+    void stopRendering();
+    void renderUpdate();
 
 public:
 
@@ -90,4 +100,7 @@ protected:
 
 signals:
     void sig_ResizeToCamera(int,int);
+
+private slots:
+     void on_RenderUpdate();
 };

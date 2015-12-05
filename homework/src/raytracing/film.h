@@ -12,4 +12,6 @@ public:
     void SetDimensions(unsigned int w, unsigned int h);
     void WriteImage(const std::string &path);
     void WriteImage(QString path);
+
+
 };

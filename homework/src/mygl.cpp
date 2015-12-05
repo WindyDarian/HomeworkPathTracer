@@ -7,13 +7,22 @@
 #include <QXmlStreamReader>
 #include <QFileDialog>
 #include <QElapsedTimer>
-#include <renderthread.h>
+#include <QPainter>
 #include <scene/geometry/mesh.h>
 #include <ctime>
 #include <raytracing/directlightingintegrator.h>
+#include <QOpenGLTexture>
 
 
 #include <iomanip>
+
+
+float const screen_quad_pos[] = {
+1.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+-1.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+-1.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+};
 
 
 
@@ -65,6 +74,11 @@ void MyGL::initializeGL()
     // Create and set up the flat-color shader
     prog_flat.create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
+    this->progressive_render_program.addShaderFromSourceFile(QOpenGLShader::Vertex  , ":/glsl/renderview.vert.glsl");
+    this->progressive_render_program.addShaderFromSourceFile(QOpenGLShader::Fragment,  ":/glsl/renderview.frag.glsl");
+    this->progressive_render_program.link();
+
+
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
     vao.bind();
@@ -76,6 +90,15 @@ void MyGL::initializeGL()
     integrator->intersection_engine = &intersection_engine;
     intersection_engine.scene = &scene;
     ResizeToSceneCamera();
+
+
+
+
+    // create full screen quad for progressive rendering
+    glGenBuffers(1, &progressive_position_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -98,10 +121,49 @@ void MyGL::paintGL()
     // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Update the viewproj matrix
-    prog_lambert.setViewProjMatrix(gl_camera.getViewProj());
-    prog_flat.setViewProjMatrix(gl_camera.getViewProj());
-    GLDrawScene();
+
+    if (!is_rendering)
+    {
+
+        // Update the viewproj matrix
+        prog_lambert.setViewProjMatrix(gl_camera.getViewProj());
+        prog_flat.setViewProjMatrix(gl_camera.getViewProj());
+
+        GLDrawScene();
+    }
+    else
+    {
+
+
+        // if rendering, draw progressive rendering scene;
+        progressive_render_program.bind();
+
+
+        QOpenGLTexture(this->progressive_scene);
+
+
+        QOpenGLTexture *texture = new QOpenGLTexture(QImage(progressive_scene));
+        texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+        texture->setMagnificationFilter(QOpenGLTexture::Linear);
+
+        // the initial texture is from the opengl frame buffer before start rendering
+        texture->bind();
+
+
+        glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
+
+        int vertexLocation = progressive_render_program.attributeLocation("position");
+        progressive_render_program.enableAttributeArray(vertexLocation);
+        int vertexTextureCoord = progressive_render_program.attributeLocation("texcoord");
+        progressive_render_program.enableAttributeArray(vertexTextureCoord);
+
+        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
+        glVertexAttribPointer(vertexTextureCoord, 2, GL_FLOAT, GL_TRUE, 5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+
+    }
 }
 
 void MyGL::GLDrawScene()
@@ -226,6 +288,8 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     gl_camera.RecomputeAttributes();
     update();  // Calls paintGL, among other things
 }
+
+
 
 void MyGL::SceneLoadDialog()
 {
@@ -377,7 +441,21 @@ void MyGL::RaytraceScene()
 
 void MyGL::RaytraceScene()
 {
+
+
     QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
+
+    //test
+    QImage p = this->grabFramebuffer();
+    progressive_scene = p.scaled(this->scene.camera.width, this->scene.camera.height);
+
+    progressive_scene.setPixel(2,2,qRgb(255,0,0));
+    progressive_scene.setPixel(2,4,qRgb(0,255,0));
+    progressive_scene.setPixel(4,2,qRgb(0,0,255));
+
+    this->is_rendering = true;
+
+
     if(filepath.length() == 0)
     {
         return;
@@ -388,9 +466,6 @@ void MyGL::RaytraceScene()
     QElapsedTimer render_timer;
     render_timer.start();
 
-
-#define MULTITHREADED
-#ifdef MULTITHREADED
     //Set up 16 (max) threads
     unsigned int width = scene.camera.width;
     unsigned int height = scene.camera.height;
@@ -448,23 +523,7 @@ void MyGL::RaytraceScene()
     }
     delete [] render_threads;
 
-#else
-    StratifiedPixelSampler pixel_sampler(scene.sqrt_samples);
-    for(unsigned int i = 0; i < scene.camera.width; i++)
-    {
-        for(unsigned int j = 0; j < scene.camera.height; j++)
-        {
-            QList<glm::vec2> sample_points = pixel_sampler->GetSamples(i, j);
-            glm::vec3 accum_color;
-            for(int a = 0; a < sample_points.size(); a++)
-            {
-                glm::vec3 color = integrator.TraceRay(scene.camera.Raycast(sample_points[a]), 0);
-                accum_color += color;
-            }
-            scene.film.pixels[i][j] = accum_color / (float)sample_points.size();
-        }
-    }
-#endif
+
 
     int render_time = render_timer.elapsed();
     std::cout << "Render completed. Total time: "
@@ -472,6 +531,16 @@ void MyGL::RaytraceScene()
               << " seconds. (" << render_time << " millseconds.)"
               << std::endl;
     scene.film.WriteImage(filepath);
+}
+
+void MyGL::on_RenderUpdate()
+{
+    this->renderUpdate();
+}
+
+void MyGL::renderUpdate()
+{
+
 }
 
 

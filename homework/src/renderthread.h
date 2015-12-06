@@ -1,9 +1,11 @@
 #pragma once
 
 #include <QThread>
+#include <QImage>
 #include <raytracing/film.h>
 #include <scene/scene.h>
 #include <raytracing/integrator.h>
+#include <QMutex>
 
 glm::vec3 ComponentMult(const glm::vec3 &a, const glm::vec3 &b);
 
@@ -14,6 +16,8 @@ public:
             unsigned int ystart, unsigned int yend,
             unsigned int samplesSqrt, unsigned int depth,
             Film* f, Camera* c, Integrator* i);
+
+    QImage* preview_image = nullptr;
 
 protected:
     //This overrides the functionality of QThread::run
@@ -28,4 +32,5 @@ protected:
     Film* film;
     Camera* camera;
     Integrator* integrator;
+    static QMutex mutex;
 };

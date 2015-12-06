@@ -138,10 +138,6 @@ void MyGL::paintGL()
         // if rendering, draw progressive rendering scene;
         progressive_render_program.bind();
 
-
-        QOpenGLTexture(this->progressive_scene);
-
-
         QOpenGLTexture *texture = new QOpenGLTexture(QImage(progressive_scene));
         texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
         texture->setMagnificationFilter(QOpenGLTexture::Linear);
@@ -161,7 +157,8 @@ void MyGL::paintGL()
         glVertexAttribPointer(vertexTextureCoord, 2, GL_FLOAT, GL_TRUE, 5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
+        texture->destroy();
+        delete texture;
 
     }
 }
@@ -221,8 +218,8 @@ void MyGL::GLDrawScene()
         for (auto b :scene.boundingbox_objects)
         {
 
-                prog_flat.setModelMatrix(glm::mat4(1.0f));
-                prog_flat.draw(*this, *b);
+            prog_flat.setModelMatrix(glm::mat4(1.0f));
+            prog_flat.draw(*this, *b);
 
         }
     }
@@ -337,44 +334,44 @@ void MyGL::SceneLoadDialog()
     update();
 }
 
-inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)
-{
-    Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+//inline void _renderpixel_normal(int x, int y, Scene& scene, IntersectionEngine& intersection_engine)
+//{
+//    Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
 
-    Intersection intersection(intersection_engine.GetIntersection(r));
+//    Intersection intersection(intersection_engine.GetIntersection(r));
 
-    if(intersection.object_hit == NULL || intersection.object_hit == nullptr)
-    {
-        scene.film.pixels[x][y] = glm::vec3(0.f);
-    }
-    else
-    {
-        scene.film.pixels[x][y] = glm::abs(intersection.normal);
-        //scene.film.pixels[x][y] = intersection.normal;
-    }
-}
+//    if(intersection.object_hit == NULL || intersection.object_hit == nullptr)
+//    {
+//        scene.film.pixels[x][y] = glm::vec3(0.f);
+//    }
+//    else
+//    {
+//        scene.film.pixels[x][y] = glm::abs(intersection.normal);
+//        //scene.film.pixels[x][y] = intersection.normal;
+//    }
+//}
 
-inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator, PixelSampler* sampler = nullptr)
-{
-    if (sampler == nullptr)
-    {
-        Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
-        scene.film.pixels[x][y] = integrator.TraceRay(r, 0);
-    }
-    else
-    {
-        auto samples = sampler->GetSamples(x, y);
-        glm::vec3 color_total(0.f);
+//inline void _renderpixel(int x, int y, Scene& scene, Integrator& integrator, PixelSampler* sampler = nullptr)
+//{
+//    if (sampler == nullptr)
+//    {
+//        Ray r(scene.camera.Raycast(static_cast<float>(x), static_cast<float>(y)));
+//        scene.film.pixels[x][y] = integrator.TraceRay(r, 0);
+//    }
+//    else
+//    {
+//        auto samples = sampler->GetSamples(x, y);
+//        glm::vec3 color_total(0.f);
 
-        for (glm::vec2 sample : samples)
-        {
-            Ray r = scene.camera.Raycast(sample.x, sample.y);
-            color_total += integrator.TraceRay(r, 0);
-        }
+//        for (glm::vec2 sample : samples)
+//        {
+//            Ray r = scene.camera.Raycast(sample.x, sample.y);
+//            color_total += integrator.TraceRay(r, 0);
+//        }
 
-        scene.film.pixels[x][y] = color_total / static_cast<float>(samples.size());
-    }
-}
+//        scene.film.pixels[x][y] = color_total / static_cast<float>(samples.size());
+//    }
+//}
 
 /* old
 void MyGL::RaytraceScene()
@@ -443,27 +440,28 @@ void MyGL::RaytraceScene()
 {
 
 
-    QString filepath = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
+    if (this->is_rendering)
+    {
+        std::cout << "Render Interrupted!" << std::endl;
+        this->terminateRenderThreads();
+    }
 
-    //test
-    QImage p = this->grabFramebuffer();
-    progressive_scene = p.scaled(this->scene.camera.width, this->scene.camera.height);
-
-    progressive_scene.setPixel(2,2,qRgb(255,0,0));
-    progressive_scene.setPixel(2,4,qRgb(0,255,0));
-    progressive_scene.setPixel(4,2,qRgb(0,0,255));
-
-    this->is_rendering = true;
+    output_file_path = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
 
 
-    if(filepath.length() == 0)
+    if(output_file_path.length() == 0)
     {
         return;
     }
 
+    //test
+    QImage p = this->grabFramebuffer();
+    progressive_scene = p.scaled(this->scene.camera.width, this->scene.camera.height);
+    this->is_rendering = true;
+
 
     std::cout<< "Render started:" << std::endl;
-    QElapsedTimer render_timer;
+
     render_timer.start();
 
     //Set up 16 (max) threads
@@ -477,7 +475,13 @@ void MyGL::RaytraceScene()
     if(y_block_count * y_block_size < height) y_block_count++;
 
     unsigned int num_render_threads = x_block_count * y_block_count;
-    RenderThread **render_threads = new RenderThread*[num_render_threads];
+    //RenderThread **render_threads = new RenderThread*[num_render_threads];
+    render_threads.clear();
+    render_threads.reserve(num_render_threads);
+    for(int i = 0; i < num_render_threads; i++)
+    {
+        render_threads.push_back(nullptr);
+    }
 
     //Launch the render threads we've made
     for(unsigned int Y = 0; Y < y_block_count; Y++)
@@ -491,46 +495,14 @@ void MyGL::RaytraceScene()
             unsigned int x_start = X * x_block_size;
             unsigned int x_end = glm::min((X + 1) * x_block_size, width);
             //Create and run the thread
-            render_threads[Y * x_block_count + X] = new RenderThread(x_start, x_end, y_start, y_end, scene.sqrt_samples, 5, &(scene.film), &(scene.camera), integrator.get());
+            render_threads[Y * x_block_count + X].reset(new RenderThread(x_start, x_end, y_start, y_end, scene.sqrt_samples, 5, &(scene.film), &(scene.camera), integrator.get()));
+            render_threads[Y * x_block_count + X]->preview_image = &this->progressive_scene;
             render_threads[Y * x_block_count + X]->start();
         }
     }
 
-    bool still_running;
-    do
-    {
-        still_running = false;
-        for(unsigned int i = 0; i < num_render_threads; i++)
-        {
-            if(render_threads[i]->isRunning())
-            {
-                still_running = true;
-                break;
-            }
-        }
-        if(still_running)
-        {
-            //Free the CPU to let the remaining render threads use it
-            QThread::yieldCurrentThread();
-        }
-    }
-    while(still_running);
+    QTimer::singleShot(500, this, SLOT(on_RenderUpdate()));
 
-    //Finally, clean up the render thread objects
-    for(unsigned int i = 0; i < num_render_threads; i++)
-    {
-        delete render_threads[i];
-    }
-    delete [] render_threads;
-
-
-
-    int render_time = render_timer.elapsed();
-    std::cout << "Render completed. Total time: "
-              << std::setprecision(9) << render_time/1000.0
-              << " seconds. (" << render_time << " millseconds.)"
-              << std::endl;
-    scene.film.WriteImage(filepath);
 }
 
 void MyGL::on_RenderUpdate()
@@ -540,7 +512,71 @@ void MyGL::on_RenderUpdate()
 
 void MyGL::renderUpdate()
 {
+    if (!this->is_rendering)
+        return;
 
+    update();
+    bool still_running;
+
+    still_running = false;
+    for(int i = 0; i < render_threads.size(); i++)
+    {
+        if(render_threads[i]->isRunning())
+        {
+            still_running = true;
+            QTimer::singleShot(500, this, SLOT(on_RenderUpdate()));
+            return;
+        }
+    }
+//        if(still_running)
+//        {
+//            //Free the CPU to let the remaining render threads use it
+//            QThread::yieldCurrentThread();
+//        }
+
+    if (!still_running)
+    {
+        this->completeRender();
+    }
+
+}
+
+void MyGL::completeRender()
+{
+
+    //Finally, clean up the render thread objects
+//    for(unsigned int i = 0; i < num_render_threads; i++)
+//    {
+//        delete render_threads[i];
+//    }
+//    delete [] render_threads;
+
+    this->terminateRenderThreads();
+
+
+    int render_time = render_timer.elapsed();
+    std::cout << "Render completed. Total time: "
+              << std::setprecision(9) << render_time/1000.0
+              << " seconds. (" << render_time << " millseconds.)"
+              << std::endl;
+
+
+
+    scene.film.WriteImage(output_file_path);
+    this->is_rendering = false;
+}
+
+void MyGL::terminateRenderThreads()
+{
+    for (int i = 0; i< render_threads.size(); i++)
+    {
+        if (render_threads[i]->isRunning())
+        {
+            render_threads[i]->terminate(); //FIXME: UNSAFE
+            render_threads[i]->wait();
+        }
+    }
+    this->render_threads.clear();
 }
 
 

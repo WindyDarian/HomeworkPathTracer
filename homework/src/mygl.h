@@ -23,7 +23,7 @@
 #include <raytracing/samplers/imagewidestratifiedsampler.h>
 
 #include <memory>
-
+#include <QString>
 
 class MyGL
     : public GLWidget277
@@ -64,9 +64,14 @@ private:
     GLuint progressive_position_buffer;
     QOpenGLShaderProgram progressive_render_program;
 
-    std::vector<RenderThread*> render_threads;
+    std::vector<std::unique_ptr<RenderThread>> render_threads;
+    QElapsedTimer render_timer;
     void stopRendering();
     void renderUpdate();
+    void completeRender();
+    void terminateRenderThreads();
+
+    QString output_file_path;
 
 public:
 

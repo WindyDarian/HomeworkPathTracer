@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     kdTreeBBoxVisible->setChecked(true);
     viewMenu->addAction(kdTreeBBoxVisible);
 
-    meshKdTreeBBoxVisible = new QAction("Bounding Box (BVH Tree of Mesh, top 3 layers)", viewMenu);
+    meshKdTreeBBoxVisible = new QAction("Bounding Box (BVH Tree of Mesh, top 5 layers)", viewMenu);
     meshKdTreeBBoxVisible->setCheckable(true);
     meshKdTreeBBoxVisible->setChecked(true);
     viewMenu->addAction(meshKdTreeBBoxVisible);
@@ -31,6 +31,11 @@ MainWindow::MainWindow(QWidget *parent) :
     meshTriangleBBoxVisible->setChecked(false);
     viewMenu->addAction(meshTriangleBBoxVisible);
 
+    interactiveRenderSwitch = new QAction("Interactive_Render", viewMenu);
+    interactiveRenderSwitch->setCheckable(true);
+    interactiveRenderSwitch->setChecked(false);
+    viewMenu->addAction(interactiveRenderSwitch);
+
     connect(objectBBoxVisible, SIGNAL(toggled(bool)),
                      this, SLOT(on_objectbboxvisible_toggled(bool)));
     connect(kdTreeBBoxVisible, SIGNAL(toggled(bool)),
@@ -39,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(on_meshkdtreebboxvisible_toggled(bool)));
     connect(meshTriangleBBoxVisible, SIGNAL(toggled(bool)),
             this, SLOT(on_meshtrianglebboxvisible_toggled(bool)));
+    connect(interactiveRenderSwitch, SIGNAL(toggled(bool)),
+            this, SLOT(on_interactiverendervisible_toggled(bool)));
 
 
 
@@ -182,6 +189,11 @@ void MainWindow::on_meshkdtreebboxvisible_toggled(bool value)
 void MainWindow::on_meshtrianglebboxvisible_toggled(bool value)
 {
     ui->mygl->setTriangleBBoxVisible(value);
+}
+
+void MainWindow::on_interactiverendervisible_toggled(bool value)
+{
+    ui->mygl->setInteractiveRenderEnabled(value);
 }
 
 void MainWindow::on_selectSampler_triggered(QAction * action)

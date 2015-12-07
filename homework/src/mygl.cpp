@@ -35,12 +35,18 @@ MyGL::MyGL(QWidget *parent)
 {
     setFocusPolicy(Qt::ClickFocus);
 
+
+    render_event_timer.setParent(this);
+    connect(&render_event_timer, SIGNAL(timeout()), this, SLOT(on_RenderUpdate()));
+
 //    setAALevel(AA_TWOTWO);
 //    setSampler(SAMPLER_UNIFORM);
 }
 
 MyGL::~MyGL()
 {
+    if (this->is_rendering)
+        this->terminateRenderThreads();
     makeCurrent();
 
     vao.destroy();
@@ -80,7 +86,7 @@ void MyGL::initializeGL()
 
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
-    // using multiple VAOs, we can just bind one once.
+    // using multiple VAOs, we can just bind one once.s'
     vao.bind();
 
     //Test scene data initialization
@@ -99,6 +105,7 @@ void MyGL::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -122,7 +129,7 @@ void MyGL::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-    if (!is_rendering)
+    if (!is_rendering && !interactive_render_view)
     {
 
         // Update the viewproj matrix
@@ -138,7 +145,7 @@ void MyGL::paintGL()
         // if rendering, draw progressive rendering scene;
         progressive_render_program.bind();
 
-        QOpenGLTexture *texture = new QOpenGLTexture(QImage(progressive_scene));
+        QOpenGLTexture *texture = new QOpenGLTexture(progressive_scene);
         texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
         texture->setMagnificationFilter(QOpenGLTexture::Linear);
 
@@ -155,6 +162,7 @@ void MyGL::paintGL()
 
         glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
         glVertexAttribPointer(vertexTextureCoord, 2, GL_FLOAT, GL_TRUE, 5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         texture->destroy();
@@ -245,6 +253,9 @@ void MyGL::ResizeToSceneCamera()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
+    if (this->is_rendering && !this->interactive_render_view)
+        return;
+
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -283,13 +294,29 @@ void MyGL::keyPressEvent(QKeyEvent *e)
         scene.camera.recreate();
     }
     gl_camera.RecomputeAttributes();
+
+    if (this->interactive_render_view)
+    {
+        this->completeRender();
+    }
+
     update();  // Calls paintGL, among other things
+
+    if (this->interactive_render_view)
+    {
+        this->restartInteractiveRender();
+    }
 }
 
 
 
 void MyGL::SceneLoadDialog()
 {
+    if (this->is_rendering)
+    {
+        this->completeRender();
+    }
+
     QString filepath = QFileDialog::getOpenFileName(0, QString("Load Scene"), QString("../scene_files"), tr("*.xml"));
     if(filepath.length() == 0)
     {
@@ -436,25 +463,30 @@ void MyGL::RaytraceScene()
 }
 */
 
-void MyGL::RaytraceScene()
+void MyGL::RaytraceScene(bool is_interactive)
 {
 
 
     if (this->is_rendering)
     {
-        std::cout << "Render Interrupted!" << std::endl;
-        this->terminateRenderThreads();
+        if (!is_interactive)
+            std::cout << "Render Interrupted!" << std::endl;
+        this->completeRender();
     }
 
-    output_file_path = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
-
-
-    if(output_file_path.length() == 0)
+    if (!is_interactive)
     {
-        return;
+        output_file_path = QFileDialog::getSaveFileName(0, QString("Save Image"), QString("../rendered_images"), tr("*.bmp"));
+        if(output_file_path.length() == 0)
+        {
+            return;
+        }
+    }
+    else
+    {
+        output_file_path.clear();
     }
 
-    //test
     QImage p = this->grabFramebuffer();
     progressive_scene = p.scaled(this->scene.camera.width, this->scene.camera.height);
     this->is_rendering = true;
@@ -483,6 +515,15 @@ void MyGL::RaytraceScene()
         render_threads.push_back(nullptr);
     }
 
+    Camera* cam;
+    if (is_interactive)
+    {
+        cam = &gl_camera;
+    }
+    else
+    {
+        cam = &scene.camera;
+    }
     //Launch the render threads we've made
     for(unsigned int Y = 0; Y < y_block_count; Y++)
     {
@@ -495,15 +536,15 @@ void MyGL::RaytraceScene()
             unsigned int x_start = X * x_block_size;
             unsigned int x_end = glm::min((X + 1) * x_block_size, width);
             //Create and run the thread
-            render_threads[Y * x_block_count + X].reset(new RenderThread(x_start, x_end, y_start, y_end, scene.sqrt_samples, 5, &(scene.film), &(scene.camera), integrator.get()));
+            render_threads[Y * x_block_count + X].reset(new RenderThread(x_start, x_end, y_start, y_end, scene.sqrt_samples, 5, &(scene.film), cam, integrator.get()));
             render_threads[Y * x_block_count + X]->preview_image = &this->progressive_scene;
             render_threads[Y * x_block_count + X]->start();
         }
     }
 
-    QTimer::singleShot(500, this, SLOT(on_RenderUpdate()));
-
+    render_event_timer.start(500);
 }
+
 
 void MyGL::on_RenderUpdate()
 {
@@ -516,70 +557,83 @@ void MyGL::renderUpdate()
         return;
 
     update();
-    bool still_running;
 
-    still_running = false;
     for(int i = 0; i < render_threads.size(); i++)
     {
         if(render_threads[i]->isRunning())
         {
-            still_running = true;
-            QTimer::singleShot(500, this, SLOT(on_RenderUpdate()));
+            // If one thread is still rendering, let it continue
             return;
         }
     }
-//        if(still_running)
-//        {
-//            //Free the CPU to let the remaining render threads use it
-//            QThread::yieldCurrentThread();
-//        }
 
-    if (!still_running)
-    {
-        this->completeRender();
-    }
+    // If all threads ends, it will get here and complete the render process
+    this->completeRender();
 
 }
 
 void MyGL::completeRender()
 {
 
-    //Finally, clean up the render thread objects
-//    for(unsigned int i = 0; i < num_render_threads; i++)
-//    {
-//        delete render_threads[i];
-//    }
-//    delete [] render_threads;
-
+    this->render_event_timer.stop();
     this->terminateRenderThreads();
 
 
     int render_time = render_timer.elapsed();
-    std::cout << "Render completed. Total time: "
-              << std::setprecision(9) << render_time/1000.0
-              << " seconds. (" << render_time << " millseconds.)"
-              << std::endl;
 
+    if(output_file_path.length() > 0)
+    {
+        //std::cout << "Render completed!" << std::endl;
+        std::cout << "Render completed. Total time: "
+                  << std::setprecision(9) << render_time/1000.0
+                  << " seconds. (" << render_time << " millseconds.)"
+                  << std::endl;
+        // FIXME: because I check every 500 milliseconds the rendertime has become n * 500 milliseconds
 
+        scene.film.WriteImage(output_file_path);
+        this->is_rendering = false;
+    }
 
-    scene.film.WriteImage(output_file_path);
-    this->is_rendering = false;
 }
 
 void MyGL::terminateRenderThreads()
 {
+    this->is_rendering = false;
+    this->render_event_timer.stop();
     for (int i = 0; i< render_threads.size(); i++)
     {
         if (render_threads[i]->isRunning())
         {
-            render_threads[i]->terminate(); //FIXME: UNSAFE
+            //render_threads[i]->terminate(); //FIXME: UNSAFE
+            render_threads[i]->requestTermination();
             render_threads[i]->wait();
         }
     }
     this->render_threads.clear();
 }
 
+void MyGL::setInteractiveRenderEnabled(bool value)
+{
+    this->interactive_render_view = value;
+    if (this->is_rendering && this->interactive_render_view)
+    {
+        this->completeRender();
 
+    }
+    if (this->interactive_render_view)
+    {
+        this->restartInteractiveRender();
+    }
+
+}
+
+void MyGL::restartInteractiveRender()
+{
+    if (this->interactive_render_view)
+    {
+        this->RaytraceScene(true);
+    }
+}
 
 
 void MyGL::setTriangleBBoxVisible(bool value)

@@ -7,8 +7,16 @@ RenderThread::RenderThread(unsigned int xstart, unsigned int xend, unsigned int 
     : x_start(xstart), x_end(xend), y_start(ystart), y_end(yend), samples_sqrt(samplesSqrt), max_depth(depth), film(f), camera(c), integrator(i)
 {}
 
+void RenderThread::requestTermination()
+{
+    this->isdying = true;
+}
+
 void RenderThread::run()
 {
+    if (this->isdying)
+        return;
+
     unsigned int seed = (((x_start << 16 | x_end) ^ x_start) * ((y_start << 16 | y_end) ^ y_start));
     StratifiedPixelSampler pixel_sampler(samples_sqrt, seed);
 
@@ -48,13 +56,14 @@ void RenderThread::run()
         {
             for(unsigned int X = x_start; X < x_end; X++)
             {
+                if (this->isdying)
+                    return;
+
                 glm::vec3 pixel_color;
-                QList<glm::vec2> samples = pixel_sampler.GetSamples(X, Y);
+                auto sample = pixel_sampler.getOneSample(X, Y, i);
 
-                Ray ray = camera->Raycast(samples[i]);
+                Ray ray = camera->Raycast(sample);
                 pixel_color = (integrator->TraceRay(ray, 0) + film->pixels[X][Y] * (float)i) / (float)(i + 1);
-
-                //pixel_color /= samples.size();
                 film->pixels[X][Y] = pixel_color;
 
                 if (preview_image)

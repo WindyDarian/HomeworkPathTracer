@@ -19,6 +19,8 @@ public:
 
     QImage* preview_image = nullptr;
 
+    void requestTermination();
+
 protected:
     //This overrides the functionality of QThread::run
     virtual void run();
@@ -33,4 +35,6 @@ protected:
     Camera* camera;
     Integrator* integrator;
     static QMutex mutex;
+
+    bool isdying = false;
 };

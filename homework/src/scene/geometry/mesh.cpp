@@ -452,7 +452,7 @@ void Mesh::createVisibleBoundingBoxes_bvh()
     if (!this->visible_bounding_boxes_bvh)
     {
         this->visible_bounding_boxes_bvh.reset(new std::list<BoundingBoxFrame*>());
-        this->bvh->appendBoundingBoxFrame(*this->visible_bounding_boxes_bvh, glm::vec3(0.5f,1.0f,1.0f), 0.95f, 3);
+        this->bvh->appendBoundingBoxFrame(*this->visible_bounding_boxes_bvh, glm::vec3(0.5f,1.0f,1.0f), 0.95f, 5);
         for (auto b: *this->visible_bounding_boxes_bvh)
         {
             b->create();

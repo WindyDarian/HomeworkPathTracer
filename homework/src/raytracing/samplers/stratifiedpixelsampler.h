@@ -10,6 +10,7 @@ public:
     StratifiedPixelSampler(unsigned int samples, unsigned int seed);
     virtual QList<glm::vec2> GetSamples(int x, int y);
     virtual void initialize(int width, int height) {}
+    glm::vec2 getOneSample(int x, int y, int index);
 
 protected:
     std::mt19937 mersenne_generator;

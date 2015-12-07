@@ -63,6 +63,7 @@ private:
     QImage progressive_scene;
     GLuint progressive_position_buffer;
     QOpenGLShaderProgram progressive_render_program;
+    bool interactive_render_view = false;
 
     std::vector<std::unique_ptr<RenderThread>> render_threads;
     QElapsedTimer render_timer;
@@ -90,14 +91,20 @@ public:
     void GLDrawScene();
     void ResizeToSceneCamera();
 
-    void RaytraceScene();
+    void RaytraceScene(bool is_interactive = false);
 
     void setKDTreeBBoxVisible(bool value){this->kdtree_bbox_visible = value;}
     void setObjectBBoxVisible(bool value){this->object_bbox_visible = value;}
     void setMeshBBoxVisible(bool value){this->mesh_bbox_visible = value;}
+
     void setTriangleBBoxVisible(bool value);
     void setSampler(SamplerType samplertype);
     void setAALevel(AALevelType aaleveltype);
+
+    void setInteractiveRenderEnabled(bool value);
+    void restartInteractiveRender();
+
+    QTimer render_event_timer;
 
 
 protected:

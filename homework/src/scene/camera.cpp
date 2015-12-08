@@ -2,6 +2,7 @@
 
 #include <la.h>
 #include <iostream>
+#include <raytracing/sampling.h>
 
 
 Camera::Camera():
@@ -43,7 +44,11 @@ Camera::Camera(const Camera &c):
     right(c.right),
     world_up(c.world_up),
     V(c.V),
-    H(c.H)
+    H(c.H),
+    ref_distance(c.ref_distance),
+    lens_radius(c.lens_radius),
+    focal_distance(c.focal_distance),
+    use_dof(c.use_dof)
 {}
 
 void Camera::CopyAttributes(const Camera &c)
@@ -61,6 +66,10 @@ void Camera::CopyAttributes(const Camera &c)
     aspect = c.aspect;
     V = c.V;
     H = c.H;
+    this->ref_distance = c.ref_distance;
+    this->lens_radius = c.lens_radius;
+    this->focal_distance = c.focal_distance;
+    this->use_dof = c.use_dof;
 }
 
 void Camera::RecomputeAttributes()
@@ -76,6 +85,7 @@ void Camera::RecomputeAttributes()
     this->aspect = this->width / static_cast<float>(this->height);
     this->V = len * tan_halffovy * this->up;
     this->H = len * tan_halffovy * this->aspect * this->right;
+    this->ref_distance = len;
 }
 
 glm::mat4 Camera::getViewProj() const
@@ -165,14 +175,31 @@ Ray Camera::Raycast(float x, float y)
     float d_x = 2 * x / this->width - 1;
     float d_y = - 2 * y / this->height + 1; // invert y
 
+
     // then call RaycastNDC and return
     return RaycastNDC(d_x, d_y);
 }
 
 Ray Camera::RaycastNDC(float ndc_x, float ndc_y)
 {
-    glm::vec3 p = this->ref + ndc_x * this->H + ndc_y * this->V;
-    return Ray(this->eye, glm::normalize(p - this->eye));
+
+    if (this->use_dof && this->focal_distance > 0 && this->lens_radius > 0)
+    {
+       glm::vec3 d_origin = (this->ref + ndc_x * this->H + ndc_y * this->V) - this->eye;
+       float s = this->focal_distance / this->ref_distance;
+       glm::vec3 focal_point = d_origin * s + this->eye;
+
+       glm::vec2 lensuv = sampling::concentric_sample_disc();
+       lensuv *= this->lens_radius;
+
+       glm::vec3 start_p = this->eye + this->up * lensuv.x + this->right * lensuv.y;
+       return Ray(start_p, glm::normalize(focal_point - start_p));
+    }
+    else
+    {
+        glm::vec3 p = this->ref + ndc_x * this->H + ndc_y * this->V;
+        return Ray(this->eye, glm::normalize(p - this->eye));
+    }
 }
 
 void Camera::create()

@@ -1,0 +1,139 @@
+<HTML>
+	<head>
+		<title>
+			CIS 560 Assignment 6 - Rendering Competition
+		</title>
+	</head>
+	<body>
+		<h1 align = "center">
+			Rendering Competition
+		</h1>
+		<h2 align = "center">
+			CIS 560 Homework 6
+		</h2>
+		<h2 align = "center">
+			Due: Monday, December 7, 2015 at 11:59 PM
+		</h2>
+
+		<br/>
+
+		<h3>
+			1  Overview
+		</h3>
+		<p>
+			For the final project in this course, we want you to push your Monte Carlo renderers to the limit! For this project, you may work alone or in groups of up to three. By working in groups, you will be able to implement several features that will improve the convergence rates and/or quality of your renderers significantly. No two people in a group may implement the same feature, with the sole exception of rendering a scene that you made yourself. If you implement more than 100 points worth of features, the remaining points will be extra credit. Note that the instructions for this assignment are intentionally open-ended; we want you to have more freedom in the specifics of your feature implementations. As always, using <i>Physically Based Rendering Techniques</i> as reference will be helpful.
+		</p>
+		<h4>
+			1.1  Group work
+		</h4>
+		<p>
+			If you choose to work with a group, you will need to decide whose code to use as a base for your work. Once you have done so, you should set up a Git repository and begin collaborating. Each group will only have to submit to Canvas under one member's name, but group members' contributions should be explicitly delineated in a README that you include in your submission.
+		</p>
+
+		<h3>
+			2  Creating your own scenes to render (30 - 50 points)
+		</h3>
+		<p>
+			The only mandated part of this assignment is for you to create scenes of your own to render. The main objective of this is to help you differentiate yourself from your peers when you show off your results (especially if you intend on putting your renders on a demo reel). Create at least three unique XML scenes and render them; if you are currently taking or have taken a course in 3D modeling, we recommend that you import some of your creations into your scenes.
+		</p>
+		<h4>
+			2.1  OBJ Files
+		</h4>
+		<p>
+			Should you choose to, say, import 3D models you created into your scenes to render, there are some limitations to the XML scene format of which you should be aware. For instance, a single OBJ mesh can only have one material applied to it in the XML file, and by extension only one texture map. Make sure that if you created your model with more than one texture map you remember this limitation of the XML files, and adjust your UVs accordingly.
+		</p>
+		<h4>
+			2.2  XML Reader
+		</h4>
+		<p>
+			The XMLReader class used to load the XML scene files makes use of Qt's QXmlStreamReader to parse the files. Qt's libraries are well documented, so if you care to add more tag types to your XML scene you should be able to modify the XML reader fairly easily. If you're having trouble, you can always refer to the way loading functions are already implemented.
+		</p>
+
+		<h3>
+			3  Features
+		</h3>
+		<h4>
+			3.1  Bidirectional path tracer (100 points)
+		</h4>
+		<p>
+			Implement bidirectional path tracing in your renderer. To test your progress, we recommend creating a scene in which the light is very difficult to reach directly (e.g. it's surrounded on nearly all sides by opaque objects, or it's contained within a transparent object).
+		</p>
+
+		<h4>
+			3.2  Photon mapper (100 points)
+		</h4>
+		<p>
+			Write a new integrator in your renderer that performs photon mapping. To test your progress, we recommend creating a scene containing surfaces that will cause caustic reflections, such as a concave specular surface or a refractive object.
+		</p>
+
+		<h4>
+			3.3  Volumetric rendering (80 points)
+		</h4>
+		<p>
+			Write a new integrator in your renderer that handles participating media in a scene. If you'd like to render cloud-like objects, consider implementing a Perlin noise generator to populate a set of voxels with densities.
+		</p>
+
+		<h4>
+			3.4  Progressive rendering (80 points)
+		</h4>
+		<p>
+			Using OpenGL, update the preview window to display rendered portions of your image as they are completed. You'll have to write to a texture buffer and display the stored texture on your screen. When a portion of the screen has yet to be path traced, it should still display the default GL preview.
+		</p>
+
+		<h4>
+			3.5  Implicit surfaces (30-70 points)
+		</h4>
+		<p>
+			 Implement different implicit surfaces to render. For example, you might take a 3D Mandelbrot fractal and implement the various intersection functions for it. The more varied and complex the surfaces you implement, the more points you'll earn.
+		</p>
+
+		<h4>
+			3.6  Thread scheduling (70 points)
+		</h4>
+		<p>
+			Implement a more efficient method for using parallelism to render your image. Ideally, you'd send individual ray bounces to render threads to be evaluated, rather than allocating a block of the screen to a single render thread as is done currently. This allows you to constantly have threads working to render your image. 
+		</p>
+
+		<h4>
+			3.7  BVH integration and the surface area heuristic (50 points)
+		</h4>
+		<p>
+			Add a BVH tree to your renderer, allowing you to render complex scenes much more quickly. Your BVH must make use of the surface area heuristic when splitting your scene.
+		</p>
+
+		<h4>
+			3.8  Constructive solid geometry (50 points)
+		</h4>
+		<p>
+			Add a data structure to your scene that, when testing for geometry intersection, handles CSG operations such as union, intersection, and difference.
+		</p>
+
+		<h4>
+			3.9  Depth of field (40 points)
+		</h4>
+		<p>
+			Implement depth of field in your renderer. This involves, among other things, setting a focal point for your image and altering your ray casting function to take this point into account.
+		</p>
+
+		<h4>
+			3.10  Transmissive materials (30 points)
+		</h4>
+		<p>
+			If you did not complete the extra credit for homework 5 involving transmissive (refractive) materials, you may do so for this assignment. Your material must make use of Fresnel's equations for determining the ratios of reflection and refraction at particular points on the surface.
+		</p>
+
+		<h4>
+			3.11  Other interesting features (?? points)
+		</h4>
+		<p>
+			If there is a feature not listed here that you wish to implement, just let us know and we will set a point value for your proposed feature.
+		</p>
+
+		<h3>
+			4  Submission
+		</h3>
+		<p>
+			Submit your cleaned and zipped project on Canvas. Include your renders in your submission. Also include a README to document your features and who implemented them!
+		</p>
+	</body>
+</HTML>

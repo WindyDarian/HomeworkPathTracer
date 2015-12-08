@@ -75,8 +75,9 @@ glm::vec3 MISIntegrator::TraceRay(Ray r, unsigned int depth)
                 break;
             }
 
-            glm::vec3 out_origin_outside = intersection.point + intersection.normal * accurancy;
-            //glm::vec3 out_origin_inside = intersection.point - intersection.normal * accurancy;
+            float normal_fix = -glm::sign(glm::dot(current_ray.direction, intersection.normal));
+            glm::vec3 out_origin_outside = intersection.point + intersection.normal * accurancy * normal_fix;
+            glm::vec3 out_origin_inside = intersection.point - intersection.normal * accurancy * normal_fix;
 
              // direct_lighting (light sample)
             {
@@ -120,12 +121,20 @@ glm::vec3 MISIntegrator::TraceRay(Ray r, unsigned int depth)
             float bsdf_pdf_b;
 
             auto bsdf_sample_f = intersection.object_hit->material->SampleAndEvaluateScatteredEnergy(intersection,  -current_ray.direction, sample_wi, bsdf_pdf_b);
-            if (bsdf_pdf_b <= 0)
+
+            if (bsdf_pdf_b <= 0 || fequal(glm::length2(sample_wi), 0.f))
                 break;
 
             current_pdf = bsdf_pdf_b;
-            current_ray = Ray(out_origin_outside, glm::normalize(sample_wi));
-
+            if (glm::dot(sample_wi, -current_ray.direction)>0)
+            {
+                // reflection
+                current_ray = Ray(out_origin_outside, glm::normalize(sample_wi));
+            }
+            else {
+                // transmission
+                current_ray = Ray(out_origin_inside, glm::normalize(sample_wi));
+            }
 
             Intersection intersection_bsdf = intersection_engine->GetIntersection(current_ray);
 

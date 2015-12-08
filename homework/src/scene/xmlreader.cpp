@@ -19,6 +19,7 @@
 #include <raytracing/samplers/imagewidestratifiedsampler.h>
 #include <scene/materials/bxdfs/lambertBxDF.h>
 #include <scene/materials/bxdfs/specularreflectionbxdf.h>
+#include <scene/materials/bxdfs/speculartransmissionbxdf.h>
 #include <scene/materials/bxdfs/blinnmicrofacetbxdf.h>
 #include <scene/materials/weightedmaterial.h>
 #include <QImage>
@@ -375,6 +376,32 @@ Camera XMLReader::LoadCamera(QXmlStreamReader &xml_reader)
             }
             xml_reader.readNext();
         }
+        else if(QString::compare(tag, QString("FocalDistance")) == 0)
+        {
+            xml_reader.readNext();
+            if(xml_reader.isCharacters())
+            {
+                result.focal_distance = xml_reader.text().toFloat();
+                if (result.focal_distance > 0)
+                {
+                    result.use_dof = true;
+                }
+            }
+            xml_reader.readNext();
+        }
+        else if(QString::compare(tag, QString("LensRadius")) == 0)
+        {
+            xml_reader.readNext();
+            if(xml_reader.isCharacters())
+            {
+                result.lens_radius = xml_reader.text().toFloat();
+                if (result.lens_radius > 0)
+                {
+                    result.use_dof = true;
+                }
+            }
+            xml_reader.readNext();
+        }
     }
     result.RecomputeAttributes();
     return result;
@@ -523,6 +550,31 @@ BxDF* XMLReader::LoadBxDF(QXmlStreamReader &xml_reader)
         {
             ((BlinnMicrofacetBxDF*)result)->exponent = exponent.toFloat();
         }
+    }
+    else if(QStringRef::compare(type, QString("specularTransmission")) == 0)
+    {
+        glm::vec3 trans_color(1.0f);
+        float etai = 1.0f;
+        float etat = 1.33f;
+        QStringRef color = attribs.value(QString(), QString("transmissionColor"));
+        if(QStringRef::compare(color, QString("")) != 0)
+        {
+            trans_color = ToVec3(color);
+        }
+        QStringRef ref_etai = attribs.value(QString(), QString("etai"));
+        if(QStringRef::compare(ref_etai, QString("")) != 0)
+        {
+            etai = ref_etai.toFloat();
+        }
+        QStringRef ref_etat = attribs.value(QString(), QString("etat"));
+        if(QStringRef::compare(ref_etat, QString("")) != 0)
+        {
+            etat = ref_etat.toFloat();
+        }
+
+
+        result = new SpecularTransmissionBxDF(trans_color, etai, etat);
+
     }
     else
     {

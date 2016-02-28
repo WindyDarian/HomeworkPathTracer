@@ -553,6 +553,12 @@ void MyGL::on_RenderUpdate()
 
 void MyGL::renderUpdate()
 {
+//    //temp
+//    progressive_scene.save(output_file_path + QString(".") + QString("%1").arg(temp_current_frame, 5, 10, QChar('0')) + QString(".png"));
+//    temp_current_frame++;
+//    //
+
+
     if (!this->is_rendering)
         return;
 

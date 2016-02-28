@@ -74,6 +74,8 @@ private:
 
     QString output_file_path;
 
+    //int temp_current_frame = 0;
+
 public:
 
 
